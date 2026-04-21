@@ -1,6 +1,6 @@
 ---
 name: project-init
-description: "Use when initializing or upgrading a project's management system. Triggers on /project-init, '初始化项目', 'setup project', '项目初始化', or when a project lacks management files (CLAUDE.md, PROJECT.md, session-handoff.md, TODO.md). Creates a 4-component system: session logs, project wiki, constitution tracking, and task execution. Supports fresh install and non-destructive upgrade for existing projects."
+description: "Use when initializing or upgrading a project's management system. Triggers on /project-init, '初始化项目', 'setup project', '项目初始化', or when a project lacks management files (CLAUDE.md, PROJECT.md, session-handoff.md, TODO.md). Creates a 4-component system: session logs, project wiki, constitution tracking, and task execution. Supports fresh install, deep scan (auto-populate from existing codebase), and non-destructive upgrade for existing projects."
 ---
 
 # Project Init — 4-Component Project Management System
@@ -47,13 +47,26 @@ Scan the project root for these files:
 | log/ | project root directory |
 | .claude/candidates.md | project root |
 
+Also scan for source code indicators:
+- Source files: `.py`, `.js`, `.ts`, `.go`, `.rs`, `.java`, `.rb`, `.php`, `.swift`, `.kt`, etc.
+- Package manifests: `package.json`, `pyproject.toml`, `Cargo.toml`, `go.mod`, `pom.xml`, `build.gradle`, etc.
+- README files: `README.md`, `README.*`
+- Config files: `Makefile`, `Dockerfile`, `docker-compose.*`, `.github/workflows/`, etc.
+
 Determine mode:
-- **Fresh**: None of the above exist → create all 6
-- **Upgrade**: Some exist → create only missing ones, never overwrite existing content
+- **Fresh**: None of the 6 management files exist AND no substantial source code → create all 6 with interactive questions
+- **Deep Scan**: Source code exists but management files are missing or incomplete → scan codebase and auto-populate all files with real, derived content (see Deep Scan Mode below)
+- **Upgrade**: Some management files exist, no substantial new scanning needed → create only missing ones, never overwrite existing content
+
+**Mode selection priority:**
+1. If user explicitly says `/project-init --scan` or "deep scan" → force Deep Scan mode
+2. If the project has 10+ source files (excluding generated directories like `node_modules/`, `.git/`, `dist/`, `build/`) → suggest Deep Scan mode, ask user to confirm
+3. If some management files already exist → Upgrade mode
+4. Otherwise → Fresh mode
 
 For upgrade mode with existing CLAUDE.md: check if it contains a `## 项目管理系统` section. If not, offer to append the system rules section. If it does, skip.
 
-### Step 2: Interactive Questions
+### Step 2a: Interactive Questions (Fresh Mode only)
 
 Ask the user these questions using AskUserQuestion:
 
@@ -442,6 +455,213 @@ Legacy 检测：
 
 ---
 
+## Deep Scan Mode
+
+When the project has existing source code but lacks management files, Deep Scan mode auto-populates all files with real, derived content instead of asking questions.
+
+```
+Fresh Mode:      Questions → Empty Templates
+Deep Scan Mode:  Codebase Scan → Populated Files
+Upgrade Mode:    Detect gaps → Create missing files only
+```
+
+### Deep Scan Execution Flow
+
+#### Phase 1: Deep Scan
+
+**1a. File structure scan**
+
+Read the full directory tree (excluding `node_modules/`, `.git/`, `__pycache__/`, `dist/`, `build/`, `.next/`, `vendor/`, `target/`, and similar generated directories). Capture:
+- Top-level files and their purposes
+- Directory organization pattern
+- Key entry points
+
+**1b. README / documentation scan**
+
+If any of these exist, read them for project context:
+- `README.md`, `README.*`
+- `CONTRIBUTING.md`
+- `docs/` directory
+
+Extract: project name, description, stated goals, setup instructions.
+
+**1c. Configuration scan**
+
+Read config files to detect conventions and tech choices:
+- Package manifests: `package.json`, `pyproject.toml`, `Cargo.toml`, `go.mod`, `pom.xml`, `build.gradle`, etc.
+- Lint/format config: `.eslintrc*`, `.prettierrc*`, `biome.json`, `.flake8`, etc.
+- Test config: `jest.config.*`, `vitest.config.*`, `pytest.ini`, etc.
+- CI/CD: `.github/workflows/`, `.gitlab-ci.yml`, `Jenkinsfile`, etc.
+- Docker: `Dockerfile*`, `docker-compose.*`
+- Any `Makefile`, `justfile`, `Taskfile.*`
+
+Extract: scripts, dependencies, test setup, lint rules, build pipeline.
+
+**1d. TODO/FIXME comment scan**
+
+Search the codebase for inline task markers:
+- `TODO`, `FIXME`, `HACK`, `XXX`, `OPTIMIZE`, `NOTE`
+- Record file path, line number, and surrounding context for each
+
+**1e. Existing management file scan**
+
+Same as Step 1 in the main flow — check for all 6 management files.
+
+#### Phase 2: Pattern Detection
+
+From the scan results, detect and extract:
+
+**2a. Project identity**
+- Project name (from package.json, README title, or directory name)
+- One-line description (from README, or infer from code structure)
+- Current stage (infer from: release tags, version numbers, code maturity)
+
+**2b. Architecture patterns**
+- Code organization style (monolith, microservices, monorepo, library, etc.)
+- Key directories and their roles (src/, lib/, cmd/, api/, etc.)
+- Entry points and public interfaces
+
+**2c. Conventions and rules**
+- Naming conventions (files: camelCase, snake_case, kebab-case; classes, functions, constants)
+- Code style patterns (indentation, quotes, semicolons, import ordering)
+- Test patterns (file naming, test directory structure, test framework)
+
+**2d. Module map**
+- Identify distinct modules/areas of the codebase
+- Map dependencies between modules
+- Assess completion status of each module (complete / in-progress / stub)
+
+**2e. Future tasks**
+- Extract tasks from TODO/FIXME comments
+- Identify incomplete features (stubs, empty functions, placeholder content)
+- Detect missing best-practice files (no tests, no CI, no Dockerfile where expected)
+
+#### Phase 3: Generate Content
+
+All variables in the standard templates are auto-populated from scan results. No empty placeholders — every section must contain real, derived content. If a section cannot be populated, omit it entirely rather than using "（待填充）".
+
+**Auto-detected variable replacements:**
+
+| Variable | Deep Scan Source |
+|----------|-----------------|
+| `{{PROJECT_NAME}}` | README title, package manifest `name`, or directory name |
+| `{{ONE_LINE_DESCRIPTION}}` | README description, or inferred from code structure |
+| `{{CURRENT_STAGE}}` | Inferred from version/tags/code maturity |
+| `{{GITHUB_LINE}}` | Detected from `git remote` if `.git/` exists |
+| `{{GITHUB_LINK_LINE}}` | Same as above |
+| `{{DATE}}` | Today YYYY-MM-DD |
+
+**Deep Scan template overrides for each file:**
+
+**CLAUDE.md** — The `## 项目特定规则` section is pre-populated with detected rules:
+```
+## 项目特定规则
+
+- 文件命名：{detected pattern}（从代码库检测）
+- 代码风格：{detected style}（从 lint 配置检测）
+- 测试约定：{detected test pattern}（从测试目录检测）
+```
+
+**PROJECT.md** — All sections are populated:
+- `模块/章节地图`: bullet list of detected modules with inferred purposes
+- `文件结构`: real directory tree (trimmed to relevant depth)
+- `关键文件索引`: one row per important file with auto-detected description
+- `当前进度快照`: one row per module with inferred status (has tests → more complete; has TODO/FIXME → in-progress; only stubs → stub)
+
+**session-handoff.md** — Populated with current state snapshot:
+- `核心产出文件`: detected entry points and key files with their current state
+- `关键设计决策`: inferred from architecture choices visible in code
+- `下一步`: derived from TODO/FIXME scan and detected gaps (limit to 5-8 items)
+
+**TODO.md** — Two sections added:
+1. `## 从代码库检测到的待办` — tasks extracted from TODO/FIXME/HACK comments:
+   ```
+   - [ ] {comment text}
+     来源：{file}:{line}｜负责人：｜截止：｜依赖：
+   ```
+   Include the original comment text. Leave owner/deadline/deps blank for user to fill.
+2. `## 其他建议任务` — suggestions from detected gaps:
+   - No test framework → suggest adding tests
+   - No CI/CD → suggest adding CI
+   - No README → suggest creating README
+   - Limit to 3-5 high-value suggestions
+
+**.claude/candidates.md** — Pre-populated with detected rules. For each signal:
+- **Naming**: consistent pattern across files → propose rule
+- **Code style**: from lint/format configs → propose rule
+- **Tests**: from test directory/config → propose rule
+- **Architecture**: from directory structure → propose rule
+- **Skip** inconsistent patterns — only propose rules where a clear, stable pattern exists
+
+Each candidate formatted as:
+```
+### {rule_title}
+**检测依据：** {how it was detected}
+**建议规则：** {proposed rule text for CLAUDE.md}
+```
+
+#### Phase 4: Preview & Confirm
+
+Before writing any file, present a preview report:
+
+```
+项目管理系统初始化 ✓（Deep Scan 模式）
+
+扫描结果：
+  📁 文件数量：{count} 个源文件，{count} 个目录
+  📝 TODO/FIXME：{count} 条
+  🏗️  架构风格：{detected style}
+  🧪 测试覆盖：{detected status}
+  🔄 CI/CD：{detected status}
+
+将创建/更新的文件：
+  ⚠️  CLAUDE.md           — 已存在，建议追加「## 项目管理系统」段落
+  ✨ PROJECT.md           — 将生成（含 {n} 个模块、{n} 个关键文件索引）
+  ✨ session-handoff.md   — 将生成（当前状态快照）
+  ⚠️  TODO.md             — 已存在，建议合并 {n} 条新任务
+  ✨ log/                 — 将创建（.gitkeep）
+  ✨ .claude/candidates.md — 将生成（{n} 条检测到的规则候选）
+
+是否继续？（将逐一展示各文件预览）
+```
+
+Show each file's generated content one by one. User can approve, reject, or edit each file independently. After all confirmed, write them.
+
+#### Phase 5: Final Report
+
+Same format as Step 4 in the main flow, with added scan summary:
+```
+检测到的项目概况：
+  名称：{name}
+  架构：{style}
+  模块：{count} 个
+  待办任务：{count} 条
+  规则候选：{count} 条
+```
+
+### Deep Scan Merge Rules for Existing Files
+
+When a file already exists during Deep Scan:
+
+| File | Action |
+|------|--------|
+| CLAUDE.md | **Append** `## 项目管理系统` section if missing. **Append** `## 项目特定规则` section with detected rules. Never modify existing sections. |
+| PROJECT.md | **Replace entirely** (auto-generated content). Show diff preview before replacing. |
+| session-handoff.md | **Replace entirely** (auto-generated content). Show diff preview before replacing. |
+| TODO.md | **Merge**: add derived/suggested tasks as new sections. Preserve existing tasks unchanged. |
+| log/ | **Create** if missing (with `.gitkeep`). Never touch existing log files. |
+| .claude/candidates.md | **Merge**: append detected rules as new candidates. Preserve existing entries. |
+
+### Scan Optimization
+
+For large codebases (500+ files):
+1. Skip binary files — images, fonts, compiled files, lock files
+2. Sample don't read all — for pattern detection, read at most 20 representative files per module
+3. Depth limit — scan directory tree to depth 4 by default
+4. Parallel scanning — use multiple tool calls to scan different aspects simultaneously
+
+---
+
 ## Common Mistakes
 
 | Mistake | Correct Behavior |
@@ -456,3 +676,8 @@ Legacy 检测：
 | Forgetting to read PROJECT.md at session start | CLAUDE.md template explicitly instructs this. |
 | Creating .cursor rules when user doesn't use Cursor | Only create when user answers yes to Q5. |
 | Creating duplicate .cursor/rules/ files | Check if project-system.mdc already exists before creating. Create alongside existing .mdc files, never overwrite. |
+| Using empty placeholders in Deep Scan mode | Every section must contain real, derived content. Omit sections that cannot be populated rather than using "（待填充）". |
+| Proposing rules from inconsistent patterns in Deep Scan | Only propose candidate rules where a clear, stable, consistent pattern exists across the codebase. |
+| Filling TODO owner/deadline/deps fields in Deep Scan | Leave blank. Extract the task from code comments, but let user fill in metadata. |
+| Writing files without preview in Deep Scan | Always show scan report first, then show each file content for confirmation. |
+| Modifying existing log files during Deep Scan | Never touch any file inside log/. Only create the directory if missing. |
