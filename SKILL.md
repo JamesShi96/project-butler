@@ -1,6 +1,6 @@
 ---
 name: project-init
-description: "Use when initializing or upgrading a project's management system. Triggers on /project-init, '初始化项目', 'setup project', '项目初始化', '整理文件', 'organize files', or when a project lacks management files (CLAUDE.md, PROJECT.md, STRUCTURE.md, session-handoff.md, TODO.md). Creates a 5-component system: session logs, project wiki, file structure management, constitution tracking, and task execution. When triggered by '整理文件', directly execute the File Reorganization Protocol without full initialization. Supports fresh install and non-destructive upgrade for existing projects."
+description: "Use when initializing or upgrading a project's management system, or when ending a work session. Triggers on /project-init, '初始化项目', 'setup project', '项目初始化', 'end session', '结束会话', '收工', '整理文件', 'organize files', or when a project lacks management files (CLAUDE.md, PROJECT.md, STRUCTURE.md, session-handoff.md, TODO.md). Creates a 5-component system: session logs, project wiki, file structure management, constitution tracking, and task execution. When triggered by session-end keywords, execute the full end session protocol including file reorganization. When triggered by '整理文件' alone, only execute the File Reorganization Protocol. Supports fresh install and non-destructive upgrade for existing projects."
 ---
 
 # Project Init — 5-Component Project Management System
@@ -36,14 +36,32 @@ Core idea: bottom feeds top, top constrains bottom. Logs and TODOs are raw facts
 
 ## Execution Flow
 
-### Step 0: Quick Check — Direct File Reorganization
+### Step 0: Quick Check — Direct Trigger Handling
 
-If this skill was triggered by the user saying "整理文件" / "organize files" (not initialization):
+Determine how this skill was triggered:
+
+**A. Triggered by "整理文件" / "organize files" (file reorganization only):**
 1. Skip all initialization steps (Step 1-4)
 2. Go directly to the **File Reorganization Protocol** section below and execute it
 3. Report results and stop
 
-This allows file reorganization to work in any project, regardless of whether it has been initialized with the full 5-component system.
+**B. Triggered by "收工" / "end session" / "结束会话" (full session end):**
+1. Skip initialization steps (Step 1-4)
+2. If the project has CLAUDE.md with a Session End Protocol, follow it as the base
+3. Regardless of whether CLAUDE.md exists, execute the full end session flow:
+   - Write session log → `log/session-YYYY-MM-DD-{slug}.md`
+   - Update `session-handoff.md` (if exists)
+   - Update `PROJECT.md` (if exists)
+   - Update `TODO.md` (if exists)
+   - Collect constitution candidates → `.claude/candidates.md` (if exists)
+   - **Execute File Reorganization Protocol** (see dedicated section)
+   - Output Chinese summary
+4. Report results and stop
+
+**C. Triggered by initialization keywords (/project-init, 初始化项目, etc.):**
+→ Continue to Step 1 below for full initialization
+
+This allows the skill to work in any project — whether initialized or not.
 
 ### Step 1: Detect Mode
 
