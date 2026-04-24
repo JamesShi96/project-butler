@@ -42,7 +42,7 @@ Determine how this skill was triggered:
 
 **A. Triggered by "整理文件" / "organize files" (file reorganization only):**
 1. Skip all initialization steps (Step 1-4)
-2. Go directly to the **File Reorganization Protocol** section below and execute it
+2. Go directly to the **File Reorganization Protocol** section below and execute **Mode A: Deep Organize**
 3. Report results and stop
 
 **B. Triggered by "收工" / "end session" / "结束会话" (full session end):**
@@ -54,7 +54,7 @@ Determine how this skill was triggered:
    - Update `PROJECT.md` (if exists)
    - Update `TODO.md` (if exists)
    - Collect constitution candidates → `.claude/candidates.md` (if exists)
-   - **Execute File Reorganization Protocol** (see dedicated section)
+   - **Execute File Reorganization Protocol — Mode B: Incremental Organize** (see dedicated section)
    - Output Chinese summary
 4. Report results and stop
 
@@ -191,9 +191,9 @@ This is the most critical file — it's auto-loaded by Claude Code and defines a
 3. **更新 PROJECT.md** → 如有结构/模块状态变化，同步更新
 4. **更新 TODO.md** → 标记本次已完成的任务
 5. **收集宪法候选** → 识别本次会话中的规则/偏好/边界，追加到 `.claude/candidates.md`
-6. **整理文件结构** → 扫描项目文件，按 STRUCTURE.md 规则自动整理
-   - 若 STRUCTURE.md 不存在：分析项目类型，生成规则表，整理现有文件
-   - 若 STRUCTURE.md 已存在：匹配新增文件，扩展规则，移动文件
+6. **整理文件结构（增量模式）** → 只处理新增/变更文件，按 STRUCTURE.md 规则快速归类
+   - 若 STRUCTURE.md 不存在：先建立规则表（深度模式），再整理
+   - 若 STRUCTURE.md 已存在：只匹配新增文件，不重读已有文件
    - 更新 `.claude/.file-snapshot.json`
 7. **输出中文总结** → 一段话概括本次做了什么，给你确认
 
@@ -404,7 +404,7 @@ When user says "end session" / "结束会话" / "收工":
 3. Update PROJECT.md if structure or module status changed
 4. Update TODO.md (mark completed tasks)
 5. Collect CLAUDE.md candidates → append to .claude/candidates.md
-6. File structure reorganization — scan files, match against STRUCTURE.md rules, organize (create STRUCTURE.md if missing)
+6. File structure reorganization (incremental mode) — only process new/changed files, match against STRUCTURE.md rules, organize (create STRUCTURE.md if missing)
 7. Output Chinese summary for user confirmation
 
 ## Trigger Words
@@ -457,9 +457,9 @@ File management rules. AI creates this on first end session or project init. Def
 
 ## 目录规则
 
-| 路径 | 用途 | 匹配条件 | 优先级 |
-|------|------|----------|--------|
-| （AI 根据项目类型自动生成） | | | |
+| 路径 | 用途 | 匹配条件 | 命名规范 | 优先级 |
+|------|------|----------|----------|--------|
+| （AI 根据项目类型自动生成） | | | （kebab-case / 中文 / PascalCase 等） | |
 
 ## 待分类
 以下文件尚未归类（下次整理时处理）：
@@ -488,29 +488,29 @@ When creating STRUCTURE.md for the first time, the AI must:
 3. **Generate rules** matching the project type. Use these as reference patterns:
 
 **代码项目参考规则：**
-| 路径 | 用途 | 匹配条件 | 优先级 |
-|------|------|----------|--------|
-| src/ | 源代码 | 按语言和模块组织 | 10 |
-| tests/ / test/ | 测试文件 | *test*, *spec* | 20 |
-| docs/ | 项目文档 | *.md, *.docx, *.pdf | 30 |
-| config/ / conf/ | 配置文件 | *.yaml, *.toml, *.json (非 package.json) | 15 |
+| 路径 | 用途 | 匹配条件 | 命名规范 | 优先级 |
+|------|------|----------|----------|--------|
+| src/ | 源代码 | 按语言和模块组织 | kebab-case.ext | 10 |
+| tests/ / test/ | 测试文件 | *test*, *spec* | *.test.ext, *.spec.ext | 20 |
+| docs/ | 项目文档 | *.md, *.docx, *.pdf | kebab-case.md | 30 |
+| config/ / conf/ | 配置文件 | *.yaml, *.toml, *.json (非 package.json) | kebab-case.yaml | 15 |
 
 **视频制作参考规则：**
-| 路径 | 用途 | 匹配条件 | 优先级 |
-|------|------|----------|--------|
-| footage/ | 原始素材 | *.mp4, *.mov, *.mxf | 10 |
-| scripts/ | 脚本文档 | *.docx, *.md 含脚本相关 | 20 |
-| editing/ | 剪辑工程 | *.prproj, *.drp, *.fcpxml | 30 |
-| exports/ | 成片输出 | *.mp4 命名含 export/output | 40 |
-| assets/ | 设计素材 | *.png, *.jpg, *.ai, *.psd | 15 |
+| 路径 | 用途 | 匹配条件 | 命名规范 | 优先级 |
+|------|------|----------|----------|--------|
+| footage/ | 原始素材 | *.mp4, *.mov, *.mxf | YYYY-MM-DD-description.ext | 10 |
+| scripts/ | 脚本文档 | *.docx, *.md 含脚本相关 | kebab-case.md | 20 |
+| editing/ | 剪辑工程 | *.prproj, *.drp, *.fcpxml | project-name.ext | 30 |
+| exports/ | 成片输出 | *.mp4 命名含 export/output | project-name-final.ext | 40 |
+| assets/ | 设计素材 | *.png, *.jpg, *.ai, *.psd | descriptive-name.ext | 15 |
 
 **商业文档参考规则：**
-| 路径 | 用途 | 匹配条件 | 优先级 |
-|------|------|----------|--------|
-| contracts/ | 合同法务 | *.pdf 含合同/协议 | 10 |
-| finance/ | 财务报表 | *.xlsx, *.csv 含报表/预算 | 20 |
-| teams/ | 团队子目录 | 按部门名归类 | 30 |
-| meetings/ | 会议记录 | *.docx, *.md 含会议/纪要 | 15 |
+| 路径 | 用途 | 匹配条件 | 命名规范 | 优先级 |
+|------|------|----------|----------|--------|
+| contracts/ | 合同法务 | *.pdf 含合同/协议 | YYYY-MM-DD-counterparty-type.pdf | 10 |
+| finance/ | 财务报表 | *.xlsx, *.csv 含报表/预算 | YYYY-MM-report-name.xlsx | 20 |
+| teams/ | 团队子目录 | 按部门名归类 | kebab-case/ | 30 |
+| meetings/ | 会议记录 | *.docx, *.md 含会议/纪要 | YYYY-MM-DD-notes.{md/rtf} | 15 |
 
 4. **These are starting points.** Adapt rules based on actual file content and project context. The AI should refine, merge, or add rules as needed — not blindly copy templates.
 
@@ -518,82 +518,132 @@ When creating STRUCTURE.md for the first time, the AI must:
 
 ## File Reorganization Protocol
 
-Executed as step 6 of the end session protocol (after collecting constitution candidates, before outputting summary).
+Two modes with different depth levels, triggered by different commands.
 
-### Trigger
+### Mode A: Deep Organize (深度整理)
 
-This protocol runs automatically when:
-- User says "end session" / "结束会话" / "收工"
-- User says "整理文件" / "organize files"
+**Trigger:** "整理文件" / "organize files"
 
-### Prerequisites
+**Philosophy:** Content-aware, OCD-level reorganization. Read every file, understand what it is, enforce naming consistency and structural uniformity across the entire project.
 
+**Prerequisites:**
 - Read STRUCTURE.md if it exists
 - Read `.claude/.file-snapshot.json` if it exists
 
-### Flow
+**Flow:**
 
 ```
-1. Scan: recursively list all project files
-   - Exclude: directories listed in STRUCTURE.md 排除规则 (or defaults if STRUCTURE.md doesn't exist)
+1. Full Scan: recursively list all project files
+   - Exclude: directories listed in STRUCTURE.md 排除规则 (or defaults)
    - Default exclusions: .git/, node_modules/, __pycache__/, .venv/, dist/, build/, vendor/, .claude/, log/
 
-2. Compare against .claude/.file-snapshot.json
-   - Identify new files (not in snapshot)
-   - Identify moved/renamed files (path changed but content similar)
-   - Skip files already in snapshot with same path
+2. Content Understanding Phase:
+   For EACH file in the project (not just new ones):
+   a. Read the file content (for .md files; for binary files like .pdf/.png, infer from filename + context)
+   b. Classify: what is this file? (company intro? project spec? template? meeting notes?)
+   c. Identify naming issues:
+      - Does the filename match the STRUCTURE.md 命名规范?
+      - Are there spaces, special characters, or inconsistent case?
+      - Does it have redundant prefixes (e.g., company name in a file already inside the company folder)?
+      - Is the extension duplicated (e.g., .pdf.pdf)?
+   d. Identify structural issues:
+      - Is it in the correct directory per STRUCTURE.md rules?
+      - Should it be in a subdirectory (assets/, reference-answers/)?
+      - Are sibling directories inconsistent? (e.g., company-a has ppt-brief.md but company-b has company-b-ppt-brief.md)
 
-3. Branch on STRUCTURE.md existence:
+3. Reorganization Phase:
+   a. Fix naming: rename files to match STRUCTURE.md conventions
+   b. Fix structure: move files to correct directories, create subdirectories if needed (assets/, reference-answers/, etc.)
+   c. Enforce cross-directory consistency: if one company folder has a certain structure, check if sibling folders should match
+   d. For files with no matching rule:
+      - Analyze content to infer category
+      - If inferable: add new rule to STRUCTURE.md + place file
+      - If not: add to 待分类 section
 
-   3a. STRUCTURE.md does NOT exist (first time):
-       a. Analyze file type distribution across new+existing files
-       b. Determine project type (代码/视频/商业/混合/其他)
-       c. Generate directory rule table (see Template 7 reference rules)
-       d. Create STRUCTURE.md
-       e. For each existing file:
-          - Match against rules (highest priority first)
-          - If match: move file to target directory
-          - If no match: add to 待分类 section
-       f. Update PROJECT.md file structure section
+4. Reference Update Phase:
+   a. After each rename/move: grep for old path in all .md files
+   b. Update any broken links (markdown links, imports, config references)
+   c. Check master/index documents for outdated references
 
-   3b. STRUCTURE.md EXISTS (incremental update):
-       a. For each new file:
-          - Match against existing rules (highest priority first)
-          - If match: move file to target directory
-          - If no match:
-            - AI analyzes file content and context
-            - If category is inferable: add new rule to table + move file
-            - If not inferable: add file path to 待分类 section
-       b. Check if any rules need updating:
-          - Did the user create new directories that suggest new categories?
-          - Are there patterns of files in 待分类 that share a common trait?
-       c. If rules were added/changed: update STRUCTURE.md
-
-4. Safety checks before each file move:
+5. Safety checks before each file move:
    a. Cross-reference check: grep for old path in other files
-      - If references found (import, link, config): update them
-   b. Name collision check: does target directory already have a file with same name?
+      - If references found: update them
+   b. Name collision check: does target already have a same-name file?
       - If yes: do NOT overwrite → add to 待分类 with collision note
    c. System file check: never move CLAUDE.md, PROJECT.md, STRUCTURE.md, session-handoff.md, TODO.md
 
+6. Update artifacts:
+   a. Update .claude/.file-snapshot.json (full refresh)
+   b. Update STRUCTURE.md:
+      - Add any new naming conventions discovered
+      - Add new rules for previously uncategorized files
+      - Update 整理历史
+   c. Update PROJECT.md file structure section if layout changed
+
+7. Report:
+   - Files renamed (with before → after)
+   - Files moved (with before → after)
+   - Broken links fixed
+   - New STRUCTURE.md rules added
+   - Files in 待分类 (if any)
+```
+
+---
+
+### Mode B: Incremental Organize (增量整理)
+
+**Trigger:** "收工" / "end session" / "结束会话" (embedded in end session protocol)
+
+**Philosophy:** Lightweight maintenance. Only process files that are new or changed since last snapshot. Fast, minimal token usage.
+
+**Prerequisites:**
+- Read `.claude/.file-snapshot.json` (required — this is the diff baseline)
+- Read STRUCTURE.md for rules (no need to read all file contents)
+
+**Flow:**
+
+```
+1. Diff Scan:
+   a. List all project files recursively (same exclusions as Mode A)
+   b. Compare against .file-snapshot.json
+   c. Identify ONLY:
+      - New files (not in snapshot)
+      - Moved/renamed files (path changed)
+   d. Skip all files that are already in snapshot with same path
+
+2. If no new/changed files → skip to step 5 (just update timestamp)
+
+3. Quick Classify (for NEW files only):
+   For each new file:
+   a. Read content (only if needed to determine category — skip if filename is obvious)
+   b. Match against existing STRUCTURE.md rules
+   c. If match: place file in target directory with correct naming
+   d. If no match:
+      - Brief content scan to infer category
+      - If inferable: add rule + place file
+      - If not: add to 待分类
+
+4. Safety checks (same as Mode A):
+   - Cross-reference check before moves
+   - Name collision check
+   - System file check
+
 5. Update .claude/.file-snapshot.json:
-   {
-     "lastScan": "{{current timestamp ISO format}}",
-     "files": {
-       "{{relative path}}": "{{date}}",
-       ...
-     }
-   }
-   - Add all newly organized files
+   - Add new files
    - Update paths for moved files
    - Remove entries for deleted files
 
-6. Report in end session summary:
-   - Number of files organized
-   - Number of files added to 待分类
+6. Report (in end session summary):
+   - Number of new files organized
    - Any new rules added
-   - Any structural changes made
 ```
+
+**Token optimization rules:**
+- **NEVER re-read files already in snapshot** unless specifically investigating an issue
+- **NEVER do cross-directory consistency checks** — that's Mode A's job
+- **NEVER rename existing files** — only place new ones
+- If STRUCTURE.md doesn't exist: fall back to Mode A (need to establish baseline first)
+
 
 ### Important Constraints
 
@@ -698,3 +748,8 @@ Legacy 检测：
 | Removing user-written STRUCTURE.md rules | Only add new rules. Never remove without confirmation |
 | Creating STRUCTURE.md rules without scanning project | Rules must be based on actual file analysis, not generic templates |
 | Running file reorganization on excluded directories | Always check exclusion list before any file operation |
+| Using Mode A (deep) when Mode B (incremental) was triggered | "收工" → Mode B (incremental, only new files). "整理文件" → Mode A (deep, all files). Never mix them. |
+| Re-reading unchanged files in Mode B | Mode B only processes files NOT in .file-snapshot.json. Skip everything else to save tokens. |
+| Doing content-aware naming in Mode B | Mode B only places new files. Renaming/moving existing files is Mode A's job. |
+| Not reading file contents in Mode A | Mode A MUST read each file to understand it. Don't just match by extension/filename. |
+| Not checking cross-directory consistency in Mode A | Mode A should detect inconsistencies between sibling directories (e.g., different naming patterns for same file type) |
