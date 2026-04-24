@@ -1,6 +1,6 @@
 ---
 name: project-init
-description: "Use when initializing or upgrading a project's management system. Triggers on /project-init, '初始化项目', 'setup project', '项目初始化', or when a project lacks management files (CLAUDE.md, PROJECT.md, STRUCTURE.md, session-handoff.md, TODO.md). Creates a 5-component system: session logs, project wiki, file structure management, constitution tracking, and task execution. Supports fresh install and non-destructive upgrade for existing projects."
+description: "Use when initializing or upgrading a project's management system. Triggers on /project-init, '初始化项目', 'setup project', '项目初始化', '整理文件', 'organize files', or when a project lacks management files (CLAUDE.md, PROJECT.md, STRUCTURE.md, session-handoff.md, TODO.md). Creates a 5-component system: session logs, project wiki, file structure management, constitution tracking, and task execution. When triggered by '整理文件', directly execute the File Reorganization Protocol without full initialization. Supports fresh install and non-destructive upgrade for existing projects."
 ---
 
 # Project Init — 5-Component Project Management System
@@ -35,6 +35,15 @@ Core idea: bottom feeds top, top constrains bottom. Logs and TODOs are raw facts
 ---
 
 ## Execution Flow
+
+### Step 0: Quick Check — Direct File Reorganization
+
+If this skill was triggered by the user saying "整理文件" / "organize files" (not initialization):
+1. Skip all initialization steps (Step 1-4)
+2. Go directly to the **File Reorganization Protocol** section below and execute it
+3. Report results and stop
+
+This allows file reorganization to work in any project, regardless of whether it has been initialized with the full 5-component system.
 
 ### Step 1: Detect Mode
 
@@ -586,7 +595,12 @@ When some files already exist:
 ### Rules
 1. **Never overwrite** any existing file content
 2. **Create only missing files** with templates
-3. **For existing CLAUDE.md**: check if it contains `## 项目管理系统` section. If missing, offer to append the system rules block (the trigger words, file roles, session protocols). If present, skip.
+3. **For existing CLAUDE.md**: check if it contains `## 项目管理系统` section. If missing, offer to append the system rules block. If present, check for missing elements from the 5-component system:
+   - Does the trigger words table include `整理文件 / organize files`? If not, add it.
+   - Does the file roles table include `STRUCTURE.md` and `.claude/.file-snapshot.json`? If not, add them.
+   - Does the Session End Protocol include step 6 (整理文件结构)? If not, insert it between step 5 (收集宪法候选) and the last step (输出中文总结), and renumber accordingly.
+   - Does it say "4 组件"? If so, update to "5 组件".
+   - Offer to make these updates for user confirmation before proceeding.
 4. **For existing session-handoff.md / TODO.md**: skip entirely
 5. **For log/ directory**: create if missing (with `log/.gitkeep`), never touch existing log files
 6. **For .claude/candidates.md**: create if missing, skip if exists
