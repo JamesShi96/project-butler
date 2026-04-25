@@ -546,6 +546,8 @@ Ensure `.claude/` directory exists before writing this file.
 
 ### Template 6: .cursor/rules/project-system.mdc
 
+**Language adaptation:** This Cursor rules file should mirror the language setting from CLAUDE.md. Use the configured language for all descriptions and instructions.
+
 Only create if user answered yes to Q5. Cursor rules file that mirrors the CLAUDE.md trigger behavior.
 
 ```
@@ -568,13 +570,15 @@ When user says "end session" / "结束会话" / "收工":
 6. File structure reorganization (incremental mode) — only process new/changed files, match against STRUCTURE.md rules, organize (create STRUCTURE.md if missing)
 7. Output Chinese summary for user confirmation
 
-## Trigger Words
-| Trigger | Action |
-|---------|--------|
-| review claude / 更新宪法 | Show .claude/candidates.md for user to confirm each entry |
-| sync wiki / 同步项目 | Force rescan and update PROJECT.md |
-| status / 项目现状 | Read PROJECT.md + session-handoff.md summary aloud |
-| 整理文件 / organize files | Scan files and reorganize according to STRUCTURE.md rules |
+## Triggers
+| Intent | Action |
+|--------|--------|
+| End session / wrap up (any language) | Write log, update handoff, sync wiki, check TODO, collect candidates, file reorganization, output summary |
+| Review constitution (any language) | Show .claude/candidates.md for user to confirm each entry |
+| Sync wiki (any language) | Force rescan and update PROJECT.md |
+| Check status (any language) | Read PROJECT.md + session-handoff.md summary aloud |
+| Organize files (any language) | Scan files and reorganize according to STRUCTURE.md rules |
+| Change language (any language) | Execute Language Change Protocol |
 
 ## File Roles
 | File | Who writes | When |
@@ -592,6 +596,8 @@ When user says "end session" / "结束会话" / "收工":
 ---
 
 ### Template 7: STRUCTURE.md
+
+**Language adaptation:** Adapt all headers and table column names to the configured language using the STRUCTURE.md entries in the Key Terms Glossary. The 命名规范 (Naming Convention) column values change based on language setting.
 
 File management rules. AI creates this on first end session or project init. Defines how files should be organized based on project type.
 
@@ -653,7 +659,7 @@ When creating STRUCTURE.md for the first time, the AI must:
 |------|------|----------|----------|--------|
 | src/ | 源代码 | 按语言和模块组织 | kebab-case.ext | 10 |
 | tests/ / test/ | 测试文件 | *test*, *spec* | *.test.ext, *.spec.ext | 20 |
-| docs/ | 项目文档 | *.md, *.docx, *.pdf | kebab-case.md | 30 |
+| docs/ | 项目文档 | *.md, *.docx, *.pdf | kebab-case.md (en) / 中文或kebab-case.md (zh) / kebab-case.md (bilingual) | 30 |
 | config/ / conf/ | 配置文件 | *.yaml, *.toml, *.json (非 package.json) | kebab-case.yaml | 15 |
 
 **视频制作参考规则：**
@@ -668,10 +674,18 @@ When creating STRUCTURE.md for the first time, the AI must:
 **商业文档参考规则：**
 | 路径 | 用途 | 匹配条件 | 命名规范 | 优先级 |
 |------|------|----------|----------|--------|
-| contracts/ | 合同法务 | *.pdf 含合同/协议 | YYYY-MM-DD-counterparty-type.pdf | 10 |
+| contracts/ | 合同法务 | *.pdf 含合同/协议 | YYYY-MM-DD-counterparty-type.pdf (en) / YYYY-MM-DD-对方-类型.pdf (zh) | 10 |
 | finance/ | 财务报表 | *.xlsx, *.csv 含报表/预算 | YYYY-MM-report-name.xlsx | 20 |
-| teams/ | 团队子目录 | 按部门名归类 | kebab-case/ | 30 |
-| meetings/ | 会议记录 | *.docx, *.md 含会议/纪要 | YYYY-MM-DD-notes.{md/rtf} | 15 |
+| teams/ | 团队子目录 | 按部门名归类 | kebab-case/ (en) / 部门名/ (zh) | 30 |
+| meetings/ | 会议记录 | *.docx, *.md 含会议/纪要 | YYYY-MM-DD-notes.{md/docx} (en) / YYYY-MM-DD-会议纪要.{md/docx} (zh) | 15 |
+
+**Language-specific naming rules:**
+
+When `en`: all user file names use kebab-case or snake_case, English only.
+When `zh`: all user file names can use Chinese characters, no restriction to ASCII.
+When `bilingual`: English naming preferred; Chinese names acceptable for docs and content files.
+
+These rules are applied during file reorganization (Mode A: deep rename, Mode B: new files only).
 
 4. **These are starting points.** Adapt rules based on actual file content and project context. The AI should refine, merge, or add rules as needed — not blindly copy templates.
 
