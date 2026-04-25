@@ -296,24 +296,28 @@ This is the most critical file — it's auto-loaded by Claude Code and defines a
 - **当前阶段：** {{CURRENT_STAGE}}
 {{GITHUB_LINE}}
 
+## Language / 语言
+- **Language:** {{LANGUAGE}}
+
 ## 项目管理系统
 
 本项目使用 5 组件管理系统。
 
 ### 触发词
 
-| 你说 | AI 执行 |
-|------|---------|
-| end session / 结束会话 / 收工 | 写 log + 更新 handoff + 同步 Wiki + 校对 TODO + 收集宪法候选 + 输出中文总结 |
-| review claude / 更新宪法 | 展示 .claude/candidates.md 逐条确认 |
-| sync wiki / 同步项目 | 强制重扫并更新 PROJECT.md |
-| status / 项目现状 | 朗读 PROJECT.md + session-handoff.md 摘要 |
-| 整理文件 / organize files | 扫描项目文件，按 STRUCTURE.md 规则整理 |
+| Intent | AI Action |
+|--------|-----------|
+| End session / wrap up — any expression of "we're done for now" (end session, 结束会话, 收工, wrap up, done for today, etc.) | Write log + update handoff + sync Wiki + check TODO + collect constitution candidates + file reorganization + output summary in configured language |
+| Review constitution — any expression of "check/update rules" (review claude, 更新宪法, check rules, etc.) | Show .claude/candidates.md for confirmation one by one |
+| Sync wiki — any expression of "update project overview" (sync wiki, 同步项目, refresh overview, etc.) | Force rescan and update PROJECT.md |
+| Check status — any expression of "what's the current state" (status, 项目现状, where are we, etc.) | Read PROJECT.md + session-handoff.md summary aloud |
+| Organize files — any expression of "clean up files" (organize files, 整理文件, clean up, sort files, etc.) | Scan project files, organize per STRUCTURE.md rules |
+| Change language — any expression of "switch language" (切换语言, change language, switch to English, 换成中文, etc.) | Execute Language Change Protocol |
 
 ### 文件职责
 
-| 文件 | 谁写 | 何时 |
-|------|------|------|
+| File | Who writes | When |
+|------|-----------|------|
 | CLAUDE.md | 人工确认 | review claude 时 |
 | PROJECT.md | AI 自动 | end session + 文件结构变化时 |
 | session-handoff.md | AI 自动 | end session 时 |
@@ -325,7 +329,7 @@ This is the most critical file — it's auto-loaded by Claude Code and defines a
 
 ### Session Start Protocol
 
-每次会话开始时，先读 `PROJECT.md` 获取项目全貌。
+At session start, read `PROJECT.md` for project overview, and check the Language setting in CLAUDE.md to determine output language.
 
 ### Session End Protocol
 
@@ -341,24 +345,26 @@ This is the most critical file — it's auto-loaded by Claude Code and defines a
    - 若 STRUCTURE.md 不存在：先建立规则表（深度模式），再整理
    - 若 STRUCTURE.md 已存在：只匹配新增文件，不重读已有文件
    - 更新 `.claude/.file-snapshot.json`
-7. **输出中文总结** → 一段话概括本次做了什么，给你确认
+7. **Output summary** → A brief summary of what was done this session, in the configured language
 
-### Session Log 格式
+### Session Log Format
+
+Session log headers adapt to the configured language. Use the Session Log entries from the Key Terms Glossary.
 
 写入 `log/` 的每条日志遵循以下格式：
 
 ```markdown
-# Session YYYY-MM-DD — {主题}
+# Session YYYY-MM-DD — {topic}
 
-## 本次目标
-## 关键操作（按时间顺序）
-## 决策与理由
-## 产出文件
-## 未完事项 / 下次接手点
-## 候选 CLAUDE.md 条目（如有）
+## Session Goal
+## Key Actions (Chronological)
+## Decisions & Rationale
+## Output Files
+## Unfinished Items / Next Session Pickup
+## CLAUDE.md Candidates (if any)
 ```
 
-### 宪法候选识别规则
+### Constitution Candidate Rules
 
 AI 在工作过程中，遇到以下情况时自动追加条目到 `.claude/candidates.md`：
 - 用户明确说"以后都这么做" / "这是规则" / "不要再…"
@@ -368,14 +374,14 @@ AI 在工作过程中，遇到以下情况时自动追加条目到 `.claude/cand
 
 **绝对不要直接修改 CLAUDE.md。** 所有候选条目必须经用户 review 后才写入。
 
-### TODO 格式
+### TODO Format
 
 TODO.md 中每条任务必须包含三要素：
 ```
-- [ ] {任务描述}
-  负责人：{name}｜截止：{date}｜依赖：{prerequisite}
+- [ ] {task description}
+  Owner: {name} | Deadline: {date} | Dependencies: {prerequisite}
 ```
-用户给的任务缺要素时，主动追问补全。完成的任务勾选保留（不删除）。
+If a user provides a task missing required fields, ask them to fill in. Completed tasks are checked and kept (not deleted).
 
 ## 项目特定规则
 
