@@ -1,4 +1,4 @@
-# project-init
+# project-butler
 
 **[English](README.md)** | [中文](README_zh.md)
 
@@ -6,7 +6,7 @@
 
 When you work with AI coding assistants across multiple sessions, you start from scratch every time. The AI doesn't remember what happened yesterday, what decisions were made, or what the project rules are. You end up re-explaining context, re-establishing conventions, and losing institutional knowledge.
 
-**project-init** solves this by setting up a self-maintaining project management system in one command. After setup, your AI assistant automatically logs sessions, maintains a project wiki, tracks tasks, and accumulates rules for your review — no manual effort required.
+**project-butler** solves this by setting up a self-maintaining project management system in one command. After setup, your AI assistant automatically logs sessions, maintains a project wiki, tracks tasks, and accumulates rules for your review — no manual effort required.
 
 ## The Problem It Solves
 
@@ -20,7 +20,7 @@ If any of these sound familiar, this skill is for you:
 
 ## How It Works
 
-Run `/project-init` once. It creates 6 files organized in 4 layers:
+Run `/project-butler` once. It creates 6 files organized in 4 layers:
 
 ```
 project-root/
@@ -62,7 +62,7 @@ This hierarchy means information flows upward (facts → snapshot → principles
 
 ### Language Support
 
-project-init supports 3 language modes:
+project-butler supports 3 language modes:
 
 | Mode | Content Language | User File Naming |
 |------|-----------------|------------------|
@@ -70,7 +70,7 @@ project-init supports 3 language modes:
 | `zh` (中文) | All content in Chinese | Chinese naming allowed |
 | `bilingual` (default) | Chinese with English annotations | English preferred, Chinese acceptable |
 
-Set during `/project-init` setup, or change anytime by saying "change language" / "切换语言".
+Set during `/project-butler` setup, or change anytime by saying "change language" / "切换语言".
 
 When switching language, you're asked whether to rename user files to match the new language's naming conventions. System files (CLAUDE.md, PROJECT.md, etc.) keep their English names regardless.
 
@@ -144,13 +144,13 @@ The key insight: **you just work normally, and say "end session" when you're don
 
 ## Multi-Tool Support
 
-If you use both Claude Code and Cursor, `/project-init` optionally creates a `.cursor/rules/project-system.mdc` file that mirrors the same trigger behavior. Both tools read from the same `PROJECT.md` and `session-handoff.md`, so context carries over seamlessly.
+If you use both Claude Code and Cursor, `/project-butler` optionally creates a `.cursor/rules/project-system.mdc` file that mirrors the same trigger behavior. Both tools read from the same `PROJECT.md` and `session-handoff.md`, so context carries over seamlessly.
 
 ## Install
 
 ```bash
 # Clone into your Claude Code skills directory
-git clone https://github.com/JamesShi7/project-init.git ~/.claude/skills/project-init
+git clone https://github.com/JamesShi7/project-butler.git ~/.claude/skills/project-butler
 ```
 
 ## Use
@@ -158,7 +158,7 @@ git clone https://github.com/JamesShi7/project-init.git ~/.claude/skills/project
 In any project directory:
 
 ```
-/project-init
+/project-butler
 ```
 
 Answer 5 quick questions (project name, description, stage, GitHub URL, Cursor rules?), and all files are created.

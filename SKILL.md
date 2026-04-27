@@ -1,9 +1,9 @@
 ---
-name: project-init
-description: "Use when initializing or upgrading a project's management system, or when ending a work session. Triggers on /project-init, '初始化项目', 'setup project', '项目初始化', 'end session', '结束会话', '收工', '整理文件', 'organize files', '切换语言', 'change language', or when a project lacks management files (CLAUDE.md, PROJECT.md, STRUCTURE.md, session-handoff.md, TODO.md). Creates a 5-component system: session logs, project wiki, file structure management, constitution tracking, and task execution. Supports 3 language modes (English, Chinese, bilingual). When triggered by session-end keywords, execute the full end session protocol including file reorganization. When triggered by '整理文件' alone, only execute the File Reorganization Protocol. Supports fresh install and non-destructive upgrade for existing projects."
+name: project-butler
+description: "Use when initializing or upgrading a project's management system, or when ending a work session. Triggers on /project-butler, '初始化项目', 'setup project', '项目初始化', 'end session', '结束会话', '收工', '整理文件', 'organize files', '切换语言', 'change language', or when a project lacks management files (CLAUDE.md, PROJECT.md, STRUCTURE.md, session-handoff.md, TODO.md). Creates a 5-component system: session logs, project wiki, file structure management, constitution tracking, and task execution. Supports 3 language modes (English, Chinese, bilingual). When triggered by session-end keywords, execute the full end session protocol including file reorganization. When triggered by '整理文件' alone, only execute the File Reorganization Protocol. Supports fresh install and non-destructive upgrade for existing projects."
 ---
 
-# Project Init — 5-Component Project Management System
+# Project Butler — 5-Component Project Management System
 
 Initialize a standardized project management system with 5 components:
 
@@ -191,7 +191,7 @@ Determine how this skill was triggered:
    - Output Chinese summary
 4. Report results and stop
 
-**C. Triggered by initialization keywords (/project-init, 初始化项目, etc.):**
+**C. Triggered by initialization keywords (/project-butler, 初始化项目, etc.):**
 → Continue to Step 1 below for full initialization
 
 **D. Triggered by language change intent (切换语言 / change language / 换个语言 / switch to English, etc.):**

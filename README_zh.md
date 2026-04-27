@@ -1,4 +1,4 @@
-# project-init
+# project-butler
 
 [English](README.md) | **[中文](README_zh.md)**
 
@@ -6,7 +6,7 @@
 
 当你用 AI 编程助手跨多个 session 工作时，每次都要从零开始。AI 不记得昨天发生了什么、做过哪些决策、项目的规则是什么。你不得不反复解释上下文、重新建立规范，大量的项目知识就这么流失了。
 
-**project-init** 通过一条命令搭建一套自维护的项目管理系统。设置完成后，AI 助手会自动记录会话日志、维护项目百科、追踪任务进度、积累规则候选——不需要你手动维护。
+**project-butler** 通过一条命令搭建一套自维护的项目管理系统。设置完成后，AI 助手会自动记录会话日志、维护项目百科、追踪任务进度、积累规则候选——不需要你手动维护。
 
 ## 解决什么问题
 
@@ -20,7 +20,7 @@
 
 ## 工作原理
 
-运行一次 `/project-init`，它会创建 6 个文件，按 4 个层级组织：
+运行一次 `/project-butler`，它会创建 6 个文件，按 4 个层级组织：
 
 ```
 project-root/
@@ -62,7 +62,7 @@ project-root/
 
 ### 语言支持
 
-project-init 支持 3 种语言模式：
+project-butler 支持 3 种语言模式：
 
 | 模式 | 内容语言 | 用户文件命名 |
 |------|---------|-------------|
@@ -70,7 +70,7 @@ project-init 支持 3 种语言模式：
 | `zh` (中文) | 全部中文 | 允许中文命名 |
 | `bilingual` (默认) | 中文为主，英文标注 | 英文优先，中文可接受 |
 
-在 `/project-init` 设置时选择，或随时说"切换语言" / "change language"更改。
+在 `/project-butler` 设置时选择，或随时说"切换语言" / "change language"更改。
 
 切换语言时，会询问是否按新语言的命名规范重命名用户文件。系统文件（CLAUDE.md, PROJECT.md 等）始终保持英文名。
 
@@ -144,13 +144,13 @@ project-init 支持 3 种语言模式：
 
 ## 多工具支持
 
-如果你同时使用 Claude Code 和 Cursor，`/project-init` 可以选择创建 `.cursor/rules/project-system.mdc` 文件，镜像相同的触发行为。两个工具读取同一份 `PROJECT.md` 和 `session-handoff.md`，上下文无缝衔接。
+如果你同时使用 Claude Code 和 Cursor，`/project-butler` 可以选择创建 `.cursor/rules/project-system.mdc` 文件，镜像相同的触发行为。两个工具读取同一份 `PROJECT.md` 和 `session-handoff.md`，上下文无缝衔接。
 
 ## 安装
 
 ```bash
 # Clone 到你的 Claude Code skills 目录
-git clone https://github.com/JamesShi7/project-init.git ~/.claude/skills/project-init
+git clone https://github.com/JamesShi7/project-butler.git ~/.claude/skills/project-butler
 ```
 
 ## 使用
@@ -158,7 +158,7 @@ git clone https://github.com/JamesShi7/project-init.git ~/.claude/skills/project
 在任意项目目录下：
 
 ```
-/project-init
+/project-butler
 ```
 
 回答 5 个问题（项目名称、一句话描述、当前阶段、GitHub 地址、是否创建 Cursor 规则），所有文件自动创建。
