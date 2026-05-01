@@ -25,8 +25,8 @@ Initialize a standardized project management system with 5 components:
 下层（事实流水）
 ┌────────────────────┐  ┌────────────────────┐
 │  log/（会话日志）   │  │  TODO.md（执行清单）│
-│  每次 end session   │  │  owner/deadline/    │
-│  自动生成           │  │  deps               │
+│  raw + summaries   │  │  owner/deadline/    │
+│  + archive（分级）  │  │  deps               │
 └────────────────────┘  └────────────────────┘
 ```
 
@@ -303,6 +303,8 @@ This is the most critical file — it's auto-loaded by Claude Code and defines a
 
 本项目使用 5 组件管理系统。
 
+- **Log Compaction Threshold:** 10（每积累 10 个日志文件压缩为 1 个 summary）
+
 ### 触发词
 
 | Intent | AI Action |
@@ -329,7 +331,14 @@ This is the most critical file — it's auto-loaded by Claude Code and defines a
 
 ### Session Start Protocol
 
-At session start, read `PROJECT.md` for project overview, and check the Language setting in CLAUDE.md to determine output language.
+At session start:
+
+1. Read `PROJECT.md` for project overview, and check the Language setting in CLAUDE.md to determine output language.
+2. **Read logs (bounded):**
+   - Find the highest level with summaries in `log/summaries/` — read all summaries at that level.
+   - Read all unarchived raw logs in `log/` (exclude `summaries/` and `archive/`).
+   - Total files read: at most 2 × (threshold − 1), regardless of project age.
+   - If `log/` doesn't exist yet, skip this step.
 
 ### Session End Protocol
 
@@ -337,15 +346,16 @@ At session start, read `PROJECT.md` for project overview, and check the Language
 
 1. **写会话日志** → `log/session-YYYY-MM-DD-{主题slug}.md`
    - 同日多次会话用 slug 区分（如 `session-2026-04-21-prd-draft.md`）
-2. **更新 session-handoff.md** → 刷新"当前进度 / 下一步"
-3. **更新 PROJECT.md** → 如有结构/模块状态变化，同步更新
-4. **更新 TODO.md** → 标记本次已完成的任务
-5. **收集宪法候选** → 识别本次会话中的规则/偏好/边界，追加到 `.claude/candidates.md`
-6. **整理文件结构（增量模式）** → 只处理新增/变更文件，按 STRUCTURE.md 规则快速归类
+2. **Log Compaction** → 检查未归档 raw logs 数量，若 ≥ threshold 则执行压缩（见 Log Compaction Protocol）
+3. **更新 session-handoff.md** → 刷新"当前进度 / 下一步"
+4. **更新 PROJECT.md** → 如有结构/模块状态变化，同步更新
+5. **更新 TODO.md** → 标记本次已完成的任务
+6. **收集宪法候选** → 识别本次会话中的规则/偏好/边界，追加到 `.claude/candidates.md`
+7. **整理文件结构（增量模式）** → 只处理新增/变更文件，按 STRUCTURE.md 规则快速归类
    - 若 STRUCTURE.md 不存在：先建立规则表（深度模式），再整理
    - 若 STRUCTURE.md 已存在：只匹配新增文件，不重读已有文件
    - 更新 `.claude/.file-snapshot.json`
-7. **Output summary** → A brief summary of what was done this session, in the configured language
+8. **Output summary** → A brief summary of what was done this session, in the configured language
 
 ### Session Log Format
 
@@ -620,17 +630,19 @@ description: Apply at session start and when user says end session / review clau
 # {{PROJECT_NAME}} — Project System Rules
 
 ## Session Start
-Read PROJECT.md and session-handoff.md at the start of every conversation.
+1. Read PROJECT.md and session-handoff.md at the start of every conversation.
+2. Read logs (bounded): highest-level summaries in log/summaries/ + all unarchived raw logs in log/. Skip if log/ doesn't exist.
 
 ## End Session Protocol
 When user says "end session" / "结束会话" / "收工":
 1. Write log/session-YYYY-MM-DD-{slug}.md (summary, decisions, outputs, next steps)
-2. Update session-handoff.md (refresh progress, next steps)
-3. Update PROJECT.md if structure or module status changed
-4. Update TODO.md (mark completed tasks)
-5. Collect CLAUDE.md candidates → append to .claude/candidates.md
-6. File structure reorganization (incremental mode) — only process new/changed files, match against STRUCTURE.md rules, organize (create STRUCTURE.md if missing)
-7. Output Chinese summary for user confirmation
+2. Log Compaction — compact unarchived raw logs if count ≥ threshold (see Log Compaction Protocol)
+3. Update session-handoff.md (refresh progress, next steps)
+4. Update PROJECT.md if structure or module status changed
+5. Update TODO.md (mark completed tasks)
+6. Collect CLAUDE.md candidates → append to .claude/candidates.md
+7. File structure reorganization (incremental mode) — only process new/changed files, match against STRUCTURE.md rules, organize (create STRUCTURE.md if missing)
+8. Output Chinese summary for user confirmation
 
 ## Triggers
 | Intent | Action |
@@ -682,6 +694,8 @@ File management rules. AI creates this on first end session or project init. Def
 - vendor/
 - .claude/
 - log/
+- log/summaries/
+- log/archive/
 - {{项目自定义排除}}
 
 ## 目录规则
@@ -897,6 +911,103 @@ Two modes with different depth levels, triggered by different commands.
 
 ---
 
+## Log Compaction Protocol
+
+Hierarchical log summarization. Keeps context reading bounded regardless of project age. Raw data is never deleted — only archived.
+
+### Core Rule
+
+When any level accumulates `threshold` files (default: 10, configurable in CLAUDE.md), compact them into 1 summary at the next level.
+
+### Directory Structure
+
+```
+log/
+├── session-YYYY-MM-DD-{slug}.md        ← unarchived raw logs
+├── summaries/
+│   ├── L1-001.md                        ← summary of raw logs 1-10
+│   ├── L1-002.md                        ← summary of raw logs 11-20
+│   ├── L2-001.md                        ← summary of L1-001 through L1-010
+│   └── ...
+└── archive/
+    ├── raw-001/                         ← archived raw logs for L1-001
+    ├── raw-002/                         ← archived raw logs for L1-002
+    ├── L1-001/                          ← archived L1 summaries for L2-001
+    └── ...
+```
+
+### Compaction Flow
+
+Triggered at end session, after writing the session log:
+
+```
+1. Count unarchived raw logs in log/ (exclude summaries/ and archive/)
+2. If count >= threshold:
+   a. Read all unarchived raw logs
+   b. Generate L1 summary → log/summaries/L1-{seq:03}.md
+      - Use the full 6-section session log format
+      - Header: # Log Summary L1-{seq} (Sessions {first}–{last}, {date_range})
+      - Merge all sections from the raw logs into a unified summary
+   c. Create archive folder → log/archive/raw-{seq:03}/
+   d. Move all compacted raw logs into the archive folder
+   e. Increment seq
+
+3. Count L1 summaries in log/summaries/ matching L1-*.md
+4. If count >= threshold:
+   a. Read all L1 summaries
+   b. Generate L2 summary → log/summaries/L2-{seq:03}.md
+      - Same 6-section format
+      - Header: # Log Summary L2-{seq} (Sessions {first}–{last}, {date_range})
+   c. Create archive folder → log/archive/L1-{seq:03}/
+   d. Move all compacted L1 summaries into the archive folder
+
+5. Repeat for L3, L4, etc. (each level compacts when it hits threshold)
+```
+
+### Session Start Reading
+
+Read logs in this order:
+1. Find the highest level with summaries in `log/summaries/`
+2. Read all summaries at that level (at most threshold - 1)
+3. Read all unarchived raw logs in `log/` (at most threshold - 1)
+
+Total files read: at most 2 × (threshold - 1). For threshold 10, that's at most 18 files — regardless of how many hundreds of sessions the project has.
+
+### Safety
+
+- **Never delete raw logs.** Archive them in `log/archive/` subdirectories.
+- **Never delete summaries.** Archive them alongside raw logs when compacted to a higher level.
+- **Use `git mv`** when in a git repo to preserve history during archival.
+- **Archive folders are excluded** from file reorganization (add `log/archive/` to STRUCTURE.md exclusion rules).
+
+### Summary Format
+
+Summaries use the same 6-section format as raw session logs, merged across all source files:
+
+```markdown
+# Log Summary L{level}-{seq} (Sessions {first}–{last}, {first_date} ~ {last_date})
+
+## Session Goal
+{merged goals from all source sessions}
+
+## Key Actions (Chronological)
+{consolidated timeline of key actions}
+
+## Decisions & Rationale
+{all decisions with rationale preserved}
+
+## Output Files
+{all files produced across sessions}
+
+## Unfinished Items / Next Session Pickup
+{carried-forward unfinished items, deduplicated}
+
+## CLAUDE.md Candidates (if any)
+{candidates identified during this period}
+```
+
+---
+
 ## Language Change Protocol
 
 Triggered when user expresses intent to change language (any expression: 切换语言, change language, switch to English, 换成中文, etc.).
@@ -964,6 +1075,9 @@ When some files already exist:
    - Does the file roles table include `STRUCTURE.md` and `.claude/.file-snapshot.json`? If not, add them.
    - Does the Session End Protocol include step 6 (整理文件结构)? If not, insert it between step 5 (收集宪法候选) and the last step (输出中文总结), and renumber accordingly.
    - Does it say "4 组件"? If so, update to "5 组件".
+   - Does it include `Log Compaction Threshold` in the CLAUDE.md template? If not, add it.
+   - Does the Session Start Protocol include bounded log reading (summaries + raw)? If not, update it.
+   - Does the Session End Protocol include a Log Compaction step after writing the session log? If not, insert it and renumber.
    - Offer to make these updates for user confirmation before proceeding.
 4. **For existing session-handoff.md / TODO.md**: skip entirely
 5. **For log/ directory**: create if missing (with `log/.gitkeep`), never touch existing log files
