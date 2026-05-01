@@ -196,3 +196,38 @@ git clone https://github.com/JamesShi96/project-butler.git ~/.claude/skills/proj
 ## 许可证
 
 [MIT](LICENSE)
+
+---
+
+## 更新日志
+
+### v1.0.0 (2026-05-01) — 会话恢复 + 日志压缩
+- **`/resume`** skill — 通过 jq 过滤 JSONL 恢复上次会话完整对话
+- **`/resume-full`** skill — 完整项目轨迹恢复，含历史会话摘要时间线
+- **日志压缩协议** — 日志超过 10 个文件时自动压缩旧日志
+- 从 `project-init` 更名为 `project-butler`
+
+### v0.4.0 (2026-04-29) — 多语言 + 文件管理
+- 3 种语言模式：英文、中文、双语，支持语言感知的文件命名
+- 深度整理 vs 增量整理双模式文件整理
+- 语言切换协议，支持随时切换
+- 新增"收工" / "end session"触发完整收工流程
+
+### v0.3.0 (2026-04-27) — 项目宪法 + 文件管理器
+- 新增 STRUCTURE.md 作为第 5 大组件，智能文件管理
+- 宪法候选系统 — AI 收集规则，人工逐条确认
+- 新增"整理文件"直接触发文件整理
+
+### v0.2.0 (2026-04-25) — README 重写 + 中文支持
+- 重写 README，增加问题陈述、设计哲学图示、组件详解
+- 新增中文 README（`README_zh.md`）和语言切换器
+- CLAUDE.md 模板加入 Karpathy Guidelines
+
+### v0.1.0 (2026-04-24) — 首次发布
+- 5 大组件：会话日志、项目 Wiki、项目宪法、文件管理、执行清单
+- 多工具支持（Claude Code + Cursor）
+- 一键初始化 + 升级模式
+
+---
+
+完整更新日志：[CHANGELOG.md](CHANGELOG.md) | 版本发布：[GitHub Releases](https://github.com/JamesShi96/project-butler/releases)
