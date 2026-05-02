@@ -193,6 +193,7 @@ git clone https://github.com/JamesShi96/project-butler.git ~/.claude/skills/proj
 ## 环境要求
 
 - [Claude Code](https://docs.anthropic.com/en/docs/claude-code) CLI
+- [jq](https://jqlang.github.io/jq/)（用于 `/resume` 和 `/resume-full`）
 - 可选：[Cursor](https://cursor.sh)（用于跨工具规则文件）
 
 ## 更新日志

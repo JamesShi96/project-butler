@@ -193,6 +193,7 @@ Answer 6 quick questions (project name, description, stage, GitHub URL, Cursor r
 ## Requirements
 
 - [Claude Code](https://docs.anthropic.com/en/docs/claude-code) CLI
+- [jq](https://jqlang.github.io/jq/) (for `/resume` and `/resume-full`)
 - Optionally: [Cursor](https://cursor.sh) (for cross-tool rules file)
 
 ## Update Log
