@@ -1,9 +1,6 @@
----
-name: resume
-description: Use when starting a new Claude Code session and wanting to continue from where the last session left off. Recovers full conversation context from the most recent session JSONL log for the current project. Trigger on /resume, "resume", "continue from last time", "接着上次", "继续上次的工作", "接着上次的", "继续", "上次做到哪了".
----
-
 # Resume — Recover Last Session Context
+
+> Loaded during: "resume" / "接着上次" / "继续" triggers (routed from main SKILL.md).
 
 ## Process
 

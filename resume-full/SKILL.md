@@ -1,15 +1,12 @@
----
-name: resume-full
-description: Use when starting a new Claude Code session and wanting a comprehensive overview of ALL previous sessions for this project — full project trajectory recovery. Reads the last session in detail plus summaries of all historical sessions. Trigger on /resume-full, "resume full", "full context", "项目全景", "整体回顾", "全面回顾", "项目上下文", "project overview".
----
-
 # Resume Full — Recover Full Project Context
+
+> Loaded during: "resume-full" / "全面回顾" / "项目全景" triggers (routed from main SKILL.md).
 
 ## Process
 
 ### 1. Read last session in detail
 
-Execute `/resume` steps 1-3 in full (find project path, locate last JSONL, run jq filter, read output). This gives you the detailed last-session context.
+Execute steps 1-3 from `resume/SKILL.md` in full (find project path, locate last JSONL, run jq filter, read output). This gives you the detailed last-session context.
 
 ### 2. Summarize historical sessions (bounded)
 
