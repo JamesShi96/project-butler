@@ -26,6 +26,8 @@ When some files already exist:
 10. **For existing .cursor/rules/**: check if `project-system.mdc` already exists. If yes, skip. If only other .mdc files exist, create `project-system.mdc` alongside them (not overwrite).
 11. **For language setting in CLAUDE.md**: if CLAUDE.md exists but has no `## Language` section, add one with default value `bilingual`. If it exists, skip.
 12. **For Coding Guidelines (Karpathy Guidelines) in CLAUDE.md**: if CLAUDE.md exists but has no `## Coding Guidelines` section, append the Karpathy Guidelines section (from Template 1) before the `## Project-Specific Rules` section or at the end of the file. If it exists, skip.
+13. **For UPDATE_LOG.md**: create if missing (empty template with header only). If exists, never overwrite — user has real update history here.
+14. **For Update Log step in CLAUDE.md Session End Protocol**: if the protocol only has 8 steps (ending with "Output summary"), insert step 8 (评估并写入 Update Log) and renumber the old step 8 to step 9.
 
 ## Legacy Migration (.claude/memory/ → new system)
 

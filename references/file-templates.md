@@ -64,6 +64,7 @@ The most critical file — auto-loaded by Claude Code, defines all ongoing behav
 | .claude/candidates.md | AI 自动 | 过程中识别到稳定规则时 |
 | STRUCTURE.md | AI 自动 | end session + 文件结构变化时 |
 | .claude/.file-snapshot.json | AI 自动 | end session 时 |
+| UPDATE_LOG.md | AI 自动 | end session + 重大更新时 |
 
 ### Session Start Protocol
 
@@ -91,7 +92,10 @@ At session start:
    - 若 STRUCTURE.md 不存在：先建立规则表（深度模式），再整理
    - 若 STRUCTURE.md 已存在：只匹配新增文件，不重读已有文件
    - 更新 `.claude/.file-snapshot.json`
-8. **Output summary** → A brief summary of what was done this session, in the configured language
+8. **评估并写入 Update Log** → 评估本次会话是否包含重大更新（新功能、重大修改、3+ 文件变更、用户声明里程碑、重要 TODO 完成）
+   - 若是重大更新：在 `UPDATE_LOG.md` 顶部追加一条记录（标题 + 变更要点），可选创建 GitHub Release
+   - 若不是：静默跳过
+9. **Output summary** → A brief summary of what was done this session, in the configured language
 
 ### Session Log Format
 
@@ -471,3 +475,15 @@ When `zh`: all user file names can use Chinese characters, no restriction to ASC
 When `bilingual`: English naming preferred; Chinese names acceptable for docs and content files.
 
 4. **These are starting points.** Adapt rules based on actual file content and project context. Refine, merge, or add rules as needed — not blindly copy templates.
+
+---
+
+## Template 8: UPDATE_LOG.md
+
+Adapt headers using the UPDATE_LOG glossary. Content language follows the project's configured language.
+
+```
+# Update Log
+
+> 记录项目的重大更新（AI 在 end session 时自动判断是否写入）。
+```

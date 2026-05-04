@@ -129,6 +129,15 @@ When creating or updating files, adapt based on the configured language:
 | Section | 未完事项 / 下次接手点 | Unfinished Items / Next Session Pickup |
 | Section | 候选 CLAUDE.md 条目（如有） | CLAUDE.md Candidates (if any) |
 
+### UPDATE_LOG.md
+
+| Context | 中文 | English |
+|---------|------|---------|
+| Title | 更新日志 | Update Log |
+| Meta line | 记录项目的重大更新（AI 在 end session 时自动判断是否写入） | Records significant project updates (AI auto-evaluates at end session) |
+| Entry format | YYYY-MM-DD — {一句话标题} | YYYY-MM-DD — {one-line title} |
+| README link | 更新历史见 [UPDATE_LOG.md](UPDATE_LOG.md)。 | For update history, see [UPDATE_LOG.md](UPDATE_LOG.md). |
+
 ## Common Mistakes
 
 | Mistake | Correct Behavior |

@@ -85,7 +85,11 @@ When triggered by "end session" / "结束会话" / "收工", execute in order:
 7. **File reorganization (incremental)** → read `references/file-reorganization.md`, execute Mode B
    - If STRUCTURE.md missing: execute Mode A first to establish baseline
    - Update `.claude/.file-snapshot.json`
-8. **Output summary** → brief summary in the configured language (check CLAUDE.md Language setting)
+8. **Evaluate & write update log** → read `references/update-log.md`
+   - Evaluate session significance; if significant, prepend entry to `UPDATE_LOG.md`
+   - Optionally offer GitHub Release creation
+   - If not significant, skip silently
+9. **Output summary** → brief summary in the configured language (check CLAUDE.md Language setting)
 
 ### Session Log Format
 
@@ -127,7 +131,7 @@ If user provides a task missing required fields, ask them to fill in. Completed 
 
 ### Step 1: Detect Mode
 
-Scan project root for: CLAUDE.md, PROJECT.md, session-handoff.md, TODO.md, log/, STRUCTURE.md, .claude/.file-snapshot.json, .claude/candidates.md
+Scan project root for: CLAUDE.md, PROJECT.md, session-handoff.md, TODO.md, log/, STRUCTURE.md, UPDATE_LOG.md, .claude/.file-snapshot.json, .claude/candidates.md
 
 - **Fresh**: None exist → create all
 - **Upgrade**: Some exist → read `references/upgrade-mode.md`, create only missing files, never overwrite existing content
@@ -189,7 +193,7 @@ Create `log/.gitkeep` (empty file) alongside `log/` directory so git tracks it w
 |---------|-----------------|
 | Init (fresh) | `references/file-templates.md` + `references/language-adaptation.md` |
 | Init (upgrade) | above + `references/upgrade-mode.md` |
-| End session | `references/file-reorganization.md` (always) + `references/log-compaction.md` (if logs ≥ threshold) |
+| End session | `references/file-reorganization.md` + `references/update-log.md` + `references/log-compaction.md` (if logs ≥ threshold) |
 | 整理文件 / organize files | `references/file-reorganization.md` |
 | 切换语言 / change language | `references/language-change.md` + `references/language-adaptation.md` |
 | continue / 接着上次 | `continue/SKILL.md` |
