@@ -10,15 +10,20 @@ When you work with AI coding assistants across multiple sessions, you start from
 
 ## What You Can Do
 
-| Command / Trigger | What It Does |
+All triggers are **natural language** — just say it naturally, no slash commands needed (except `/project-butler` for initial setup).
+
+| You say (natural language) | What it does |
 |---|---|
-| `/project-butler` | Initialize the full project management system — session logs, wiki, constitution, file manager, task tracker. One-time setup, everything auto-maintains after. |
+| `/project-butler` | Initialize the full project management system. One-time setup, everything auto-maintains after. |
 | "end session" / "收工" | Auto-write session log, update handoff, sync wiki, organize files. Walk away and everything is captured. |
-| `/resume` | Recover your last session's full conversation. Start a new session and pick up exactly where you left off — no re-explaining needed. |
-| `/resume-full` | Full project trajectory recovery. Read the last session in detail + summaries of all historical sessions. Perfect for returning after a long absence. |
+| "continue" / "接着上次" / "上次做到哪了" | Recover your last session's full conversation. Start a new session and pick up exactly where you left off — no re-explaining needed. |
+| "continue full context" / "全面回顾" / "项目全景" | Full project trajectory recovery. Last session in detail + summaries of all historical sessions. Perfect for returning after a long absence. |
 | "review claude" | AI shows candidate rules it discovered during work. You confirm, reject, or rewrite each one. Constitution grows organically. |
 | "sync wiki" | Force-update the project overview file. Anyone (human or AI) reads one file to understand the whole project. |
-| "organize files" | Smart file reorganization — understands what each file is, where it belongs, and respects your naming conventions. |
+| "organize files" / "整理文件" | Smart file reorganization — understands what each file is, where it belongs, and respects your naming conventions. |
+| "change language" / "切换语言" | Change content language for all management files. |
+
+> **Note:** `continue` and `continue full context` are routed through project-butler internally — there's no separate `/continue` command. Just say it naturally and the AI handles the rest.
 
 ## The Problem It Solves
 
@@ -32,7 +37,7 @@ If any of these sound familiar, this skill is for you:
 
 ## How It Works
 
-Run `/project-butler` once. It creates 8 files organized in 4 layers:
+Run `/project-butler` once. It creates 8 files organized in 3 layers:
 
 ```
 project-root/
@@ -92,7 +97,7 @@ When switching language, you're asked whether to rename user files to match the 
 
 #### 1. Session Logs (log/)
 
-Every time you say `end session`, the AI writes a structured log:
+Every time you say "end session" / "收工", the AI writes a structured log:
 
 ```markdown
 # Session 2026-04-21 — PRD Draft
@@ -105,7 +110,7 @@ Every time you say `end session`, the AI writes a structured log:
 ## CLAUDE.md Candidates (if any)
 ```
 
-Like meeting notes, but automatic. Next session, the AI reads the latest log and picks up where you left off.
+Like meeting notes, but automatic. Next session, say "continue" or "接着上次" and the AI reads the latest log to pick up where you left off.
 
 #### 2. Project Wiki (PROJECT.md)
 
@@ -125,7 +130,7 @@ The project's rules and boundaries — but with a crucial safety mechanism:
 
 - **AI never edits CLAUDE.md directly**
 - During work, the AI identifies patterns that might be rules ("this user always wants tests first", "they use snake_case for files") and collects them in `.claude/candidates.md`
-- When you say `review claude`, the AI presents candidates one by one for you to **confirm, reject, or rewrite**
+- When you say "review claude", the AI presents candidates one by one for you to **confirm, reject, or rewrite**
 - Only confirmed entries get written to CLAUDE.md
 
 This means the constitution grows organically from real usage patterns, but you stay in control.
@@ -152,18 +157,20 @@ If you mention a task without these fields, the AI asks you to fill them in. Com
 
 ## Trigger Words
 
-After setup, these become part of your workflow:
+After setup, just say these naturally — no slash commands needed:
 
 | You say (any expression of...) | What happens |
 |---------|-------------|
-| "we're done" / "end session" | Write log + update handoff + sync Wiki + organize files + output summary |
+| "we're done" / "end session" / "收工" | Write log + update handoff + sync Wiki + organize files + output summary |
+| "continue" / "接着上次" / "上次做到哪了" | Recover last session's context and pick up where you left off |
+| "continue full context" / "全面回顾" / "项目全景" | Full project trajectory recovery with all historical session summaries |
 | "check the rules" / "review claude" | Show candidate rules for you to confirm one by one |
 | "update overview" / "sync wiki" | Force rescan and update PROJECT.md |
 | "where are we" / "status" | Read Wiki + handoff summary aloud |
-| "clean up files" / "organize" | Scan and reorganize files per STRUCTURE.md rules |
+| "clean up files" / "organize files" | Scan and reorganize files per STRUCTURE.md rules |
 | "switch language" / "切换语言" | Change content language for all management files |
 
-The key insight: **you just work normally, and say "end session" when you're done.** The system handles everything else.
+The key insight: **you just work normally, and say "end session" when you're done.** The system handles everything else. Next time, say "continue" and you're back.
 
 ## Multi-Tool Support
 
@@ -176,7 +183,7 @@ If you use both Claude Code and Cursor, `/project-butler` optionally creates a `
 git clone https://github.com/JamesShi96/project-butler.git ~/.claude/skills/project-butler
 ```
 
-This includes `/resume` and `/resume-full` — no separate installation needed.
+Session recovery (`continue` / `continue full context`) is included — no separate installation needed.
 
 ## Use
 
@@ -193,13 +200,19 @@ Answer 6 quick questions (project name, description, stage, GitHub URL, Cursor r
 ## Requirements
 
 - [Claude Code](https://docs.anthropic.com/en/docs/claude-code) CLI
-- [jq](https://jqlang.github.io/jq/) (for `/resume` and `/resume-full`)
+- [jq](https://jqlang.github.io/jq/) (for `continue` / `continue full context` session recovery)
 - Optionally: [Cursor](https://cursor.sh) (for cross-tool rules file)
 
 ## Update Log
 
+### v1.1.0 (2026-05-04) — SKILL.md Refactor + Continue Rename
+- SKILL.md refactored from 1175 → 196 lines with on-demand reference loading (70% token reduction for common triggers)
+- Renamed `/resume` → `continue`, `/resume-full` → `continue full context` (natural language triggers, no slash needed)
+- All triggers now natural language — just say it and the AI routes to the right workflow
+- Common Mistakes distributed into each reference file for context-relevant guidance
+
 ### v1.0.0 (2026-05-01) — Session Recovery + Log Compaction
-- `/resume` + `/resume-full` session recovery skills
+- Session recovery skills (`continue` / `continue full context`)
 - Log Compaction Protocol (auto-compact when exceeding 10 files)
 - Renamed from `project-init` → `project-butler`
 

@@ -1,5 +1,19 @@
 # Update Log
 
+## v1.1.0 (2026-05-04)
+
+### SKILL.md Refactor + Continue Rename
+- SKILL.md refactored from 1175 → 196 lines with on-demand reference loading
+  - Heavy content split into `references/` (6 files): file-templates, language-adaptation, file-reorganization, log-compaction, language-change, upgrade-mode
+  - Common Mistakes distributed into each reference file for context-relevant guidance
+  - 70% token reduction for common triggers (end session, organize files, language change)
+- Renamed `/resume` → `continue`, `/resume-full` → `continue full context`
+  - Routed through main SKILL.md Step 0 (no independent sub-skills)
+  - Avoids conflict with Claude Code's built-in `/resume` command
+- All triggers now natural language — just say it and the AI routes to the right workflow
+  - Added trigger words to SKILL.md description field for reliable matching
+- Updated both READMEs (EN/ZH) with natural language trigger documentation
+
 ## v1.0.0 (2026-05-01)
 
 ### Session Recovery

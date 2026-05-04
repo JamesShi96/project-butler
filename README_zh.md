@@ -10,15 +10,20 @@
 
 ## 你能做什么
 
-| 命令 / 触发词 | 它能干什么 |
+所有触发词都是**自然语言**——直接说就行，不需要斜杠命令（除了初始化时用 `/project-butler`）。
+
+| 你说（自然语言） | 它能干什么 |
 |---|---|
-| `/project-butler` | 一键初始化完整项目管理系统——会话日志、项目 Wiki、项目宪法、文件管理、任务追踪。一次设置，后续全自动维护。 |
+| `/project-butler` | 一键初始化完整项目管理系统。一次设置，后续全自动维护。 |
 | "end session" / "收工" | 自动写会话日志、更新接手指引、同步 Wiki、整理文件。说完走人，一切都已记录。 |
-| `/resume` | 恢复上次会话的完整对话。新开一个 session，直接从上次中断的地方继续——不用重新解释。 |
-| `/resume-full` | 完整项目轨迹恢复。上次会话详细读取 + 所有历史会话摘要时间线。长时间没碰项目后回来用这个。 |
+| "continue" / "接着上次" / "上次做到哪了" | 恢复上次会话的完整对话。新开一个 session，直接从上次中断的地方继续——不用重新解释。 |
+| "continue full context" / "全面回顾" / "项目全景" | 完整项目轨迹恢复。上次会话详细读取 + 所有历史会话摘要时间线。长时间没碰项目后回来用这个。 |
 | "review claude" / "更新宪法" | AI 展示工作中发现的候选规则，你逐条确认、驳回或改写。宪法从真实使用中有机生长。 |
 | "sync wiki" / "同步项目" | 强制更新项目概览文件。任何人（或 AI）读这一个文件就能理解项目全貌。 |
 | "organize files" / "整理文件" | 智能文件整理——理解每个文件是什么、该放哪里，遵守你的命名规范。 |
+| "change language" / "切换语言" | 更改所有管理文件的内容语言。 |
+
+> **说明：** `continue` 和 `continue full context` 通过 project-butler 内部路由触发，没有独立的 `/continue` 命令。直接说就行，AI 会自动处理。
 
 ## 解决什么问题
 
@@ -32,7 +37,7 @@
 
 ## 工作原理
 
-运行一次 `/project-butler`，它会创建 8 个文件，按 4 个层级组织：
+运行一次 `/project-butler`，它会创建 8 个文件，按 3 个层级组织：
 
 ```
 project-root/
@@ -92,7 +97,7 @@ project-butler 支持 3 种语言模式：
 
 #### 1. 会话日志（log/）
 
-每次你说 `end session`，AI 自动写一条结构化日志：
+每次你说 "end session" / "收工"，AI 自动写一条结构化日志：
 
 ```markdown
 # Session 2026-04-21 — PRD 草稿
@@ -105,7 +110,7 @@ project-butler 支持 3 种语言模式：
 ## 候选 CLAUDE.md 条目（如有）
 ```
 
-像 meeting notes，但是全自动的。下一个 session，AI 读取最新日志就能接上。
+像 meeting notes，但是全自动的。下次开新 session，说 "continue" / "接着上次" 就能接上。
 
 #### 2. 项目 Wiki（PROJECT.md）
 
@@ -125,7 +130,7 @@ project-butler 支持 3 种语言模式：
 
 - **AI 绝对不直接修改 CLAUDE.md**
 - 工作过程中，AI 识别出可能是规则的模式（"这个用户总是要先写测试"、"他们用 snake_case 命名文件"），收集到 `.claude/candidates.md`
-- 你说 `review claude` 时，AI 逐条展示候选条目，让你**确认、驳回或改写**
+- 你说 "review claude" 时，AI 逐条展示候选条目，让你**确认、驳回或改写**
 - 只有你确认的条目才会写入 CLAUDE.md
 
 这意味着宪法从真实使用模式中有机生长，但你始终掌控最终决定权。
@@ -152,18 +157,20 @@ project-butler 支持 3 种语言模式：
 
 ## 触发词
 
-设置完成后，这些触发词成为你的日常工作流：
+设置完成后，直接说就行——不需要斜杠命令：
 
 | 你说（任何表达...意思的话） | 发生什么 |
 |---------|-------------|
-| "做完了" / "收工" | 写 log + 更新 handoff + 同步 Wiki + 整理文件 + 输出总结 |
-| "审查规则" / "更新宪法" | 展示候选规则逐条确认 |
-| "同步一下" / "同步项目" | 强制重扫并更新 PROJECT.md |
-| "项目现状" / "进度怎么样" | 朗读 Wiki + handoff 摘要 |
-| "整理文件" / "收拾一下" | 扫描并按 STRUCTURE.md 规则整理文件 |
-| "切换语言" / "换成英文" | 更改所有管理文件的内容语言 |
+| "做完了" / "收工" / "end session" | 写 log + 更新 handoff + 同步 Wiki + 整理文件 + 输出总结 |
+| "继续" / "接着上次" / "上次做到哪了" | 恢复上次会话上下文，直接接上 |
+| "全面回顾" / "项目全景" / "continue full context" | 完整项目轨迹恢复，包含所有历史会话摘要 |
+| "审查规则" / "review claude" | 展示候选规则逐条确认 |
+| "同步一下" / "sync wiki" | 强制重扫并更新 PROJECT.md |
+| "项目现状" / "status" | 朗读 Wiki + handoff 摘要 |
+| "整理文件" / "organize files" | 扫描并按 STRUCTURE.md 规则整理文件 |
+| "切换语言" / "change language" | 更改所有管理文件的内容语言 |
 
-核心体验：**你正常工作，做完说一声 "end session"，系统自动处理剩下的一切。**
+核心体验：**你正常工作，做完说一声 "收工"，系统自动处理剩下的一切。下次说 "接着上次"，直接继续。**
 
 ## 多工具支持
 
@@ -176,7 +183,7 @@ project-butler 支持 3 种语言模式：
 git clone https://github.com/JamesShi96/project-butler.git ~/.claude/skills/project-butler
 ```
 
-`/resume` 和 `/resume-full` 已包含在内，无需额外安装。
+会话恢复（`continue` / `continue full context`）已包含在内，无需额外安装。
 
 ## 使用
 
@@ -193,13 +200,19 @@ git clone https://github.com/JamesShi96/project-butler.git ~/.claude/skills/proj
 ## 环境要求
 
 - [Claude Code](https://docs.anthropic.com/en/docs/claude-code) CLI
-- [jq](https://jqlang.github.io/jq/)（用于 `/resume` 和 `/resume-full`）
+- [jq](https://jqlang.github.io/jq/)（用于 `continue` / `continue full context` 会话恢复）
 - 可选：[Cursor](https://cursor.sh)（用于跨工具规则文件）
 
 ## 更新日志
 
+### v1.1.0 (2026-05-04) — SKILL.md 精简 + Continue 更名
+- SKILL.md 从 1175 行精简到 196 行，按需加载 reference 文件（常用触发降幅 70%）
+- `/resume` 更名为 `continue`，`/resume-full` 更名为 `continue full context`
+- 所有触发改为自然语言——直接说就行，AI 自动路由
+- Common Mistakes 拆散到各 reference 文件，按上下文呈现
+
 ### v1.0.0 (2026-05-01) — 会话恢复 + 日志压缩
-- `/resume` + `/resume-full` 会话恢复 skill
+- 会话恢复功能（`continue` / `continue full context`）
 - 日志压缩协议（超过 10 个文件自动压缩）
 - 从 `project-init` 更名为 `project-butler`
 
