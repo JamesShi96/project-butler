@@ -1,12 +1,12 @@
-# Resume Full — Recover Full Project Context
+# Continue Full Context — Recover Full Project Context
 
-> Loaded during: "resume-full" / "全面回顾" / "项目全景" triggers (routed from main SKILL.md).
+> Loaded during: "continue full context" / "全面回顾" triggers (routed from main SKILL.md).
 
 ## Process
 
 ### 1. Read last session in detail
 
-Execute steps 1-3 from `resume/SKILL.md` in full (find project path, locate last JSONL, run jq filter, read output). This gives you the detailed last-session context.
+Execute steps 1-3 from `continue/SKILL.md` in full (find project path, locate last JSONL, run jq filter, read output). This gives you the detailed last-session context.
 
 ### 2. Summarize historical sessions (bounded)
 

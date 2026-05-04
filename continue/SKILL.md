@@ -1,6 +1,6 @@
-# Resume — Recover Last Session Context
+# Continue — Recover Last Session Context
 
-> Loaded during: "resume" / "接着上次" / "继续" triggers (routed from main SKILL.md).
+> Loaded during: "continue" / "接着上次" triggers (routed from main SKILL.md).
 
 ## Process
 

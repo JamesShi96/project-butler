@@ -1,6 +1,6 @@
 ---
 name: project-butler
-description: "Use when initializing or upgrading a project's management system, ending a work session, or resuming from a previous session. Triggers on /project-butler, '初始化项目', 'setup project', '项目初始化', 'end session', '结束会话', '收工', '整理文件', 'organize files', '切换语言', 'change language', 'resume', 'continue from last time', '接着上次', '接着上次的', '继续上次的工作', '继续', '上次做到哪了', 'resume full', 'full context', 'project overview', '全面回顾', '项目全景', '项目上下文', '整体回顾', or when a project lacks management files (CLAUDE.md, PROJECT.md, STRUCTURE.md, session-handoff.md, TODO.md). Creates a 5-component system: session logs, project wiki, file structure management, constitution tracking, and task execution. Supports 3 language modes (English, Chinese, bilingual). When triggered by session-end keywords, execute the full end session protocol including file reorganization. When triggered by '整理文件' alone, only execute the File Reorganization Protocol. When triggered by resume keywords, recover context from the previous session. Supports fresh install and non-destructive upgrade for existing projects."
+description: "Use when initializing or upgrading a project's management system, ending a work session, or resuming from a previous session. Triggers on /project-butler, '初始化项目', 'setup project', '项目初始化', 'end session', '结束会话', '收工', '整理文件', 'organize files', '切换语言', 'change language', 'continue', 'continue from last time', '接着上次', '接着上次的', '继续上次的工作', '上次做到哪了', 'continue full context', 'full context', 'project overview', '全面回顾', '项目全景', '项目上下文', '整体回顾', or when a project lacks management files (CLAUDE.md, PROJECT.md, STRUCTURE.md, session-handoff.md, TODO.md). Creates a 5-component system: session logs, project wiki, file structure management, constitution tracking, and task execution. Supports 3 language modes (English, Chinese, bilingual). When triggered by session-end keywords, execute the full end session protocol including file reorganization. When triggered by '整理文件' alone, only execute the File Reorganization Protocol. When triggered by resume keywords, recover context from the previous session. Supports fresh install and non-destructive upgrade for existing projects."
 ---
 
 # Project Butler — 5-Component Project Management System
@@ -57,14 +57,14 @@ Determine how this skill was triggered:
 2. Execute the Language Change Protocol
 3. Report and stop
 
-**E. "resume" / "接着上次" / "继续" / "上次做到哪了":**
-1. Read `resume/SKILL.md`
-2. Execute the Resume process (recover last session context)
+**E. "continue" / "接着上次" / "上次做到哪了":**
+1. Read `continue/SKILL.md`
+2. Execute the Continue process (recover last session context)
 3. Report and stop
 
-**F. "resume-full" / "全面回顾" / "项目全景" / "full context":**
-1. Read `resume-full/SKILL.md`
-2. Execute the Resume Full process (full project trajectory recovery)
+**F. "continue full context" / "全面回顾" / "项目全景" / "full context":**
+1. Read `continue-full-context/SKILL.md`
+2. Execute the Continue Full Context process (full project trajectory recovery)
 3. Report and stop
 
 ---
@@ -192,5 +192,5 @@ Create `log/.gitkeep` (empty file) alongside `log/` directory so git tracks it w
 | End session | `references/file-reorganization.md` (always) + `references/log-compaction.md` (if logs ≥ threshold) |
 | 整理文件 / organize files | `references/file-reorganization.md` |
 | 切换语言 / change language | `references/language-change.md` + `references/language-adaptation.md` |
-| resume / 接着上次 | `resume/SKILL.md` |
-| resume-full / 全面回顾 | `resume-full/SKILL.md` |
+| continue / 接着上次 | `continue/SKILL.md` |
+| continue full context / 全面回顾 | `continue-full-context/SKILL.md` |
