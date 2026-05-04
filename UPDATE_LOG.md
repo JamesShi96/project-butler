@@ -1,5 +1,18 @@
 # Update Log
 
+## v1.2.0 (2026-05-05)
+
+### Update Log Auto-Tracking
+- Auto-detect significant updates at end session (new features, major changes, 3+ file changes, milestones, important TODO completions)
+- New `UPDATE_LOG.md` — milestone-level change history between session logs and project wiki
+- GitHub Release integration — optional release creation for significant updates
+- README link integration during init (non-intrusive, link-only)
+- Supports both code and non-code projects
+- Full protocol: `references/update-log.md` with significance criteria, format, and 6 Common Mistakes
+- Cross-file consistency: SKILL.md (9-step end session), CLAUDE.md template, Cursor template, PROJECT.md template, upgrade-mode, language-adaptation all updated
+
+---
+
 ## v1.1.0 (2026-05-04)
 
 ### SKILL.md Refactor + Continue Rename

@@ -40,13 +40,14 @@ The key insight: **you just work normally, and say "end session" when you're don
 
 ## How It Works
 
-Run `/project-butler` once. It creates 8 files organized in 3 layers:
+Run `/project-butler` once. It creates 9 files organized in 3 layers:
 
 ```
 project-root/
 ├── CLAUDE.md                   ← Constitution (human-confirmed rules)
 ├── PROJECT.md                  ← Wiki (auto-synced project overview)
 ├── STRUCTURE.md                ← File management rules (auto-maintained)
+├── UPDATE_LOG.md               ← Update log (milestone-level changes)
 ├── session-handoff.md          ← Cross-session handoff (auto-updated)
 ├── TODO.md                     ← Execution checklist
 ├── log/                        ← Session logs (auto-generated)
@@ -67,6 +68,11 @@ project-root/
   │  PROJECT.md (Wiki)                  │  ← Auto-synced snapshot
   │  What this project IS right now     │
   └─────────────────────────────────────┘
+            ↑ milestones surfaced from below
+  ┌─────────────────────────────────────┐
+  │  UPDATE_LOG.md (Update Log)         │  ← Milestone-level changes
+  │  What changed, version by version   │
+  └─────────────────────────────────────┘
             ↑ state summarized from below
   ┌──────────────────────┐ ┌───────────────────────┐
   │  log/ (Session Logs) │ │  TODO.md (Task List)  │  ← Raw facts, written often
@@ -77,6 +83,7 @@ project-root/
 **Bottom feeds top, top constrains bottom.**
 
 - **Logs and TODOs** are the raw fact stream — what happened, what needs to happen
+- **Update Log** surfaces milestone-level changes — significant updates auto-detected from session logs
 - **Wiki** is the current state snapshot — auto-distilled from the raw facts
 - **Constitution** is the stable principle layer — rules that persist and guide all behavior
 
@@ -96,7 +103,7 @@ Set during `/project-butler` setup, or change anytime by saying "change language
 
 When switching language, you're asked whether to rename user files to match the new language's naming conventions. System files (CLAUDE.md, PROJECT.md, etc.) keep their English names regardless.
 
-### The 5 Components
+### The 6 Components
 
 #### 1. Session Logs (log/)
 
@@ -158,6 +165,21 @@ Not an idea pool — an execution plan. Every task has three required fields:
 
 If you mention a task without these fields, the AI asks you to fill them in. Completed tasks are checked off and kept (not deleted) as execution history.
 
+#### 6. Update Log (UPDATE_LOG.md)
+
+Not every session deserves a changelog entry, but the ones that matter should be recorded. At end session, the AI evaluates what happened against significance criteria (new features, major changes, 3+ files changed, milestones, important TODOs completed) and automatically writes milestone-level entries:
+
+```markdown
+## 2026-05-05 — User Authentication Module Complete
+
+- Added JWT-based auth with refresh tokens
+- Created login/register/logout endpoints
+- Wrote integration tests (12/12 passing)
+---
+```
+
+If your project has a GitHub remote, it offers to create a GitHub Release too. Works for both code and non-code projects — any project that has significant updates worth tracking.
+
 ## Multi-Tool Support
 
 If you use both Claude Code and Cursor, `/project-butler` optionally creates a `.cursor/rules/project-system.mdc` file that mirrors the same trigger behavior. Both tools read from the same `PROJECT.md` and `session-handoff.md`, so context carries over seamlessly.
@@ -190,6 +212,13 @@ Answer 6 quick questions (project name, description, stage, GitHub URL, Cursor r
 - Optionally: [Cursor](https://cursor.sh) (for cross-tool rules file)
 
 ## Update Log
+
+### v1.2.0 (2026-05-05) — Update Log Auto-Tracking
+- Auto-detect significant updates at end session (new features, major changes, 3+ files, milestones)
+- New `UPDATE_LOG.md` — milestone-level change history between session logs and wiki
+- GitHub Release integration (optional, asks first)
+- README link during init (non-intrusive)
+- Supports both code and non-code projects
 
 ### v1.1.0 (2026-05-04) — SKILL.md Refactor + Continue Rename
 - SKILL.md refactored from 1175 → 196 lines with on-demand reference loading (70% token reduction for common triggers)
