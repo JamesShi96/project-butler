@@ -45,7 +45,7 @@ The most critical file — auto-loaded by Claude Code, defines all ongoing behav
 
 | Intent | AI Action |
 |--------|-----------|
-| End session / wrap up — any expression of "we're done for now" (end session, 结束会话, 收工, wrap up, done for today, etc.) | Write log + update handoff + sync Wiki + check TODO + collect constitution candidates + file reorganization + output summary in configured language |
+| End session / wrap up — any expression of "we're done for now" (end session, 结束会话, 收工, wrap up, done for today, etc.) | Write log + update handoff + sync Wiki + check TODO + collect constitution candidates + file reorganization + evaluate update log + output summary in configured language |
 | Review constitution — any expression of "check/update rules" (review claude, 更新宪法, check rules, etc.) | Show .claude/candidates.md for confirmation one by one |
 | Sync wiki — any expression of "update project overview" (sync wiki, 同步项目, refresh overview, etc.) | Force rescan and update PROJECT.md |
 | Check status — any expression of "what's the current state" (status, 项目现状, where are we, etc.) | Read PROJECT.md + session-handoff.md summary aloud |
@@ -230,6 +230,7 @@ Adapt headers using the PROJECT.md glossary. In bilingual mode, use Chinese head
 ├── STRUCTURE.md                ← 文件管理规则（AI 自动维护）
 ├── session-handoff.md          ← 接手指引（AI 自动）
 ├── TODO.md                     ← 执行清单
+├── UPDATE_LOG.md               ← 更新日志（重大更新时写入）
 ├── log/                        ← 会话日志
 └── .claude/
     ├── candidates.md           ← 宪法候选池
@@ -245,6 +246,7 @@ Adapt headers using the PROJECT.md glossary. In bilingual mode, use Chinese head
 | TODO.md | 执行任务清单 |
 | .claude/candidates.md | 待确认的宪法候选条目 |
 | STRUCTURE.md | 文件管理规则，定义目录组织和匹配条件 |
+| UPDATE_LOG.md | 更新日志，记录重大更新 |
 
 ## 当前进度快照
 | 模块 | 状态 | 备注 |
@@ -361,12 +363,13 @@ When user says "end session" / "结束会话" / "收工":
 5. Update TODO.md (mark completed tasks)
 6. Collect CLAUDE.md candidates → append to .claude/candidates.md
 7. File structure reorganization (incremental mode) — only process new/changed files, match against STRUCTURE.md rules, organize (create STRUCTURE.md if missing)
-8. Output Chinese summary for user confirmation
+8. Evaluate and write update log — if significant changes, prepend entry to UPDATE_LOG.md; optionally offer GitHub Release
+9. Output summary in configured language
 
 ## Triggers
 | Intent | Action |
 |--------|--------|
-| End session / wrap up (any language) | Write log, update handoff, sync wiki, check TODO, collect candidates, file reorganization, output summary |
+| End session / wrap up (any language) | Write log, update handoff, sync wiki, check TODO, collect candidates, file reorganization, evaluate update log, output summary |
 | Review constitution (any language) | Show .claude/candidates.md for user to confirm each entry |
 | Sync wiki (any language) | Force rescan and update PROJECT.md |
 | Check status (any language) | Read PROJECT.md + session-handoff.md summary aloud |
@@ -384,6 +387,7 @@ When user says "end session" / "结束会话" / "收工":
 | .claude/candidates.md | AI auto | when stable rules identified |
 | STRUCTURE.md | AI auto | end session + file structure changes |
 | .claude/.file-snapshot.json | AI auto | end session |
+| UPDATE_LOG.md | AI auto | end session + significant updates |
 ```
 
 ---

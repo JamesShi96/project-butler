@@ -168,6 +168,7 @@ Create `log/.gitkeep` (empty file) alongside `log/` directory so git tracks it w
   ✅ log/                — 会话日志目录（已创建）
   ✅ .claude/candidates.md — 宪法候选池（已创建）
   ✅ STRUCTURE.md        — 文件管理规则（已创建）
+  ✅ UPDATE_LOG.md       — 更新日志（已创建）
   ✅ .cursor/rules/      — Cursor 规则（已创建 / 已跳过）
   🌐 Language: {{LANGUAGE}}
 
