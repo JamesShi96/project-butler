@@ -8,23 +8,6 @@ When you work with AI coding assistants across multiple sessions, you start from
 
 **project-butler** solves this by setting up a self-maintaining project management system in one command. After setup, your AI assistant automatically logs sessions, maintains a project wiki, tracks tasks, and accumulates rules for your review — no manual effort required.
 
-## What You Can Do
-
-All triggers are **natural language** — just say it naturally, no slash commands needed (except `/project-butler` for initial setup).
-
-| You say (natural language) | What it does |
-|---|---|
-| `/project-butler` | Initialize the full project management system. One-time setup, everything auto-maintains after. |
-| "end session" / "收工" | Auto-write session log, update handoff, sync wiki, organize files. Walk away and everything is captured. |
-| "continue" / "接着上次" / "上次做到哪了" | Recover your last session's full conversation. Start a new session and pick up exactly where you left off — no re-explaining needed. |
-| "continue full context" / "全面回顾" / "项目全景" | Full project trajectory recovery. Last session in detail + summaries of all historical sessions. Perfect for returning after a long absence. |
-| "review claude" | AI shows candidate rules it discovered during work. You confirm, reject, or rewrite each one. Constitution grows organically. |
-| "sync wiki" | Force-update the project overview file. Anyone (human or AI) reads one file to understand the whole project. |
-| "organize files" / "整理文件" | Smart file reorganization — understands what each file is, where it belongs, and respects your naming conventions. |
-| "change language" / "切换语言" | Change content language for all management files. |
-
-> **Note:** `continue` and `continue full context` are routed through project-butler internally — there's no separate `/continue` command. Just say it naturally and the AI handles the rest.
-
 ## The Problem It Solves
 
 If any of these sound familiar, this skill is for you:
@@ -34,6 +17,26 @@ If any of these sound familiar, this skill is for you:
 - **"I keep forgetting to update the README after changes"** — Documentation drifts from reality
 - **"The AI keeps violating my project rules"** — Rules exist in your head but not in a file the AI reads
 - **"I use both Claude Code and Cursor, and context doesn't carry over"** — Different tools, different context
+
+## What You Can Do
+
+All triggers are **natural language** — just say it naturally, no slash commands needed (except `/project-butler` for initial setup).
+
+| You say (natural language) | What it does |
+|---|---|
+| `/project-butler` | Initialize the full project management system. One-time setup, everything auto-maintains after. |
+| "we're done" / "end session" | Auto-write session log, update handoff, sync wiki, organize files. Walk away and everything is captured. |
+| "continue" / "continue from last time" | Recover your last session's full conversation. Pick up exactly where you left off — no re-explaining needed. |
+| "continue full context" | Full project trajectory recovery. Last session in detail + summaries of all historical sessions. Perfect for returning after a long absence. |
+| "check the rules" / "review claude" | AI shows candidate rules it discovered during work. You confirm, reject, or rewrite each one. Constitution grows organically. |
+| "update overview" / "sync wiki" | Force-update the project overview file. Anyone (human or AI) reads one file to understand the whole project. |
+| "where are we" / "status" | Read Wiki + handoff summary aloud. |
+| "organize files" | Smart file reorganization — understands what each file is, where it belongs, and respects your naming conventions. |
+| "change language" | Change content language for all management files. |
+
+> **Note:** `continue` and `continue full context` are routed through project-butler internally — there's no separate `/continue` command. Just say it naturally and the AI handles the rest.
+
+The key insight: **you just work normally, and say "end session" when you're done.** The system handles everything else. Next time, say "continue" and you're back.
 
 ## How It Works
 
@@ -86,10 +89,10 @@ project-butler supports 3 language modes:
 | Mode | Content Language | User File Naming |
 |------|-----------------|------------------|
 | `en` (English) | All content in English | English naming (kebab-case) |
-| `zh` (中文) | All content in Chinese | Chinese naming allowed |
+| `zh` (Chinese) | All content in Chinese | Chinese naming allowed |
 | `bilingual` (default) | Chinese with English annotations | English preferred, Chinese acceptable |
 
-Set during `/project-butler` setup, or change anytime by saying "change language" / "切换语言".
+Set during `/project-butler` setup, or change anytime by saying "change language".
 
 When switching language, you're asked whether to rename user files to match the new language's naming conventions. System files (CLAUDE.md, PROJECT.md, etc.) keep their English names regardless.
 
@@ -97,7 +100,7 @@ When switching language, you're asked whether to rename user files to match the 
 
 #### 1. Session Logs (log/)
 
-Every time you say "end session" / "收工", the AI writes a structured log:
+Every time you say "end session", the AI writes a structured log:
 
 ```markdown
 # Session 2026-04-21 — PRD Draft
@@ -110,7 +113,7 @@ Every time you say "end session" / "收工", the AI writes a structured log:
 ## CLAUDE.md Candidates (if any)
 ```
 
-Like meeting notes, but automatic. Next session, say "continue" or "接着上次" and the AI reads the latest log to pick up where you left off.
+Like meeting notes, but automatic. Next session, say "continue" and the AI reads the latest log to pick up where you left off.
 
 #### 2. Project Wiki (PROJECT.md)
 
@@ -154,23 +157,6 @@ Not an idea pool — an execution plan. Every task has three required fields:
 ```
 
 If you mention a task without these fields, the AI asks you to fill them in. Completed tasks are checked off and kept (not deleted) as execution history.
-
-## Trigger Words
-
-After setup, just say these naturally — no slash commands needed:
-
-| You say (any expression of...) | What happens |
-|---------|-------------|
-| "we're done" / "end session" / "收工" | Write log + update handoff + sync Wiki + organize files + output summary |
-| "continue" / "接着上次" / "上次做到哪了" | Recover last session's context and pick up where you left off |
-| "continue full context" / "全面回顾" / "项目全景" | Full project trajectory recovery with all historical session summaries |
-| "check the rules" / "review claude" | Show candidate rules for you to confirm one by one |
-| "update overview" / "sync wiki" | Force rescan and update PROJECT.md |
-| "where are we" / "status" | Read Wiki + handoff summary aloud |
-| "clean up files" / "organize files" | Scan and reorganize files per STRUCTURE.md rules |
-| "switch language" / "切换语言" | Change content language for all management files |
-
-The key insight: **you just work normally, and say "end session" when you're done.** The system handles everything else. Next time, say "continue" and you're back.
 
 ## Multi-Tool Support
 
