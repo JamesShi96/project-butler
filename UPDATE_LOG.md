@@ -30,8 +30,8 @@
 ## v1.0.0 (2026-05-01)
 
 ### Session Recovery
-- **`/resume`** — Recover last session's full conversation context via jq-filtered JSONL reading
-- **`/resume-full`** — Full project trajectory recovery with historical session timeline
+- **`/resume`** — Original session recovery trigger; renamed to `continue` in v1.1.0
+- **`/resume-full`** — Original full trajectory recovery trigger; renamed to `continue full context` in v1.1.0
 - Both skills included in the repo — no separate installation needed
 
 ### Log Compaction Protocol
@@ -62,6 +62,6 @@ When session logs exceed 10 files, automatically compact older logs into a singl
 ## v0.1.0 (2026-04-24)
 
 ### Initial Release
-- 5-component system: session logs, project wiki, constitution, file manager, execution checklist
-- Multi-tool support (Claude Code + Cursor)
+- Project memory stack: session logs, project wiki, constitution, file manager, execution checklist
+- Multi-tool support foundation with Claude Code native skill and Cursor project rules
 - One-command setup with upgrade mode

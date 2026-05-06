@@ -2,241 +2,201 @@
 
 **[English](README.md)** | [中文](README_zh.md)
 
-> One command to give your project a persistent brain.
+[![GitHub stars](https://img.shields.io/github/stars/JamesShi96/project-butler?style=social)](https://github.com/JamesShi96/project-butler/stargazers)
+[![GitHub release](https://img.shields.io/github/v/release/JamesShi96/project-butler?display_name=tag)](https://github.com/JamesShi96/project-butler/releases)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![AI Coding Assistants](https://img.shields.io/badge/AI%20Coding%20Assistants-Claude%20Code%20%7C%20Cursor%20%7C%20Codex-6B46C1)](docs/compatibility.md)
 
-When you work with AI coding assistants across multiple sessions, you start from scratch every time. The AI doesn't remember what happened yesterday, what decisions were made, or what the project rules are. You end up re-explaining context, re-establishing conventions, and losing institutional knowledge.
+> Persistent project memory for AI coding assistants.
 
-**project-butler** solves this by setting up a self-maintaining project management system in one command. After setup, your AI assistant automatically logs sessions, maintains a project wiki, tracks tasks, and accumulates rules for your review — no manual effort required.
+project-butler gives Claude Code, Cursor, Codex, and similar AI coding assistants a shared project memory stack: session logs, handoff notes, project wiki, TODOs, rules, file structure, and changelog.
 
-## The Problem It Solves
+You keep working normally. At the end, say `end session`. Next time, say `continue`.
 
-If any of these sound familiar, this skill is for you:
+## Quick Start
 
-- **"I had to re-explain the project architecture to the AI for the third time today"** — Every new session starts with zero context
-- **"What did we decide about naming conventions last week?"** — Decisions get lost between sessions
-- **"I keep forgetting to update the README after changes"** — Documentation drifts from reality
-- **"The AI keeps violating my project rules"** — Rules exist in your head but not in a file the AI reads
-- **"I use both Claude Code and Cursor, and context doesn't carry over"** — Different tools, different context
-
-## What You Can Do
-
-All triggers are **natural language** — just say it naturally, no slash commands needed (except `/project-butler` for initial setup).
-
-| You say (natural language) | What it does |
-|---|---|
-| `/project-butler` | Initialize the full project management system. One-time setup, everything auto-maintains after. |
-| "we're done" / "end session" | Auto-write session log, update handoff, sync wiki, organize files. Walk away and everything is captured. |
-| "continue" / "continue from last time" | Recover your last session's full conversation. Pick up exactly where you left off — no re-explaining needed. |
-| "continue full context" | Full project trajectory recovery. Last session in detail + summaries of all historical sessions. Perfect for returning after a long absence. |
-| "check the rules" / "review claude" | AI shows candidate rules it discovered during work. You confirm, reject, or rewrite each one. Constitution grows organically. |
-| "update overview" / "sync wiki" | Force-update the project overview file. Anyone (human or AI) reads one file to understand the whole project. |
-| "where are we" / "status" | Read Wiki + handoff summary aloud. |
-| "organize files" | Smart file reorganization — understands what each file is, where it belongs, and respects your naming conventions. |
-| "change language" | Change content language for all management files. |
-
-> **Note:** `continue` and `continue full context` are routed through project-butler internally — there's no separate `/continue` command. Just say it naturally and the AI handles the rest.
-
-The key insight: **you just work normally, and say "end session" when you're done.** The system handles everything else. Next time, say "continue" and you're back.
-
-## How It Works
-
-Run `/project-butler` once. It creates 9 files organized in 3 layers:
-
-```
-project-root/
-├── CLAUDE.md                   ← Constitution (human-confirmed rules)
-├── PROJECT.md                  ← Wiki (auto-synced project overview)
-├── STRUCTURE.md                ← File management rules (auto-maintained)
-├── UPDATE_LOG.md               ← Update log (milestone-level changes)
-├── session-handoff.md          ← Cross-session handoff (auto-updated)
-├── TODO.md                     ← Execution checklist
-├── log/                        ← Session logs (auto-generated)
-└── .claude/
-    ├── candidates.md           ← Constitution candidate pool
-    └── .file-snapshot.json     ← File organization snapshot
-```
-
-### Design Philosophy: Layered by Stability
-
-```
-  ┌─────────────────────────────────────┐
-  │  CLAUDE.md (Constitution)           │  ← Changes rarely, human-approved
-  │  ↑ candidates collected by AI       │
-  └─────────────────────────────────────┘
-            ↑ principles distilled from below
-  ┌─────────────────────────────────────┐
-  │  PROJECT.md (Wiki)                  │  ← Auto-synced snapshot
-  │  What this project IS right now     │
-  └─────────────────────────────────────┘
-            ↑ milestones surfaced from below
-  ┌─────────────────────────────────────┐
-  │  UPDATE_LOG.md (Update Log)         │  ← Milestone-level changes
-  │  What changed, version by version   │
-  └─────────────────────────────────────┘
-            ↑ state summarized from below
-  ┌──────────────────────┐ ┌───────────────────────┐
-  │  log/ (Session Logs) │ │  TODO.md (Task List)  │  ← Raw facts, written often
-  │  What happened when  │ │  What needs to happen │
-  └──────────────────────┘ └───────────────────────┘
-```
-
-**Bottom feeds top, top constrains bottom.**
-
-- **Logs and TODOs** are the raw fact stream — what happened, what needs to happen
-- **Update Log** surfaces milestone-level changes — significant updates auto-detected from session logs
-- **Wiki** is the current state snapshot — auto-distilled from the raw facts
-- **Constitution** is the stable principle layer — rules that persist and guide all behavior
-
-This hierarchy means information flows upward (facts → snapshot → principles) and constraints flow downward (principles → snapshot → facts). Each layer has a different change frequency, owner, and purpose.
-
-### Language Support
-
-project-butler supports 3 language modes:
-
-| Mode | Content Language | User File Naming |
-|------|-----------------|------------------|
-| `en` (English) | All content in English | English naming (kebab-case) |
-| `zh` (Chinese) | All content in Chinese | Chinese naming allowed |
-| `bilingual` (default) | Chinese with English annotations | English preferred, Chinese acceptable |
-
-Set during `/project-butler` setup, or change anytime by saying "change language".
-
-When switching language, you're asked whether to rename user files to match the new language's naming conventions. System files (CLAUDE.md, PROJECT.md, etc.) keep their English names regardless.
-
-### The 6 Components
-
-#### 1. Session Logs (log/)
-
-Every time you say "end session", the AI writes a structured log:
-
-```markdown
-# Session 2026-04-21 — PRD Draft
-
-## Session Goal
-## Key Actions (Chronological)
-## Decisions & Rationale
-## Output Files
-## Unfinished Items / Next Session Pickup
-## CLAUDE.md Candidates (if any)
-```
-
-Like meeting notes, but automatic. Next session, say "continue" and the AI reads the latest log to pick up where you left off.
-
-#### 2. Project Wiki (PROJECT.md)
-
-A single file that answers: **what is this project, and where does it stand?**
-
-- One-line definition, current stage, module map
-- File structure (auto-generated)
-- Key file index with descriptions
-- Progress snapshot table
-- Links (GitHub, docs, designs)
-
-Auto-synced when files change or sessions end. Anyone (human or AI) reads this one file to understand the project.
-
-#### 3. Constitution (CLAUDE.md)
-
-The project's rules and boundaries — but with a crucial safety mechanism:
-
-- **AI never edits CLAUDE.md directly**
-- During work, the AI identifies patterns that might be rules ("this user always wants tests first", "they use snake_case for files") and collects them in `.claude/candidates.md`
-- When you say "review claude", the AI presents candidates one by one for you to **confirm, reject, or rewrite**
-- Only confirmed entries get written to CLAUDE.md
-
-This means the constitution grows organically from real usage patterns, but you stay in control.
-
-#### 4. File Manager (STRUCTURE.md)
-
-Intelligent file organization — not just moving files around, but understanding what each file is and where it belongs:
-
-- Two modes: **deep organize** (reads every file, fixes naming + structure) and **incremental organize** (only processes new files at end of session)
-- Language-aware naming: en → kebab-case, zh → Chinese names allowed, bilingual → English preferred
-- Adapts to project type (code, video production, business docs, mixed)
-- Never touches management files or excluded directories (`.git/`, `node_modules/`, etc.)
-
-#### 5. Execution Checklist (TODO.md)
-
-Not an idea pool — an execution plan. Every task has three required fields:
-
-```
-- [ ] Implement user authentication
-  Owner: James | Deadline: 2026-04-30 | Dependencies: Database schema finalized
-```
-
-If you mention a task without these fields, the AI asks you to fill them in. Completed tasks are checked off and kept (not deleted) as execution history.
-
-#### 6. Update Log (UPDATE_LOG.md)
-
-Not every session deserves a changelog entry, but the ones that matter should be recorded. At end session, the AI evaluates what happened against significance criteria (new features, major changes, 3+ files changed, milestones, important TODOs completed) and automatically writes milestone-level entries:
-
-```markdown
-## 2026-05-05 — User Authentication Module Complete
-
-- Added JWT-based auth with refresh tokens
-- Created login/register/logout endpoints
-- Wrote integration tests (12/12 passing)
----
-```
-
-If your project has a GitHub remote, it offers to create a GitHub Release too. Works for both code and non-code projects — any project that has significant updates worth tracking.
-
-## Multi-Tool Support
-
-If you use both Claude Code and Cursor, `/project-butler` optionally creates a `.cursor/rules/project-system.mdc` file that mirrors the same trigger behavior. Both tools read from the same `PROJECT.md` and `session-handoff.md`, so context carries over seamlessly.
-
-## Install
+Install as a Claude Code skill:
 
 ```bash
-# Clone into your Claude Code skills directory
 git clone https://github.com/JamesShi96/project-butler.git ~/.claude/skills/project-butler
 ```
 
-Session recovery (`continue` / `continue full context`) is included — no separate installation needed.
+Open any project and initialize the memory stack:
 
-## Use
-
-In any project directory:
-
-```
+```text
 /project-butler
 ```
 
-Answer 6 quick questions (project name, description, stage, GitHub URL, Cursor rules?, language), and all files are created.
+At the end of a work session:
 
-**Upgrade mode**: if a project already has some files (CLAUDE.md, TODO.md, etc.), it only creates missing ones and never overwrites existing content. It also detects legacy `.claude/memory/` directories and suggests migration.
+```text
+end session
+```
+
+Next time:
+
+```text
+continue
+```
+
+For Cursor, Codex, and other assistants, see [Tool Compatibility](docs/compatibility.md).
+
+## Why It Exists
+
+AI coding assistants are powerful in one session and forgetful across sessions. If any of these sound familiar, project-butler is for you:
+
+- **"I had to re-explain the architecture again."** Each new session starts with missing context.
+- **"What did we decide about naming conventions last week?"** Decisions disappear into chat history.
+- **"The README and TODOs keep drifting from reality."** Project state stops matching the files.
+- **"The AI keeps violating rules I already explained."** Rules live in your head instead of in project memory.
+- **"I switch between Claude Code, Cursor, and Codex."** Different tools need one shared source of truth.
+
+project-butler turns a project folder into that source of truth.
+
+## What It Creates
+
+Run `/project-butler` once. It creates a file-based project memory stack:
+
+```text
+project-root/
+├── CLAUDE.md                   <- Project rules / constitution
+├── PROJECT.md                  <- Current project wiki
+├── STRUCTURE.md                <- File organization rules
+├── UPDATE_LOG.md               <- Milestone-level changelog
+├── session-handoff.md          <- Cross-session handoff
+├── TODO.md                     <- Execution checklist
+├── log/                        <- Session logs
+└── .claude/
+    ├── candidates.md           <- Candidate rules for review
+    └── .file-snapshot.json     <- File organization snapshot
+```
+
+The core files are plain Markdown, so other tools can read them even when they do not run the skill natively.
+
+## Common Commands
+
+All triggers are natural language. Use slash commands only for first-time setup.
+
+| You say | What happens |
+|---|---|
+| `/project-butler` | Initialize or upgrade the project memory stack. |
+| `end session` / `we're done` | Write a session log, update handoff, sync wiki, update TODOs, organize new files, and record significant changes. |
+| `continue` / `continue from last time` | Recover the previous session and resume without re-explaining context. |
+| `continue full context` | Rebuild the full project trajectory from the latest session plus historical summaries. |
+| `review claude` / `check the rules` | Review candidate project rules before they are promoted into the constitution. |
+| `sync wiki` / `update overview` | Force-refresh `PROJECT.md`. |
+| `status` / `where are we` | Read the current wiki and handoff summary. |
+| `organize files` | Run file organization based on `STRUCTURE.md`. |
+| `change language` | Switch project management files between English, Chinese, and bilingual mode. |
+
+Session recovery (`continue` / `continue full context`) is routed through project-butler internally. There is no separate `/continue` command to install.
+
+## Tool Support
+
+| Tool | Status | How it works |
+|---|---|---|
+| Claude Code | Native skill | Install this repo under `~/.claude/skills/project-butler` and run `/project-butler`. |
+| Cursor | Project rules | project-butler can generate `.cursor/rules/project-system.mdc`, which points Cursor at the same project memory files. |
+| Codex | Shared memory files | Codex can read the generated Markdown files (`PROJECT.md`, `TODO.md`, `session-handoff.md`, rules) as project context. |
+| Other AI assistants | File-based | Any assistant that can read project files can use the memory stack as shared context. |
+
+See [docs/compatibility.md](docs/compatibility.md) for details and caveats.
+
+## How It Works
+
+### The Memory Stack
+
+project-butler organizes project memory by stability:
+
+```text
+Stable rules
+┌─────────────────────────────────────┐
+│  CLAUDE.md / project rules          │  <- Human-reviewed principles
+│  ↑ candidates collected by AI       │
+└─────────────────────────────────────┘
+            ↑ distilled from work
+Current state
+┌─────────────────────────────────────┐
+│  PROJECT.md                         │  <- What the project is now
+│  STRUCTURE.md                       │  <- Where files belong
+│  UPDATE_LOG.md                      │  <- Milestone-level changes
+└─────────────────────────────────────┘
+            ↑ summarized from facts
+Raw facts
+┌──────────────────────┐ ┌───────────────────────┐
+│  log/                │ │  TODO.md              │
+│  What happened       │ │  What needs doing     │
+└──────────────────────┘ └───────────────────────┘
+            ↓
+session-handoff.md       <- Where the next session should resume
+```
+
+Bottom feeds top. Top constrains bottom.
+
+- **Session logs** capture what happened.
+- **Handoff** tells the next assistant where to resume.
+- **Project wiki** summarizes the current state.
+- **TODOs** keep execution visible.
+- **Rules / constitution** preserve decisions that should keep guiding the project.
+- **Update log** records significant changes at milestone level.
+- **Structure rules** keep files from drifting into chaos.
+
+### Language Support
+
+project-butler supports three language modes:
+
+| Mode | Content language | User file naming |
+|---|---|---|
+| `en` | English | English naming (`kebab-case`) |
+| `zh` | Chinese | Chinese naming allowed |
+| `bilingual` | Chinese with English annotations | English preferred, Chinese acceptable |
+
+You choose the mode during setup, and can later say `change language`.
+
+### Upgrade Mode
+
+If a project already has some management files, project-butler creates only the missing ones. It does not overwrite existing content. It also detects legacy `.claude/memory/` layouts and suggests migration.
+
+## Examples
+
+See [docs/examples.md](docs/examples.md) for a complete session flow:
+
+1. initialize a project,
+2. work normally,
+3. end the session,
+4. resume the next day,
+5. review accumulated rules.
 
 ## Requirements
 
-- [Claude Code](https://docs.anthropic.com/en/docs/claude-code) CLI
-- [jq](https://jqlang.github.io/jq/) (for `continue` / `continue full context` session recovery)
-- Optionally: [Cursor](https://cursor.sh) (for cross-tool rules file)
+- [Claude Code](https://docs.anthropic.com/en/docs/claude-code) CLI for native skill execution
+- [jq](https://jqlang.github.io/jq/) for `continue` / `continue full context` session recovery
+- Optional: [Cursor](https://cursor.sh) for generated project rules
+- Optional: Codex or other AI coding assistants that can read project Markdown files
 
 ## Update Log
 
-### v1.2.0 (2026-05-05) — Update Log Auto-Tracking
-- Auto-detect significant updates at end session (new features, major changes, 3+ files, milestones)
-- New `UPDATE_LOG.md` — milestone-level change history between session logs and wiki
-- GitHub Release integration (optional, asks first)
-- README link during init (non-intrusive)
-- Supports both code and non-code projects
+### v1.2.0 (2026-05-05) - Update Log Auto-Tracking
+- Auto-detect significant updates at end session.
+- Add `UPDATE_LOG.md` for milestone-level change history.
+- Offer optional GitHub Release creation for significant updates.
+- Support both code and non-code projects.
 
-### v1.1.0 (2026-05-04) — SKILL.md Refactor + Continue Rename
-- SKILL.md refactored from 1175 → 196 lines with on-demand reference loading (70% token reduction for common triggers)
-- Renamed `/resume` → `continue`, `/resume-full` → `continue full context` (natural language triggers, no slash needed)
-- All triggers now natural language — just say it and the AI routes to the right workflow
-- Common Mistakes distributed into each reference file for context-relevant guidance
+### v1.1.0 (2026-05-04) - SKILL.md Refactor + Continue Rename
+- Refactor SKILL.md from 1175 to 196 lines with on-demand reference loading.
+- Rename `/resume` to `continue` and `/resume-full` to `continue full context`.
+- Route all triggers through natural language.
 
-### v1.0.0 (2026-05-01) — Session Recovery + Log Compaction
-- Session recovery skills (`continue` / `continue full context`)
-- Log Compaction Protocol (auto-compact when exceeding 10 files)
-- Renamed from `project-init` → `project-butler`
-
-### v0.4.0 (2026-04-29) — Multi-Language + File Management
-### v0.3.0 (2026-04-27) — Constitution + File Manager
-### v0.2.0 (2026-04-25) — README Rewrite + Chinese Support
-### v0.1.0 (2026-04-24) — Initial Release
+### v1.0.0 (2026-05-01) - Session Recovery + Log Compaction
+- Add session recovery (`continue` / `continue full context`).
+- Add log compaction when raw logs exceed the threshold.
+- Rename from `project-init` to `project-butler`.
 
 Full update log: [UPDATE_LOG.md](UPDATE_LOG.md) | Releases: [GitHub Releases](https://github.com/JamesShi96/project-butler/releases)
+
+## Star History
+
+[![Star History Chart](https://api.star-history.com/svg?repos=JamesShi96/project-butler&type=Date)](https://www.star-history.com/#JamesShi96/project-butler&Date)
 
 ## License
 

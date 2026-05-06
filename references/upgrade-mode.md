@@ -8,7 +8,7 @@ When some files already exist:
 
 1. **Never overwrite** any existing file content
 2. **Create only missing files** with templates
-3. **For existing CLAUDE.md**: check if it contains `## 项目管理系统` section. If missing, offer to append the system rules block. If present, check for missing elements from the 5-component system:
+3. **For existing CLAUDE.md**: check if it contains `## 项目管理系统` section. If missing, offer to append the system rules block. If present, check for missing elements from the project memory stack:
    - Does the trigger words table include `整理文件 / organize files`? If not, add it.
    - Does the file roles table include `STRUCTURE.md` and `.claude/.file-snapshot.json`? If not, add them.
    - Does the Session End Protocol include step 6 (整理文件结构)? If not, insert it between step 5 (收集宪法候选) and the last step (输出中文总结), and renumber accordingly.

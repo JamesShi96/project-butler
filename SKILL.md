@@ -1,11 +1,11 @@
 ---
 name: project-butler
-description: "Use when initializing or upgrading a project's management system, ending a work session, or resuming from a previous session. Triggers on /project-butler, '初始化项目', 'setup project', '项目初始化', 'end session', '结束会话', '收工', '整理文件', 'organize files', '切换语言', 'change language', 'continue', 'continue from last time', '接着上次', '接着上次的', '继续上次的工作', '上次做到哪了', 'continue full context', 'full context', 'project overview', '全面回顾', '项目全景', '项目上下文', '整体回顾', or when a project lacks management files (CLAUDE.md, PROJECT.md, STRUCTURE.md, session-handoff.md, TODO.md). Creates a 5-component system: session logs, project wiki, file structure management, constitution tracking, and task execution. Supports 3 language modes (English, Chinese, bilingual). When triggered by session-end keywords, execute the full end session protocol including file reorganization. When triggered by '整理文件' alone, only execute the File Reorganization Protocol. When triggered by resume keywords, recover context from the previous session. Supports fresh install and non-destructive upgrade for existing projects."
+description: "Use when initializing or upgrading a project's memory system, ending a work session, or resuming from a previous session. Triggers on /project-butler, '初始化项目', 'setup project', '项目初始化', 'end session', '结束会话', '收工', '整理文件', 'organize files', '切换语言', 'change language', 'continue', 'continue from last time', '接着上次', '接着上次的', '继续上次的工作', '上次做到哪了', 'continue full context', 'full context', 'project overview', '全面回顾', '项目全景', '项目上下文', '整体回顾', or when a project lacks management files (CLAUDE.md, PROJECT.md, STRUCTURE.md, UPDATE_LOG.md, session-handoff.md, TODO.md). Creates a project memory stack: session logs, handoff notes, project wiki, file structure rules, constitution/rules tracking, task execution, and milestone update log. Supports 3 language modes (English, Chinese, bilingual). When triggered by session-end keywords, execute the full end session protocol including file reorganization. When triggered by '整理文件' alone, only execute the File Reorganization Protocol. When triggered by resume keywords, recover context from the previous session. Supports fresh install and non-destructive upgrade for existing projects."
 ---
 
-# Project Butler — 5-Component Project Management System
+# Project Butler — Project Memory Stack
 
-Initialize a standardized project management system with 5 components:
+Initialize a standardized project memory stack:
 
 ```
 上层（稳定原则）
@@ -20,6 +20,7 @@ Initialize a standardized project management system with 5 components:
 │  概览 / 结构 / 模块状态 / 文件索引    │
 │  STRUCTURE.md（文件管理规则）← AI 自动│
 │  目录规则 / 匹配条件 / 整理历史       │
+│  UPDATE_LOG.md（里程碑变化）← AI 自动 │
 └─────────────────────────────────────┘
         ↑ 状态汇总
 下层（事实流水）
@@ -28,9 +29,11 @@ Initialize a standardized project management system with 5 components:
 │  raw + summaries   │  │  owner/deadline/    │
 │  + archive（分级）  │  │  deps               │
 └────────────────────┘  └────────────────────┘
+        ↓
+session-handoff.md（下次接手点）
 ```
 
-Core idea: bottom feeds top, top constrains bottom. Logs and TODOs are raw facts. Wiki is the current snapshot. Structure manages file organization. Constitution is stable principles.
+Core idea: bottom feeds top, top constrains bottom. Logs and TODOs are raw facts. Handoff marks the next resume point. Wiki is the current snapshot. Structure manages file organization. Update Log records milestone changes. Constitution is stable principles.
 
 Supports 3 language modes: English (`en`), Chinese (`zh`), or bilingual. All content adapts to the selected language.
 

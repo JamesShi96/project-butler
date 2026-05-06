@@ -345,7 +345,7 @@ Only create if user answered yes to Q5. Mirror the language setting from CLAUDE.
 
 ```
 ---
-description: Apply at session start and when user says end session / review claude / sync wiki / status / organize files. Defines the 5-component project management system behavior.
+description: Apply at session start and when user says end session / review claude / sync wiki / status / organize files. Defines the project memory stack behavior.
 ---
 
 # {{PROJECT_NAME}} — Project System Rules
