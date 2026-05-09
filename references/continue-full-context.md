@@ -6,7 +6,7 @@
 
 ### 1. Read last session in detail
 
-Execute steps 1-3 from `continue/SKILL.md` in full (find project path, locate last JSONL, run jq filter, read output). This gives you the detailed last-session context.
+Execute steps 1-3 from `references/continue.md` in full (find project path, locate last JSONL, run jq filter, read output). This gives you the detailed last-session context.
 
 ### 2. Summarize historical sessions (bounded)
 

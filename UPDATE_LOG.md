@@ -1,5 +1,14 @@
 # Update Log
 
+## v1.2.1 (2026-05-09)
+
+### Skill Loader Compatibility
+- Moved continue recovery guides from nested `SKILL.md` files into `references/continue.md` and `references/continue-full-context.md`
+- Shortened the main skill description to stay within loader metadata limits
+- Kept `continue` and `continue full context` routed through the main project-butler skill, with no independent sub-skills
+
+---
+
 ## v1.2.0 (2026-05-05)
 
 ### Update Log Auto-Tracking
@@ -32,7 +41,7 @@
 ### Session Recovery
 - **`/resume`** — Original session recovery trigger; renamed to `continue` in v1.1.0
 - **`/resume-full`** — Original full trajectory recovery trigger; renamed to `continue full context` in v1.1.0
-- Both skills included in the repo — no separate installation needed
+- Both recovery workflows included in the repo — no separate installation needed
 
 ### Log Compaction Protocol
 When session logs exceed 10 files, automatically compact older logs into a single summary file. Keeps the `log/` directory bounded without losing history.

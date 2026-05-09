@@ -176,6 +176,11 @@ See [docs/examples.md](docs/examples.md) for a complete session flow:
 
 ## Update Log
 
+### v1.2.1 (2026-05-09) - Skill Loader Compatibility
+- Move `continue` reference workflows under `references/` instead of nested `SKILL.md` files.
+- Shorten skill metadata to satisfy loader limits.
+- Keep session recovery routed through the main project-butler skill.
+
 ### v1.2.0 (2026-05-05) - Update Log Auto-Tracking
 - Auto-detect significant updates at end session.
 - Add `UPDATE_LOG.md` for milestone-level change history.

@@ -1,6 +1,6 @@
 ---
 name: project-butler
-description: "Use when initializing or upgrading a project's memory system, ending a work session, or resuming from a previous session. Triggers on /project-butler, '初始化项目', 'setup project', '项目初始化', 'end session', '结束会话', '收工', '整理文件', 'organize files', '切换语言', 'change language', 'continue', 'continue from last time', '接着上次', '接着上次的', '继续上次的工作', '上次做到哪了', 'continue full context', 'full context', 'project overview', '全面回顾', '项目全景', '项目上下文', '整体回顾', or when a project lacks management files (CLAUDE.md, PROJECT.md, STRUCTURE.md, UPDATE_LOG.md, session-handoff.md, TODO.md). Creates a project memory stack: session logs, handoff notes, project wiki, file structure rules, constitution/rules tracking, task execution, and milestone update log. Supports 3 language modes (English, Chinese, bilingual). When triggered by session-end keywords, execute the full end session protocol including file reorganization. When triggered by '整理文件' alone, only execute the File Reorganization Protocol. When triggered by resume keywords, recover context from the previous session. Supports fresh install and non-destructive upgrade for existing projects."
+description: "Project memory workflow for init/upgrade, end session, file organization, language switching, and context recovery. Use for /project-butler, setup/初始化项目, end session/收工, organize files/整理文件, change language/切换语言, continue/接着上次, continue full context/全面回顾, project overview/项目上下文, or when management files are missing. Creates and maintains CLAUDE.md, PROJECT.md, STRUCTURE.md, UPDATE_LOG.md, session-handoff.md, TODO.md, log/, and .claude candidates/snapshot."
 ---
 
 # Project Butler — Project Memory Stack
@@ -61,12 +61,12 @@ Determine how this skill was triggered:
 3. Report and stop
 
 **E. "continue" / "接着上次" / "上次做到哪了":**
-1. Read `continue/SKILL.md`
+1. Read `references/continue.md`
 2. Execute the Continue process (recover last session context)
 3. Report and stop
 
 **F. "continue full context" / "全面回顾" / "项目全景" / "full context":**
-1. Read `continue-full-context/SKILL.md`
+1. Read `references/continue-full-context.md`
 2. Execute the Continue Full Context process (full project trajectory recovery)
 3. Report and stop
 
@@ -200,5 +200,5 @@ Create `log/.gitkeep` (empty file) alongside `log/` directory so git tracks it w
 | End session | `references/file-reorganization.md` + `references/update-log.md` + `references/log-compaction.md` (if logs ≥ threshold) |
 | 整理文件 / organize files | `references/file-reorganization.md` |
 | 切换语言 / change language | `references/language-change.md` + `references/language-adaptation.md` |
-| continue / 接着上次 | `continue/SKILL.md` |
-| continue full context / 全面回顾 | `continue-full-context/SKILL.md` |
+| continue / 接着上次 | `references/continue.md` |
+| continue full context / 全面回顾 | `references/continue-full-context.md` |

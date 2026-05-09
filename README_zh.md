@@ -176,6 +176,11 @@ project-butler 支持三种语言模式：
 
 ## 更新日志
 
+### v1.2.1 (2026-05-09) - Skill 加载兼容性
+- 将 `continue` 相关恢复流程移动到 `references/`，不再使用嵌套 `SKILL.md` 文件。
+- 缩短 skill metadata，满足 loader 长度限制。
+- 保持会话恢复由 project-butler 主 skill 统一路由。
+
 ### v1.2.0 (2026-05-05) - 更新日志自动追踪
 - 收工时自动判断是否为重大更新。
 - 新增 `UPDATE_LOG.md`，记录里程碑级变化。
