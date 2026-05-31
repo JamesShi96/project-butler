@@ -2,77 +2,187 @@
 
 > Loaded during: end session (Mode B), "整理文件" / "organize files" (Mode A).
 
-Two modes with different depth levels, triggered by different commands.
+Two modes with different depth levels, triggered by different commands. Mode A is a four-phase flow. Mode B is lightweight incremental.
 
-## Mode A: Deep Organize (深度整理)
+## Mode A: Four-Phase Organize (四阶段整理)
 
 **Trigger:** "整理文件" / "organize files"
 
-**Philosophy:** Content-aware, OCD-level reorganization. Read every file, understand what it is, enforce naming consistency and structural uniformity across the entire project.
+**Philosophy:** Understand the project before touching anything. Analyze files, infer structure, let the user confirm the plan, then execute.
 
 **Prerequisites:**
 - Read STRUCTURE.md if it exists
 - Read `.claude/.file-snapshot.json` if it exists
+- Read PROJECT.md if it exists (for known module info)
 
 **Flow:**
 
 ```
-1. Full Scan: recursively list all project files
-   - Exclude: directories listed in STRUCTURE.md 排除规则 (or defaults)
-   - Default exclusions: .git/, node_modules/, __pycache__/, .venv/, dist/, build/, vendor/, .claude/, log/
-
-2. Content Understanding Phase:
-   For EACH file in the project (not just new ones):
-   a. Read the file content (for .md files; for binary files like .pdf/.png, infer from filename + context)
-   b. Classify: what is this file? (company intro? project spec? template? meeting notes?)
-   c. Identify naming issues:
-      - Does the filename match the STRUCTURE.md 命名规范?
-      - Are there spaces, special characters, or inconsistent case?
-      - Does it have redundant prefixes (e.g., company name in a file already inside the company folder)?
-      - Is the extension duplicated (e.g., .pdf.pdf)?
-      - Does the filename follow the language-appropriate naming convention from STRUCTURE.md?
-   d. Identify structural issues:
-      - Is it in the correct directory per STRUCTURE.md rules?
-      - Should it be in a subdirectory (assets/, reference-answers/)?
-      - Are sibling directories inconsistent?
-
-3. Reorganization Phase:
-   a. Fix naming: rename files to match STRUCTURE.md conventions
-   - Apply language-appropriate naming
-   b. Fix structure: move files to correct directories, create subdirectories if needed
-   c. Enforce cross-directory consistency
-   d. For files with no matching rule:
-      - Analyze content to infer category
-      - If inferable: add new rule to STRUCTURE.md + place file
-      - If not: add to 待分类 section
-
-4. Reference Update Phase:
-   a. After each rename/move: grep for old path in all .md files
-   b. Update any broken links (markdown links, imports, config references)
-   c. Check master/index documents for outdated references
-
-5. Safety checks before each file move:
-   a. Cross-reference check: grep for old path in other files
-      - If references found: update them
-   b. Name collision check: does target already have a same-name file?
-      - If yes: do NOT overwrite → add to 待分类 with collision note
-   c. System file check: never move CLAUDE.md, PROJECT.md, STRUCTURE.md, session-handoff.md, TODO.md
-
-6. Update artifacts:
-   a. Update .claude/.file-snapshot.json (full refresh)
-   b. Update STRUCTURE.md:
-      - Add any new naming conventions discovered
-      - Add new rules for previously uncategorized files
-      - Update 整理历史
-   c. Update PROJECT.md file structure section if layout changed
-
-7. Report:
-   - Files renamed (with before → after)
-   - Files moved (with before → after)
-   - Broken links fixed
-   - New STRUCTURE.md rules added
-   - Files in 待分类 (if any)
+Phase 1: Discover   → scan + mixed analysis → module map + confidence
+Phase 2: Ask or Plan → low confidence: ask organizing dimensions
+                     → high confidence: go straight to plan
+Phase 3: Plan       → show plan → user confirms
+Phase 4: Execute    → move/rename/create + update references + update management files
 ```
+
+### Phase 1: Discover (Project Discovery)
+
+**Goal:** Understand every file's role, module affiliation, and inter-file relationships.
+
+**Step 1: Structural signal scan (all files, no content reading)**
+
+Fast operations — glob, grep, file type detection only:
+
+- File type distribution (.ts, .py, .md, .json, .mp4, ...)
+- Directory hierarchy and existing groupings
+- Naming patterns (kebab-case, PascalCase, Chinese, dates, client names, ...)
+- Import/require relationships (grep for import/require patterns)
+- File size outliers (very large or very small files may indicate different roles)
+
+Output: quick classification + list of uncertain files.
+
+**Step 2: Content understanding (only uncertain files)**
+
+Read file content only for files where Step 1 could not determine:
+- Files with no clear type indicator
+- Files in the project root with ambiguous names
+- .md and .json files (could be config, docs, data, or metadata)
+- Files with unexpected naming patterns
+
+Do NOT re-read files already clearly classified by Step 1.
+
+**Token control:** If the project has over 200 files, sample per directory in Step 2 rather than reading every uncertain file.
+
+**Step 3: Relationship inference**
+
+From the import grep results and file proximity:
+- Which files import each other (belong to the same module)
+- Which files are shared utilities or configs
+- Which files are standalone resources
+
+**Output: Module Map** — present this to yourself (not to the user yet):
+
+```
+Project Type: {code / video-production / business-docs / mixed / other}
+
+Identified Modules:
+| Module | File Count | Core Files | Description |
+|--------|-----------|------------|-------------|
+
+Unaffiliated Files:
+| File | Inferred Purpose | Confidence |
+|------|-----------------|------------|
+
+Existing Structure Assessment:
+- Reasonable: {what's already well-organized}
+- Needs improvement: {what's scattered or misplaced}
+```
+
+**Confidence assessment:**
+
+After generating the module map, assess overall confidence:
+- **High confidence**: standard project type, files have clear module affiliations, naming is consistent, existing structure is mostly sound. Examples: typical Node.js project with src/ + tests/ + docs/.
+- **Low confidence**: ambiguous project type, many unaffiliated files, multiple plausible organizing dimensions exist, non-standard file types. Examples: AIGC team files that could be organized by client/type/date, mixed media projects.
+
+### Phase 2: Ask or Plan
+
+**If low confidence**, present the dimension question to the user:
+
+```
+## File Distribution Found
+
+File types: {distribution summary}
+Date range: {if applicable}
+Client/project clues: {if found in filenames}
+
+## Suggested Organizing Dimensions
+
+A. {dimension 1} (recommended)
+   {example structure}
+
+B. {dimension 2}
+   {example structure}
+
+C. {dimension 3}
+   {example structure}
+
+D. Two-level combination (e.g., {dim 1} → {dim 2})
+   {example structure}
+
+How would you like to organize? You can also describe your own approach.
+```
+
+Rules:
+- AI suggests 2-3 reasonable dimensions based on discovery results, ranked by likelihood
+- User can pick one, combine multiple levels, or describe their own
+- The chosen dimension feeds into Phase 3
+
+**If high confidence**, skip directly to Phase 3. The plan will always explicitly state the organizing dimension used — the user can catch misjudgments there.
+
+### Phase 3: Plan (Structure Proposal)
+
+Present the plan for user review:
+
+```
+## Directory Structure Plan
+
+Organizing dimension: {by module / by client / by type / ...}
+
+### New Directories
++ {new dirs to create}
+
+### File Moves
+→ {old path} → {new path}
+
+### File Renames
+→ {old name} → {new name}
+
+### Unchanged
+✓ {dirs/files that stay as-is}
+
+### STRUCTURE.md Rule Updates
+| Path | Purpose | Match Condition | Naming Convention |
+|------|---------|-----------------|-------------------|
+
+---
+Confirm this plan? (confirm / partial modify / abandon)
+```
+
+Key rules:
+- Operations separated by type — user sees at a glance what will change
+- Unchanged sections explicitly listed — gives user confidence
+- STRUCTURE.md rules shown inline — one confirmation covers both
+- User can partially modify: "don't touch X, do the rest"
+
+Wait for explicit user confirmation before proceeding to Phase 4.
+
+### Phase 4: Execute
+
+**Execution order:**
+
+```
+1. Create new directories        → mkdir -p
+2. Move files                    → git mv (preserves git history)
+3. Rename files                  → git mv
+4. Fix references                → grep old paths → update .md, imports, config
+5. Clean empty directories       → remove dirs that became empty
+6. Update management files:
+   - STRUCTURE.md                → replace with plan's rule table
+   - .file-snapshot.json         → full refresh
+   - PROJECT.md                  → update file structure section
+```
+
+**Safety checks before each file move:**
+- Cross-reference check: grep for old path in other files, update if found
+- Name collision check: does target already have a same-name file? If yes → flag, do NOT overwrite
+- System file check: never move CLAUDE.md, PROJECT.md, STRUCTURE.md, session-handoff.md, TODO.md, UPDATE_LOG.md
+
+**Report:**
+- Files moved (with before → after)
+- Files renamed (with before → after)
+- Directories created
+- References updated
+- Files in 待分类 (if any)
 
 ---
 
@@ -147,15 +257,17 @@ Two modes with different depth levels, triggered by different commands.
 
 | Mistake | Correct Behavior |
 |---------|-----------------|
+| Skipping Phase 1 and going straight to organizing | Always run Discover first. Understanding the project is not optional. |
+| Not asking about organizing dimensions when confidence is low | Low confidence means the AI genuinely cannot determine the right structure. Ask the user. |
+| Showing a plan without labeling the organizing dimension | Every plan must state its dimension (by module, by client, by type, etc.) so the user can verify. |
+| Executing Phase 4 without explicit user confirmation | The plan is a proposal. Wait for the user to say yes (or partially modify) before touching files. |
 | Moving files without checking cross-references | Always grep for imports/links to old path and update them |
 | Overwriting files on name collision | If same-name file exists at target, flag for manual resolution instead |
 | Moving management files (CLAUDE.md, PROJECT.md, etc.) | These must stay at project root. Never reorganize them |
 | Using bare mv instead of git mv | In git repos, use git mv to preserve history |
 | Removing user-written STRUCTURE.md rules | Only add new rules. Never remove without confirmation |
-| Creating STRUCTURE.md rules without scanning project | Rules must be based on actual file analysis, not generic templates |
-| Running file reorganization on excluded directories | Always check exclusion list before any file operation |
 | Using Mode A (deep) when Mode B (incremental) was triggered | "收工" → Mode B. "整理文件" → Mode A. Never mix them. |
 | Re-reading unchanged files in Mode B | Mode B only processes files NOT in .file-snapshot.json |
 | Doing content-aware naming in Mode B | Mode B only places new files. Renaming existing files is Mode A's job. |
-| Not reading file contents in Mode A | Mode A MUST read each file to understand it |
-| Not checking cross-directory consistency in Mode A | Mode A should detect inconsistencies between sibling directories |
+| Reading every file content in Step 1 of Discover | Step 1 is structural signals only (glob/grep). Content reading is Step 2, only for uncertain files. |
+| Not falling back to Mode A when STRUCTURE.md is missing in Mode B | If STRUCTURE.md doesn't exist, Mode B cannot function. Fall back to Mode A. |
