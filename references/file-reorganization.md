@@ -84,6 +84,18 @@ After generating the module map, assess overall confidence:
 - **High confidence**: standard project type, files have clear module affiliations, naming is consistent, existing structure is mostly sound. Examples: typical Node.js project with src/ + tests/ + docs/.
 - **Low confidence**: ambiguous project type, many unaffiliated files, multiple plausible organizing dimensions exist, non-standard file types. Examples: AIGC team files that could be organized by client/type/date, mixed media projects.
 
+**Early exit — no reorganization needed:**
+
+After generating the module map, check: does the project already have STRUCTURE.md with rules, and do all files match those rules without naming or structural issues? If yes, report to the user:
+
+```
+项目结构合理，无需整理。
+- {N} 个文件均已按 STRUCTURE.md 规则归类
+- 未发现命名问题或结构问题
+```
+
+Then stop — do not proceed to Phase 2/3/4.
+
 ### Phase 2: Ask or Plan
 
 **If low confidence**, present the dimension question to the user:
@@ -271,3 +283,4 @@ Wait for explicit user confirmation before proceeding to Phase 4.
 | Doing content-aware naming in Mode B | Mode B only places new files. Renaming existing files is Mode A's job. |
 | Reading every file content in Step 1 of Discover | Step 1 is structural signals only (glob/grep). Content reading is Step 2, only for uncertain files. |
 | Not falling back to Mode A when STRUCTURE.md is missing in Mode B | If STRUCTURE.md doesn't exist, Mode B cannot function. Fall back to Mode A. |
+| Forcing the full flow when the project is already well-organized | If all files match STRUCTURE.md rules and no issues found, use the early exit. Don't make the user confirm an empty plan. |
