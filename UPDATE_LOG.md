@@ -1,5 +1,29 @@
 # Update Log
 
+## v1.3.0 (2026-06-01)
+
+### Four-Phase File Reorganization
+
+Replaced template-based file reorganization with a project-understanding-driven flow.
+
+**Mode A redesign (整理文件):**
+- Four-phase flow: Discover → Ask or Plan → Plan → Execute
+- Phase 1 (Discover): structural signals first (glob/grep/imports), content reading only for uncertain files, then relationship inference to build a module map
+- Phase 2 (Ask or Plan): three-tier confidence routing — high confidence skips straight to plan, medium confidence (most common) focuses on specific issues, low confidence asks user about organizing dimensions
+- Phase 3 (Plan): clear proposal with moves, renames, unchanged sections, and suggested cleanup — user confirms before any action
+- Phase 4 (Execute): safe execution with cross-reference checks, name collision detection, and `git mv` for history preservation
+- Early exit: well-organized projects skip directly, no empty plan forced
+
+**STRUCTURE.md template redesign:**
+- Replaced four fixed templates (code/video/document/mixed) with discovery-based rule generation
+- Initialization now runs lightweight project analysis to generate rules from actual file patterns
+- Fallback to minimal template for empty projects
+
+**Safety:**
+- Never-delete policy: suspected temp/cache/duplicate files are flagged in "Suggested Cleanup" for user review, never removed by AI
+
+---
+
 ## v1.2.1 (2026-05-09)
 
 ### Skill Loader Compatibility

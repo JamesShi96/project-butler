@@ -45,7 +45,7 @@ Determine how this skill was triggered:
 
 **A. "整理文件" / "organize files":**
 1. Read `references/file-reorganization.md`
-2. Execute **Mode A: Deep Organize**
+2. Execute **Mode A: Four-Phase Organize** (Discover → Ask or Plan → Plan → Execute)
 3. Report and stop
 
 **B. "收工" / "end session" / "结束会话":**

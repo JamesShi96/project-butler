@@ -1,9 +1,29 @@
-# File Reorganization Protocol
+# File Reorganization Redesign — Implementation Plan
 
-> Loaded during: end session (Mode B), "整理文件" / "organize files" (Mode A).
+> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-Two modes with different depth levels, triggered by different commands. Mode A is a four-phase flow. Mode B is lightweight incremental.
+**Goal:** Replace template-based file reorganization with a four-phase flow that truly understands the project before organizing.
 
+**Architecture:** Mode A (deep organize) becomes Discover → Ask or Plan → Plan → Execute. Mode B (incremental) unchanged. Initialization gains a discovery step for STRUCTURE.md generation.
+
+**Tech Stack:** Markdown prompt files only. No code.
+
+**Spec:** `docs/superpowers/specs/2026-05-31-file-reorganization-design.md`
+
+---
+
+### Task 1: Rewrite Mode A in file-reorganization.md
+
+**Files:**
+- Modify: `references/file-reorganization.md`
+
+Replace the entire Mode A section (lines 7–75) with the four-phase flow. Keep Mode B, Important Constraints, and Common Mistakes sections — but update Common Mistakes to reflect the new flow.
+
+- [ ] **Step 1: Write the new Mode A content**
+
+Replace lines 7–75 (from `## Mode A: Deep Organize` to the closing triple-backtick before `---`) with:
+
+```markdown
 ## Mode A: Four-Phase Organize (四阶段整理)
 
 **Trigger:** "整理文件" / "organize files"
@@ -84,18 +104,6 @@ After generating the module map, assess overall confidence:
 - **High confidence**: standard project type, files have clear module affiliations, naming is consistent, existing structure is mostly sound. Examples: typical Node.js project with src/ + tests/ + docs/.
 - **Low confidence**: ambiguous project type, many unaffiliated files, multiple plausible organizing dimensions exist, non-standard file types. Examples: AIGC team files that could be organized by client/type/date, mixed media projects.
 
-**Early exit — no reorganization needed:**
-
-After generating the module map, check: does the project already have STRUCTURE.md with rules, and do all files match those rules without naming or structural issues? If yes, report to the user:
-
-```
-项目结构合理，无需整理。
-- {N} 个文件均已按 STRUCTURE.md 规则归类
-- 未发现命名问题或结构问题
-```
-
-Then stop — do not proceed to Phase 2/3/4.
-
 ### Phase 2: Ask or Plan
 
 **If low confidence**, present the dimension question to the user:
@@ -129,9 +137,7 @@ Rules:
 - User can pick one, combine multiple levels, or describe their own
 - The chosen dimension feeds into Phase 3
 
-**If high confidence** (structure mostly sound, no dimension question needed), skip directly to Phase 3.
-
-**If medium confidence** (overall structure is reasonable, but there are specific misplaced files, uncovered directories, or naming inconsistencies), skip the dimension question but list the specific issues found and ask the user to confirm the plan. This is the most common scenario for projects that already have some organization. Do not ask about organizing dimensions — the structure works, just needs fixes. Go straight to Phase 3 with a focused plan that addresses only the specific issues.
+**If high confidence**, skip directly to Phase 3. The plan will always explicitly state the organizing dimension used — the user can catch misjudgments there.
 
 ### Phase 3: Plan (Structure Proposal)
 
@@ -154,9 +160,6 @@ Organizing dimension: {by module / by client / by type / ...}
 ### Unchanged
 ✓ {dirs/files that stay as-is}
 
-### Suggested Cleanup (AI will NOT delete — for your review)
-⚠️ {file path} — {reason: likely temp/cache/dupe, consider deleting or adding to .gitignore}
-
 ### STRUCTURE.md Rule Updates
 | Path | Purpose | Match Condition | Naming Convention |
 |------|---------|-----------------|-------------------|
@@ -170,7 +173,6 @@ Key rules:
 - Unchanged sections explicitly listed — gives user confidence
 - STRUCTURE.md rules shown inline — one confirmation covers both
 - User can partially modify: "don't touch X, do the rest"
-- **Suggested Cleanup** lists files that look like temp/cache/duplicate files, but AI NEVER deletes them — only flags them for the user to review
 
 Wait for explicit user confirmation before proceeding to Phase 4.
 
@@ -201,76 +203,13 @@ Wait for explicit user confirmation before proceeding to Phase 4.
 - Directories created
 - References updated
 - Files in 待分类 (if any)
-
----
-
-## Mode B: Incremental Organize (增量整理)
-
-**Trigger:** "收工" / "end session" / "结束会话" (embedded in end session protocol)
-
-**Philosophy:** Lightweight maintenance. Only process files that are new or changed since last snapshot. Fast, minimal token usage.
-
-**Prerequisites:**
-- Read `.claude/.file-snapshot.json` (required — this is the diff baseline)
-- Read STRUCTURE.md for rules (no need to read all file contents)
-
-**Flow:**
-
-```
-1. Diff Scan:
-   a. List all project files recursively (same exclusions as Mode A)
-   b. Compare against .file-snapshot.json
-   c. Identify ONLY:
-      - New files (not in snapshot)
-      - Moved/renamed files (path changed)
-   d. Skip all files that are already in snapshot with same path
-
-2. If no new/changed files → skip to step 5 (just update timestamp)
-
-3. Quick Classify (for NEW files only):
-   For each new file:
-   a. Read content (only if needed to determine category — skip if filename is obvious)
-   b. Match against existing STRUCTURE.md rules
-   c. If match: place file in target directory with correct naming
-   - Apply language-appropriate naming from STRUCTURE.md conventions
-   d. If no match:
-      - Brief content scan to infer category
-      - If inferable: add rule + place file
-      - If not: add to 待分类
-
-4. Safety checks (same as Mode A):
-   - Cross-reference check before moves
-   - Name collision check
-   - System file check
-
-5. Update .claude/.file-snapshot.json:
-   - Add new files
-   - Update paths for moved files
-   - Remove entries for deleted files
-
-6. Report (in end session summary):
-   - Number of new files organized
-   - Any new rules added
 ```
 
-**Token optimization rules:**
-- **NEVER re-read files already in snapshot** unless specifically investigating an issue
-- **NEVER do cross-directory consistency checks** — that's Mode A's job
-- **NEVER rename existing files** — only place new ones
-- **NEVER rename files to a different language in Mode B** — language-based renaming only happens in Mode A or via the Language Change Protocol
-- If STRUCTURE.md doesn't exist: fall back to Mode A (need to establish baseline first)
+- [ ] **Step 2: Update Common Mistakes table**
 
----
+Replace the entire Common Mistakes table (lines 146–161) with:
 
-## Important Constraints
-
-- **Never move management files**: CLAUDE.md, PROJECT.md, STRUCTURE.md, session-handoff.md, TODO.md stay at project root
-- **Never move files in exclusion list**: .git/, node_modules/, etc.
-- **Preserve git history**: use `git mv` when in a git repo, not bare `mv`
-- **Update references**: after moving a file, search for and update any imports/links to its old path
-- **No overwrites**: if target has a same-name file, flag instead of clobbering
-- **Respect human edits**: if user manually modified STRUCTURE.md rules, honor them. Only add new rules, never remove user-written rules without confirmation
-
+```markdown
 ## Common Mistakes
 
 | Mistake | Correct Behavior |
@@ -289,5 +228,188 @@ Wait for explicit user confirmation before proceeding to Phase 4.
 | Doing content-aware naming in Mode B | Mode B only places new files. Renaming existing files is Mode A's job. |
 | Reading every file content in Step 1 of Discover | Step 1 is structural signals only (glob/grep). Content reading is Step 2, only for uncertain files. |
 | Not falling back to Mode A when STRUCTURE.md is missing in Mode B | If STRUCTURE.md doesn't exist, Mode B cannot function. Fall back to Mode A. |
-| Forcing the full flow when the project is already well-organized | If all files match STRUCTURE.md rules and no issues found, use the early exit. Don't make the user confirm an empty plan. |
-| Deleting files during reorganization | NEVER delete any file. Flag suspected temp/cache/duplicate files in "Suggested Cleanup" for the user to handle. |
+```
+
+- [ ] **Step 3: Verify Mode B, Important Constraints, and header are preserved**
+
+Re-read the file and confirm:
+- Line 1: `# File Reorganization Protocol` — unchanged
+- Lines 1–3: header — unchanged
+- Lines 5–6: `Two modes...` — update to `Two modes with different depth levels, triggered by different commands. Mode A is a four-phase flow. Mode B is lightweight incremental.`
+- Mode B section — completely unchanged
+- Important Constraints section — completely unchanged
+
+- [ ] **Step 4: Commit**
+
+```bash
+git add references/file-reorganization.md
+git commit -m "refactor: replace Mode A with four-phase file reorganization flow"
+```
+
+---
+
+### Task 2: Rewrite Template 7 in file-templates.md
+
+**Files:**
+- Modify: `references/file-templates.md`
+
+Replace the STRUCTURE.md template generation logic (lines 395–482) to use discovery-based rules instead of four fixed templates.
+
+- [ ] **Step 1: Replace Template 7 and its rule generation logic**
+
+Replace lines 395–482 (from `## Template 7: STRUCTURE.md` to the line before `## Template 8: UPDATE_LOG.md`) with:
+
+```markdown
+## Template 7: STRUCTURE.md
+
+Adapt headers and column names using the STRUCTURE.md glossary. The 命名规范 column values change based on language setting.
+
+```
+# {{PROJECT_NAME}} — 文件管理结构
+
+> 最后更新：{{DATE}}
+
+## 项目类型
+{{determined by module map — see Rule Generation below}}
+
+## 排除规则
+以下目录/文件不参与整理：
+- .git/
+- node_modules/
+- __pycache__/
+- .venv/
+- dist/
+- build/
+- vendor/
+- .claude/
+- log/
+- log/summaries/
+- log/archive/
+- {{项目自定义排除}}
+
+## 目录规则
+
+| 路径 | 用途 | 匹配条件 | 命名规范 | 优先级 |
+|------|------|----------|----------|--------|
+| （AI 根据项目分析自动生成） | | | （kebab-case / 中文 / PascalCase 等） | |
+
+## 待分类
+以下文件尚未归类（下次整理时处理）：
+- （暂无）
+
+## 整理历史
+| 日期 | 操作 | 文件数 |
+|------|------|--------|
+| {{DATE}} | 初始化结构 | 0 |
+```
+
+**Rule generation logic:**
+
+When creating STRUCTURE.md during initialization:
+
+1. **Run a lightweight discovery** — scan all files in the project (excluding the default exclusion list):
+   - File type distribution (glob only, no content reading)
+   - Existing directory structure
+   - Naming patterns in filenames
+   - If the project has import/require patterns, grep for module boundaries
+
+2. **Generate rules from discovery** — based on what you actually found, not generic templates:
+   - For each distinct file group (by type, by directory, by naming pattern), create a row in the directory rules table
+   - Match condition: describe what files belong here (file extensions, name patterns, content keywords)
+   - Naming convention: based on the language setting and what the existing files already use
+   - Priority: lower number = higher priority when a file matches multiple rules
+
+3. **If the project is empty** (no files yet), use a minimal starter rule based on the project type determined from user answers in Step 2:
+   - If the one-line description mentions code/software: create a minimal src/ rule
+   - Otherwise: leave the rules table empty with a note "（AI will populate rules after project files are created）"
+
+4. **Language-specific naming rules:**
+
+When `en`: all user file names use kebab-case or snake_case, English only.
+When `zh`: all user file names can use Chinese characters, no restriction to ASCII.
+When `bilingual`: English naming preferred; Chinese names acceptable for docs and content files.
+```
+
+- [ ] **Step 2: Verify Template 8 (UPDATE_LOG.md) is preserved**
+
+Read the file starting from `## Template 8` and confirm it's unchanged.
+
+- [ ] **Step 3: Commit**
+
+```bash
+git add references/file-templates.md
+git commit -m "refactor: replace STRUCTURE.md template with discovery-based generation"
+```
+
+---
+
+### Task 3: Update SKILL.md trigger A
+
+**Files:**
+- Modify: `SKILL.md`
+
+- [ ] **Step 1: Update trigger A description**
+
+Replace lines 46–49:
+
+```
+**A. "整理文件" / "organize files":**
+1. Read `references/file-reorganization.md`
+2. Execute **Mode A: Deep Organize**
+3. Report and stop
+```
+
+With:
+
+```
+**A. "整理文件" / "organize files":**
+1. Read `references/file-reorganization.md`
+2. Execute **Mode A: Four-Phase Organize** (Discover → Ask or Plan → Plan → Execute)
+3. Report and stop
+```
+
+- [ ] **Step 2: Commit**
+
+```bash
+git add SKILL.md
+git commit -m "docs: update file reorganization trigger to reference four-phase flow"
+```
+
+---
+
+### Task 4: Cross-file consistency verification
+
+**Files:**
+- Read: `SKILL.md`, `references/file-reorganization.md`, `references/file-templates.md`, `references/upgrade-mode.md`
+
+- [ ] **Step 1: Verify SKILL.md reference table**
+
+Read SKILL.md lines 196–204 (Reference Loading table). Confirm:
+- Row for "整理文件 / organize files" still says `references/file-reorganization.md`
+- Row for "Init (fresh)" still says `references/file-templates.md`
+- No other rows reference "Mode A" or "Deep Organize"
+
+If any row references "Mode A: Deep Organize", update it to "Mode A: Four-Phase Organize".
+
+- [ ] **Step 2: Verify upgrade-mode.md doesn't conflict**
+
+Read `references/upgrade-mode.md`. Confirm:
+- Rule 7 (STRUCTURE.md): "create if missing" logic still works — the new discovery-based template is compatible because the template structure (headers, tables, sections) is the same, only the rule generation logic changed
+- No references to "four templates" or "code/video/document/mixed" template types that would be stale
+
+If stale references exist, update them.
+
+- [ ] **Step 3: Verify end session flow in SKILL.md**
+
+Read SKILL.md lines 75–95 (End Session Flow). Confirm:
+- Step 7 still says "File reorganization (incremental) → read references/file-reorganization.md, execute Mode B"
+- No reference to "Mode A" in the end session flow
+
+- [ ] **Step 4: Final commit if any fixes were needed**
+
+```bash
+git add -A
+git commit -m "fix: ensure cross-file consistency after file reorganization redesign"
+```
+
+If no fixes were needed, skip this step.

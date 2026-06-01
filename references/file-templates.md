@@ -402,7 +402,7 @@ Adapt headers and column names using the STRUCTURE.md glossary. The 命名规范
 > 最后更新：{{DATE}}
 
 ## 项目类型
-{{AI 判断：代码项目 / 视频制作 / 商业文档 / 混合型 / 其他}}
+{{determined by module map — see Rule Generation below}}
 
 ## 排除规则
 以下目录/文件不参与整理：
@@ -423,7 +423,7 @@ Adapt headers and column names using the STRUCTURE.md glossary. The 命名规范
 
 | 路径 | 用途 | 匹配条件 | 命名规范 | 优先级 |
 |------|------|----------|----------|--------|
-| （AI 根据项目类型自动生成） | | | （kebab-case / 中文 / PascalCase 等） | |
+| （AI 根据项目分析自动生成） | | | （kebab-case / 中文 / PascalCase 等） | |
 
 ## 待分类
 以下文件尚未归类（下次整理时处理）：
@@ -437,48 +437,29 @@ Adapt headers and column names using the STRUCTURE.md glossary. The 命名规范
 
 **Rule generation logic:**
 
-When creating STRUCTURE.md for the first time:
+When creating STRUCTURE.md during initialization:
 
-1. **Scan all files** in the project (excluding the default exclusion list)
-2. **Determine project type** by analyzing file type distribution:
-   - Majority `.py`/`.ts`/`.go`/`.java` etc. → 代码项目
-   - Majority `.mp4`/`.mov`/`.prproj` etc. → 视频制作
-   - Majority `.xlsx`/`.pdf`/`.docx` etc. → 商业文档
-   - Mixed without clear majority → 混合型
-3. **Generate rules** matching the project type. Use these as reference patterns:
+1. **Run a lightweight discovery** — scan all files in the project (excluding the default exclusion list):
+   - File type distribution (glob only, no content reading)
+   - Existing directory structure
+   - Naming patterns in filenames
+   - If the project has import/require patterns, grep for module boundaries
 
-**代码项目参考规则：**
-| 路径 | 用途 | 匹配条件 | 命名规范 | 优先级 |
-|------|------|----------|----------|--------|
-| src/ | 源代码 | 按语言和模块组织 | kebab-case.ext | 10 |
-| tests/ / test/ | 测试文件 | *test*, *spec* | *.test.ext, *.spec.ext | 20 |
-| docs/ | 项目文档 | *.md, *.docx, *.pdf | kebab-case.md (en) / 中文或kebab-case.md (zh) / kebab-case.md (bilingual) | 30 |
-| config/ / conf/ | 配置文件 | *.yaml, *.toml, *.json (非 package.json) | kebab-case.yaml | 15 |
+2. **Generate rules from discovery** — based on what you actually found, not generic templates:
+   - For each distinct file group (by type, by directory, by naming pattern), create a row in the directory rules table
+   - Match condition: describe what files belong here (file extensions, name patterns, content keywords)
+   - Naming convention: based on the language setting and what the existing files already use
+   - Priority: lower number = higher priority when a file matches multiple rules
 
-**视频制作参考规则：**
-| 路径 | 用途 | 匹配条件 | 命名规范 | 优先级 |
-|------|------|----------|----------|--------|
-| footage/ | 原始素材 | *.mp4, *.mov, *.mxf | YYYY-MM-DD-description.ext | 10 |
-| scripts/ | 脚本文档 | *.docx, *.md 含脚本相关 | kebab-case.md | 20 |
-| editing/ | 剪辑工程 | *.prproj, *.drp, *.fcpxml | project-name.ext | 30 |
-| exports/ | 成片输出 | *.mp4 命名含 export/output | project-name-final.ext | 40 |
-| assets/ | 设计素材 | *.png, *.jpg, *.ai, *.psd | descriptive-name.ext | 15 |
+3. **If the project is empty** (no files yet), use a minimal starter rule based on the project type determined from user answers in Step 2:
+   - If the one-line description mentions code/software: create a minimal src/ rule
+   - Otherwise: leave the rules table empty with a note "（AI will populate rules after project files are created）"
 
-**商业文档参考规则：**
-| 路径 | 用途 | 匹配条件 | 命名规范 | 优先级 |
-|------|------|----------|----------|--------|
-| contracts/ | 合同法务 | *.pdf 含合同/协议 | YYYY-MM-DD-counterparty-type.pdf (en) / YYYY-MM-DD-对方-类型.pdf (zh) | 10 |
-| finance/ | 财务报表 | *.xlsx, *.csv 含报表/预算 | YYYY-MM-report-name.xlsx | 20 |
-| teams/ | 团队子目录 | 按部门名归类 | kebab-case/ (en) / 部门名/ (zh) | 30 |
-| meetings/ | 会议记录 | *.docx, *.md 含会议/纪要 | YYYY-MM-DD-notes.{md/docx} (en) / YYYY-MM-DD-会议纪要.{md/docx} (zh) | 15 |
-
-**Language-specific naming rules:**
+4. **Language-specific naming rules:**
 
 When `en`: all user file names use kebab-case or snake_case, English only.
 When `zh`: all user file names can use Chinese characters, no restriction to ASCII.
 When `bilingual`: English naming preferred; Chinese names acceptable for docs and content files.
-
-4. **These are starting points.** Adapt rules based on actual file content and project context. Refine, merge, or add rules as needed — not blindly copy templates.
 
 ---
 
