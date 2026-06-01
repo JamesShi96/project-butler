@@ -265,7 +265,8 @@ Wait for explicit user confirmation before proceeding to Phase 4.
 ## Important Constraints
 
 - **Never move management files**: CLAUDE.md, PROJECT.md, STRUCTURE.md, session-handoff.md, TODO.md stay at project root
-- **Never move files in exclusion list**: .git/, node_modules/, etc.
+- **Never move files in exclusion list**: .git/, node_modules/, docs/, etc.
+- **Never move or rename files in docs/**: Document files are managed by DOCS.md and the Document Archiving Protocol, not by file reorganization
 - **Preserve git history**: use `git mv` when in a git repo, not bare `mv`
 - **Update references**: after moving a file, search for and update any imports/links to its old path
 - **No overwrites**: if target has a same-name file, flag instead of clobbering
@@ -291,3 +292,4 @@ Wait for explicit user confirmation before proceeding to Phase 4.
 | Not falling back to Mode A when STRUCTURE.md is missing in Mode B | If STRUCTURE.md doesn't exist, Mode B cannot function. Fall back to Mode A. |
 | Forcing the full flow when the project is already well-organized | If all files match STRUCTURE.md rules and no issues found, use the early exit. Don't make the user confirm an empty plan. |
 | Deleting files during reorganization | NEVER delete any file. Flag suspected temp/cache/duplicate files in "Suggested Cleanup" for the user to handle. |
+| Reorganizing files in docs/ directory | docs/ is managed by DOCS.md and the Document Archiving Protocol. File reorganization should skip docs/ entirely. |

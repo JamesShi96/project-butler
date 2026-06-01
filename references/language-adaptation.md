@@ -138,6 +138,28 @@ When creating or updating files, adapt based on the configured language:
 | Entry format | YYYY-MM-DD — {一句话标题} | YYYY-MM-DD — {one-line title} |
 | README link | 更新历史见 [UPDATE_LOG.md](UPDATE_LOG.md)。 | For update history, see [UPDATE_LOG.md](UPDATE_LOG.md). |
 
+### DOCS.md
+
+| Context | 中文 | English |
+|---------|------|---------|
+| Title suffix | 文档索引 | Document Index |
+| Meta line | 最后更新 | Last updated |
+| Section | PRD | PRD |
+| Section | 技术设计 | Tech Design |
+| Section | 设计文档 | Design Docs |
+| Section | 调研 | Research |
+| Section | 会议纪要 | Meeting Notes |
+| Section | 实验记录 | Experiments |
+| Section | 整理历史 | Organization History |
+| Table column | 文档 | Document |
+| Table column | 标题 | Title |
+| Table column | 状态 | Status |
+| Table column | Sub 文档 | Sub-docs |
+| Status value | 草稿 | Draft |
+| Status value | 进行中 | In Progress |
+| Status value | 已完成 | Done |
+| Status value | 已废弃 | Deprecated |
+
 ## Common Mistakes
 
 | Mistake | Correct Behavior |
