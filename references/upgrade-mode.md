@@ -16,6 +16,8 @@ When some files already exist:
    - Does it include `Log Compaction Threshold` in the CLAUDE.md template? If not, add it.
    - Does the Session Start Protocol include bounded log reading (summaries + raw)? If not, update it.
    - Does the Session End Protocol include a Log Compaction step after writing the session log? If not, insert it and renumber.
+   - Does the Session End Protocol include step 7.5 (文档归档)? If not, insert it after step 7 and renumber accordingly.
+   - Does the file roles table include `DOCS.md`? If not, add it.
    - Offer to make these updates for user confirmation before proceeding.
 4. **For existing session-handoff.md / TODO.md**: skip entirely
 5. **For log/ directory**: create if missing (with `log/.gitkeep`), never touch existing log files
@@ -28,6 +30,8 @@ When some files already exist:
 12. **For Coding Guidelines (Karpathy Guidelines) in CLAUDE.md**: if CLAUDE.md exists but has no `## Coding Guidelines` section, append the Karpathy Guidelines section (from Template 1) before the `## Project-Specific Rules` section or at the end of the file. If it exists, skip.
 13. **For UPDATE_LOG.md**: create if missing (empty template with header only). If exists, never overwrite — user has real update history here.
 14. **For Update Log step in CLAUDE.md Session End Protocol**: if the protocol only has 8 steps (ending with "Output summary"), insert step 8 (评估并写入 Update Log) and renumber the old step 8 to step 9.
+15. **For DOCS.md**: create if missing. Use default types: PRD, 技术设计, 调研 (most common combination). Create corresponding `docs/` subdirectories with `.gitkeep` files. If exists, never overwrite — user has real document index here.
+16. **For docs/ directory**: create if missing with default subdirectories (`prd/`, `tech-design/`, `research/`) each with `.gitkeep`. If exists, skip.
 
 ## Legacy Migration (.claude/memory/ → new system)
 
@@ -67,6 +71,7 @@ Output shows status of each file, plus any legacy migration suggestions:
   ✅ .claude/candidates.md — 已创建（新增）
   ✅ STRUCTURE.md               — 已创建（新增）/ 已存在，跳过
   ✅ .claude/.file-snapshot.json — 已创建（新增）/ 已存在，跳过
+  ✅ docs/ + DOCS.md      — 已创建（新增）/ 已存在，跳过
   🌐 Language setting      — 已添加（默认 bilingual）/ 已存在，跳过
 
 Legacy 检测：
