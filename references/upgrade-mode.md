@@ -13,6 +13,7 @@ When some files already exist:
    - Does the file roles table include `STRUCTURE.md` and `.claude/.file-snapshot.json`? If not, add them.
    - Does the Session End Protocol include step 6 (整理文件结构)? If not, insert it between step 5 (收集宪法候选) and the last step (输出中文总结), and renumber accordingly.
    - Does it say "4 组件"? If so, update to "5 组件".
+   - Does it say "5 组件"? If so, update to "6 组件".
    - Does it include `Log Compaction Threshold` in the CLAUDE.md template? If not, add it.
    - Does the Session Start Protocol include bounded log reading (summaries + raw)? If not, update it.
    - Does the Session End Protocol include a Log Compaction step after writing the session log? If not, insert it and renumber.

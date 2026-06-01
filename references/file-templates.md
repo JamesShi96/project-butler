@@ -38,7 +38,7 @@ The most critical file — auto-loaded by Claude Code, defines all ongoing behav
 
 ## 项目管理系统
 
-本项目使用 5 组件管理系统。
+本项目使用 6 组件管理系统。
 
 - **Log Compaction Threshold:** 10（每积累 10 个日志文件压缩为 1 个 summary）
 
@@ -297,7 +297,7 @@ Adapt headers using the session-handoff.md glossary.
 ## 关键设计决策
 | # | 决策 | 理由 | 日期 |
 |---|------|------|------|
-| 1 | 采用 5 组件管理系统 | Log + Wiki + Structure + Constitution + TODO | {{DATE}} |
+| 1 | 采用 6 组件管理系统 | Log + Wiki + Structure + Constitution + TODO + Docs | {{DATE}} |
 
 ## 迭代历史
 | 版本 | 日期 | 变更 |
@@ -382,7 +382,7 @@ When user says "end session" / "结束会话" / "收工":
 ## Triggers
 | Intent | Action |
 |--------|--------|
-| End session / wrap up (any language) | Write log, update handoff, sync wiki, check TODO, collect candidates, file reorganization, evaluate update log, output summary |
+| End session / wrap up (any language) | Write log, update handoff, sync wiki, check TODO, collect candidates, file reorganization, document archiving, evaluate update log, output summary |
 | Review constitution (any language) | Show .claude/candidates.md for user to confirm each entry |
 | Sync wiki (any language) | Force rescan and update PROJECT.md |
 | Check status (any language) | Read PROJECT.md + session-handoff.md summary aloud |
@@ -428,6 +428,7 @@ Adapt headers and column names using the STRUCTURE.md glossary. The 命名规范
 - build/
 - vendor/
 - .claude/
+- docs/
 - log/
 - log/summaries/
 - log/archive/

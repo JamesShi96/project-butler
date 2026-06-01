@@ -1,5 +1,19 @@
 # Update Log
 
+## v1.4.1 (2026-06-02)
+
+### Bug Fixes: Cross-Reference Consistency
+
+Fixed 4 cross-reference bugs found during static analysis testing of v1.3.0 + v1.4.0:
+- STRUCTURE.md template missing `docs/` in exclusion list (file reorganization could misplace documents)
+- update-log.md positioning description outdated ("between file reorganization" → "between document archiving")
+- Component count updated from 5 → 6 (DOCS.md is now a standalone component)
+- Cursor template triggers table missing "document archiving" in end session description
+
+Also added "5→6 组件" upgrade check to upgrade-mode.md.
+
+---
+
 ## v1.3.0 (2026-06-01)
 
 ### Four-Phase File Reorganization

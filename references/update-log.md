@@ -1,6 +1,6 @@
 # Update Log Protocol
 
-> Loaded during: end session (step 8, between file reorganization and output summary).
+> Loaded during: end session (step 8, between document archiving and output summary).
 
 ## Purpose
 
