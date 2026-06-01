@@ -11,6 +11,7 @@ All templates use these variables:
 - `{{GITHUB_LINE}}` → `- **GitHub：** {{answer}}` if Q4 provided, else empty string
 - `{{DATE}}` → today YYYY-MM-DD
 - `{{LANGUAGE}}` → Q6 answer (`en`, `zh`, or `bilingual`)
+- `{{DOC_TYPES}}` → Q7 answers (list of selected document type directories, e.g., `prd, tech-design, research`)
 
 For language adaptation: adapt headers, labels, and descriptions to the configured language. See `references/language-adaptation.md` for glossaries.
 
@@ -45,7 +46,7 @@ The most critical file — auto-loaded by Claude Code, defines all ongoing behav
 
 | Intent | AI Action |
 |--------|-----------|
-| End session / wrap up — any expression of "we're done for now" (end session, 结束会话, 收工, wrap up, done for today, etc.) | Write log + update handoff + sync Wiki + check TODO + collect constitution candidates + file reorganization + evaluate update log + output summary in configured language |
+| End session / wrap up — any expression of "we're done for now" (end session, 结束会话, 收工, wrap up, done for today, etc.) | Write log + update handoff + sync Wiki + check TODO + collect constitution candidates + file reorganization + document archiving + evaluate update log + output summary in configured language |
 | Review constitution — any expression of "check/update rules" (review claude, 更新宪法, check rules, etc.) | Show .claude/candidates.md for confirmation one by one |
 | Sync wiki — any expression of "update project overview" (sync wiki, 同步项目, refresh overview, etc.) | Force rescan and update PROJECT.md |
 | Check status — any expression of "what's the current state" (status, 项目现状, where are we, etc.) | Read PROJECT.md + session-handoff.md summary aloud |
@@ -65,6 +66,7 @@ The most critical file — auto-loaded by Claude Code, defines all ongoing behav
 | STRUCTURE.md | AI 自动 | end session + 文件结构变化时 |
 | .claude/.file-snapshot.json | AI 自动 | end session 时 |
 | UPDATE_LOG.md | AI 自动 | end session + 重大更新时 |
+| DOCS.md | AI 自动 | end session + 文档归档时 |
 
 ### Session Start Protocol
 
@@ -92,6 +94,10 @@ At session start:
    - 若 STRUCTURE.md 不存在：先建立规则表（深度模式），再整理
    - 若 STRUCTURE.md 已存在：只匹配新增文件，不重读已有文件
    - 更新 `.claude/.file-snapshot.json`
+7.5. **文档归档** → read `references/document-archiving.md`，扫描本次会话产出的文档
+   - 识别并分类文档（PRD / 技术设计 / 设计文档 / 调研 / 会议纪要 / 实验记录）
+   - 归档到 `docs/` 对应子目录 + 更新 `DOCS.md` 索引元数据
+   - 若 DOCS.md 不存在：创建（升级兼容）
 8. **评估并写入 Update Log** → 评估本次会话是否包含重大更新（新功能、重大修改、3+ 文件变更、用户声明里程碑、重要 TODO 完成）
    - 若是重大更新：在 `UPDATE_LOG.md` 顶部追加一条记录（标题 + 变更要点），可选创建 GitHub Release
    - 若不是：静默跳过
@@ -231,6 +237,11 @@ Adapt headers using the PROJECT.md glossary. In bilingual mode, use Chinese head
 ├── session-handoff.md          ← 接手指引（AI 自动）
 ├── TODO.md                     ← 执行清单
 ├── UPDATE_LOG.md               ← 更新日志（重大更新时写入）
+├── DOCS.md                    ← 文档索引（AI 自动归档）
+├── docs/                      ← 文档仓库
+│   ├── prd/                   ← PRD
+│   ├── tech-design/           ← 技术设计
+│   └── ...                    ← 其他文档类型
 ├── log/                        ← 会话日志
 └── .claude/
     ├── candidates.md           ← 宪法候选池
@@ -247,6 +258,7 @@ Adapt headers using the PROJECT.md glossary. In bilingual mode, use Chinese head
 | .claude/candidates.md | 待确认的宪法候选条目 |
 | STRUCTURE.md | 文件管理规则，定义目录组织和匹配条件 |
 | UPDATE_LOG.md | 更新日志，记录重大更新 |
+| DOCS.md | 文档索引，记录所有文档的元数据和层级关系 |
 
 ## 当前进度快照
 | 模块 | 状态 | 备注 |
@@ -363,6 +375,7 @@ When user says "end session" / "结束会话" / "收工":
 5. Update TODO.md (mark completed tasks)
 6. Collect CLAUDE.md candidates → append to .claude/candidates.md
 7. File structure reorganization (incremental mode) — only process new/changed files, match against STRUCTURE.md rules, organize (create STRUCTURE.md if missing)
+7.5. Document archiving — read references/document-archiving.md, scan for document output, classify and archive to docs/, update DOCS.md index
 8. Evaluate and write update log — if significant changes, prepend entry to UPDATE_LOG.md; optionally offer GitHub Release
 9. Output summary in configured language
 
@@ -388,6 +401,7 @@ When user says "end session" / "结束会话" / "收工":
 | STRUCTURE.md | AI auto | end session + file structure changes |
 | .claude/.file-snapshot.json | AI auto | end session |
 | UPDATE_LOG.md | AI auto | end session + significant updates |
+| DOCS.md | AI auto | end session + document archiving |
 ```
 
 ---
@@ -472,3 +486,50 @@ Adapt headers using the UPDATE_LOG glossary. Content language follows the projec
 
 > 记录项目的重大更新（AI 在 end session 时自动判断是否写入）。
 ```
+
+---
+
+## Template 9: DOCS.md
+
+Adapt headers using the DOCS.md glossary in `references/language-adaptation.md`. Only include sections for document types selected during initialization (Q7).
+
+```
+# {{PROJECT_NAME}} — 文档索引
+
+> 最后更新：{{DATE}}
+
+## PRD
+| 文档 | 标题 | 状态 | 最后更新 | Sub 文档 |
+|------|------|------|----------|----------|
+| [docs/prd/main.md](docs/prd/main.md) | 产品需求总览 | 草稿 | {{DATE}} | - |
+
+## 技术设计
+| 文档 | 标题 | 状态 | 最后更新 | Sub 文档 |
+|------|------|------|----------|----------|
+| [docs/tech-design/main.md](docs/tech-design/main.md) | 技术设计总览 | 草稿 | {{DATE}} | - |
+
+## 调研
+| 文档 | 标题 | 状态 | 最后更新 | Sub 文档 |
+|------|------|------|----------|----------|
+| （暂无） | | | | |
+
+## 整理历史
+| 日期 | 操作 | 文档数 |
+|------|------|--------|
+| {{DATE}} | 初始化 | 0 |
+```
+
+**Only include sections for types selected by user.** Remove unselected type sections entirely. For each selected type, create a placeholder row with main.md if the type is PRD or 技术设计 (these commonly start with an overview doc). For other types, use the "（暂无）" placeholder.
+
+**Directory creation:** For each selected type, create `docs/{type}/` with a `.gitkeep` file. For types with a main.md placeholder, create the placeholder file:
+
+```
+# {Type Name} 总览
+
+> 最后更新：{{DATE}}
+
+## 概述
+（待填充）
+```
+
+**Variable:** `{{DOC_TYPES}}` — comma-separated list of selected type directory names (e.g., `prd, tech-design, design, research`).
