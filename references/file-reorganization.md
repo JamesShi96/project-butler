@@ -129,7 +129,9 @@ Rules:
 - User can pick one, combine multiple levels, or describe their own
 - The chosen dimension feeds into Phase 3
 
-**If high confidence**, skip directly to Phase 3. The plan will always explicitly state the organizing dimension used — the user can catch misjudgments there.
+**If high confidence** (structure mostly sound, no dimension question needed), skip directly to Phase 3.
+
+**If medium confidence** (overall structure is reasonable, but there are specific misplaced files, uncovered directories, or naming inconsistencies), skip the dimension question but list the specific issues found and ask the user to confirm the plan. This is the most common scenario for projects that already have some organization. Do not ask about organizing dimensions — the structure works, just needs fixes. Go straight to Phase 3 with a focused plan that addresses only the specific issues.
 
 ### Phase 3: Plan (Structure Proposal)
 
@@ -152,6 +154,9 @@ Organizing dimension: {by module / by client / by type / ...}
 ### Unchanged
 ✓ {dirs/files that stay as-is}
 
+### Suggested Cleanup (AI will NOT delete — for your review)
+⚠️ {file path} — {reason: likely temp/cache/dupe, consider deleting or adding to .gitignore}
+
 ### STRUCTURE.md Rule Updates
 | Path | Purpose | Match Condition | Naming Convention |
 |------|---------|-----------------|-------------------|
@@ -165,6 +170,7 @@ Key rules:
 - Unchanged sections explicitly listed — gives user confidence
 - STRUCTURE.md rules shown inline — one confirmation covers both
 - User can partially modify: "don't touch X, do the rest"
+- **Suggested Cleanup** lists files that look like temp/cache/duplicate files, but AI NEVER deletes them — only flags them for the user to review
 
 Wait for explicit user confirmation before proceeding to Phase 4.
 
@@ -284,3 +290,4 @@ Wait for explicit user confirmation before proceeding to Phase 4.
 | Reading every file content in Step 1 of Discover | Step 1 is structural signals only (glob/grep). Content reading is Step 2, only for uncertain files. |
 | Not falling back to Mode A when STRUCTURE.md is missing in Mode B | If STRUCTURE.md doesn't exist, Mode B cannot function. Fall back to Mode A. |
 | Forcing the full flow when the project is already well-organized | If all files match STRUCTURE.md rules and no issues found, use the early exit. Don't make the user confirm an empty plan. |
+| Deleting files during reorganization | NEVER delete any file. Flag suspected temp/cache/duplicate files in "Suggested Cleanup" for the user to handle. |
