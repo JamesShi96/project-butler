@@ -88,6 +88,11 @@ When triggered by "end session" / "结束会话" / "收工", execute in order:
 7. **File reorganization (incremental)** → read `references/file-reorganization.md`, execute Mode B
    - If STRUCTURE.md missing: execute Mode A first to establish baseline
    - Update `.claude/.file-snapshot.json`
+7.5. **Document archiving** → read `references/document-archiving.md`, scan and archive document output
+   - Identify documents created/modified this session
+   - Classify by type, archive to `docs/` subdirectories
+   - Update `DOCS.md` index and metadata
+   - If DOCS.md missing: create it (upgrade compatibility)
 8. **Evaluate & write update log** → read `references/update-log.md`
    - Evaluate session significance; if significant, prepend entry to `UPDATE_LOG.md`
    - Optionally offer GitHub Release creation
@@ -134,7 +139,7 @@ If user provides a task missing required fields, ask them to fill in. Completed 
 
 ### Step 1: Detect Mode
 
-Scan project root for: CLAUDE.md, PROJECT.md, session-handoff.md, TODO.md, log/, STRUCTURE.md, UPDATE_LOG.md, .claude/.file-snapshot.json, .claude/candidates.md
+Scan project root for: CLAUDE.md, PROJECT.md, session-handoff.md, TODO.md, log/, STRUCTURE.md, UPDATE_LOG.md, DOCS.md, docs/, .claude/.file-snapshot.json, .claude/candidates.md
 
 - **Fresh**: None exist → create all
 - **Upgrade**: Some exist → read `references/upgrade-mode.md`, create only missing files, never overwrite existing content
@@ -149,10 +154,14 @@ Use AskUserQuestion to ask:
 4. **GitHub 仓库** — optional, e.g., "org/repo-name"
 5. **是否创建 Cursor 规则文件** — yes/no (default yes)
 6. **语言 / Language** — `en` / `zh` / `bilingual` (default bilingual)
+7. **文档类型** — 选择需要的文档管理类型（多选）
+   预设选项：PRD / 技术设计 / 设计文档 / 调研 / 会议纪要 / 实验记录
+   AI 根据项目描述推荐默认选项
+   用户可增减
 
 ### Step 3: Create Files
 
-Read `references/file-templates.md` + `references/language-adaptation.md`.
+Read `references/file-templates.md` + `references/language-adaptation.md` + `references/document-archiving.md`.
 
 Create each file using templates, replacing `{{VARIABLES}}` with user answers. Apply language adaptation rules and glossary from the reference.
 
@@ -172,6 +181,7 @@ Create `log/.gitkeep` (empty file) alongside `log/` directory so git tracks it w
   ✅ .claude/candidates.md — 宪法候选池（已创建）
   ✅ STRUCTURE.md        — 文件管理规则（已创建）
   ✅ UPDATE_LOG.md       — 更新日志（已创建）
+  ✅ docs/ + DOCS.md      — 文档归档系统（已创建）
   ✅ .cursor/rules/      — Cursor 规则（已创建 / 已跳过）
   🌐 Language: {{LANGUAGE}}
 
@@ -195,9 +205,9 @@ Create `log/.gitkeep` (empty file) alongside `log/` directory so git tracks it w
 
 | Trigger | Read these files |
 |---------|-----------------|
-| Init (fresh) | `references/file-templates.md` + `references/language-adaptation.md` |
+| Init (fresh) | `references/file-templates.md` + `references/language-adaptation.md` + `references/document-archiving.md` |
 | Init (upgrade) | above + `references/upgrade-mode.md` |
-| End session | `references/file-reorganization.md` + `references/update-log.md` + `references/log-compaction.md` (if logs ≥ threshold) |
+| End session | `references/file-reorganization.md` + `references/document-archiving.md` + `references/update-log.md` + `references/log-compaction.md` (if logs ≥ threshold) |
 | 整理文件 / organize files | `references/file-reorganization.md` |
 | 切换语言 / change language | `references/language-change.md` + `references/language-adaptation.md` |
 | continue / 接着上次 | `references/continue.md` |
