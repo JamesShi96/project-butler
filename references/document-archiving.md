@@ -72,6 +72,10 @@ For each classified document:
 - If the document is large (>500 lines or clearly multi-topic): suggest splitting to user
 - When splitting: create main.md (overview + index) + sub-documents, update DOCS.md hierarchy
 
+**After all documents are archived:**
+- Update `.claude/.file-snapshot.json`: update paths for moved files, add new files in docs/
+- Note: step 7 (Mode B) already updated the snapshot earlier this session, so this step only needs to update entries for files that document archiving moved again
+
 ### Step 4: Update DOCS.md
 
 **If DOCS.md doesn't exist** — create it (see Initialization section below).
@@ -96,7 +100,9 @@ If the session creates a new document type not in the preset six:
 - Add new section to DOCS.md with the same table format
 - Use the custom type name as both directory and section header
 
-## DOCS.md Template (for initialization)
+## DOCS.md Template (for end session fallback)
+
+This template is used when DOCS.md is created during end session (step 7.5 upgrade compatibility). For initialization, use the richer Template 9 in `references/file-templates.md` (which includes `{{PROJECT_NAME}}` prefix and main.md placeholders).
 
 Adapt headers to language setting. When `en`: "Document Index", section names in English.
 
@@ -151,3 +157,4 @@ When initializing, present these options:
 | Reading entire document contents for classification | Only read first 3-5 paragraphs. Filename and directory should be sufficient for most cases |
 | Auto-splitting documents without asking | Large documents: suggest splitting, but let user decide |
 | Removing DOCS.md entries for deleted documents | If a document was deleted, mark entry as "已废弃" rather than removing the row |
+| Not updating .file-snapshot.json after moving documents | After archiving, update .file-snapshot.json with new paths. Otherwise Mode B will see moved files as "new" next session |

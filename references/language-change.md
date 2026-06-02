@@ -24,6 +24,7 @@ Triggered when user expresses intent to change language (any expression: 切换�
    - STRUCTURE.md — translate all headers and table column names;
      update 命名规范 column to reflect new language's naming conventions
    - .cursor/rules/project-system.mdc — translate all content (if exists)
+   - DOCS.md — translate section headers and status values (use DOCS.md glossary from references/language-adaptation.md)
 
 4. Ask user about user file renaming:
    "是否要按新语言的命名规范重命名用户文件？(Rename user files to match new language naming conventions?)"

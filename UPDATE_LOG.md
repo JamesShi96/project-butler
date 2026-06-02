@@ -2,15 +2,22 @@
 
 ## v1.4.1 (2026-06-02)
 
-### Bug Fixes: Cross-Reference Consistency
+### Bug Fixes: Cross-Reference + Flow Consistency
 
-Fixed 4 cross-reference bugs found during static analysis testing of v1.3.0 + v1.4.0:
+Two rounds of testing (static analysis + deep flow tracing) found and fixed 8 bugs:
+
+**Round 1 — Cross-reference consistency:**
 - STRUCTURE.md template missing `docs/` in exclusion list (file reorganization could misplace documents)
 - update-log.md positioning description outdated ("between file reorganization" → "between document archiving")
 - Component count updated from 5 → 6 (DOCS.md is now a standalone component)
 - Cursor template triggers table missing "document archiving" in end session description
 
-Also added "5→6 组件" upgrade check to upgrade-mode.md.
+**Round 2 — Deep flow tracing:**
+- SKILL.md architecture diagram missing DOCS.md in middle layer
+- Language Change Protocol missing DOCS.md in file rewrite list (language switch would leave DOCS.md untranslated)
+- Document archiving step 3 doesn't update `.file-snapshot.json` after moving files (next Mode B run would re-process them)
+- document-archiving.md DOCS.md template lacks `{{PROJECT_NAME}}` prefix vs init Template 9 — clarified fallback vs init usage
+- Inlined Q7 document type recommendation logic in SKILL.md Step 2 (was only in document-archiving.md, loaded too late)
 
 ---
 

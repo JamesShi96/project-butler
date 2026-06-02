@@ -21,6 +21,7 @@ Initialize a standardized project memory stack:
 │  STRUCTURE.md（文件管理规则）← AI 自动│
 │  目录规则 / 匹配条件 / 整理历史       │
 │  UPDATE_LOG.md（里程碑变化）← AI 自动 │
+│  DOCS.md（文档索引 + 元数据）← AI 自动 │
 └─────────────────────────────────────┘
         ↑ 状态汇总
 下层（事实流水）
@@ -156,7 +157,7 @@ Use AskUserQuestion to ask:
 6. **语言 / Language** — `en` / `zh` / `bilingual` (default bilingual)
 7. **文档类型** — 选择需要的文档管理类型（多选）
    预设选项：PRD / 技术设计 / 设计文档 / 调研 / 会议纪要 / 实验记录
-   AI 根据项目描述推荐默认选项
+   AI 根据项目描述推荐默认选项：产品类→PRD+技术设计+设计文档 / 运营类→PRD+调研+会议纪要 / 研究类→调研+实验记录 / 内容类→设计文档+调研
    用户可增减
 
 ### Step 3: Create Files
