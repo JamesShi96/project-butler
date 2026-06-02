@@ -9,6 +9,7 @@ All templates use these variables:
 - `{{ONE_LINE_DESCRIPTION}}` → Q2 answer
 - `{{CURRENT_STAGE}}` → Q3 answer
 - `{{GITHUB_LINE}}` → `- **GitHub：** {{answer}}` if Q4 provided, else empty string
+- `{{GITHUB_LINK_LINE}}` → `- GitHub: https://github.com/{{answer}}` if Q4 provided, else `- （待添加）`
 - `{{DATE}}` → today YYYY-MM-DD
 - `{{LANGUAGE}}` → Q6 answer (`en`, `zh`, or `bilingual`)
 - `{{DOC_TYPES}}` → Q7 answers (list of selected document type directories, e.g., `prd, tech-design, research`)
@@ -52,6 +53,8 @@ The most critical file — auto-loaded by Claude Code, defines all ongoing behav
 | Check status — any expression of "what's the current state" (status, 项目现状, where are we, etc.) | Read PROJECT.md + session-handoff.md summary aloud |
 | Organize files — any expression of "clean up files" (organize files, 整理文件, clean up, sort files, etc.) | Scan project files, organize per STRUCTURE.md rules |
 | Change language — any expression of "switch language" (切换语言, change language, switch to English, 换成中文, etc.) | Execute Language Change Protocol |
+| Continue — any expression of "pick up where we left off" (接着上次, continue, 上次做到哪了, etc.) | Read last session log + session-handoff.md + PROJECT.md to recover context |
+| Continue full context — any expression of "full project review" (全面回顾, full context, 项目全景, etc.) | Full project trajectory recovery across all sessions |
 
 ### 文件职责
 

@@ -4,7 +4,7 @@
 
 ### Bug Fixes: Cross-Reference + Flow Consistency
 
-Five rounds of testing (static analysis + deep flow tracing + edge cases + template consistency + path tracing) found and fixed 18 bugs:
+Six rounds of testing (static analysis + deep flow tracing + edge cases + template consistency + path tracing + init simulation) found and fixed 20 bugs:
 
 **Round 1 — Cross-reference consistency:**
 - STRUCTURE.md template missing `docs/` in exclusion list (file reorganization could misplace documents)
@@ -34,6 +34,10 @@ Five rounds of testing (static analysis + deep flow tracing + edge cases + templ
 - file-reorganization.md Phase 4 safety checks + Important Constraints missing DOCS.md (could be moved during file reorganization)
 - language-change.md step 3 missing UPDATE_LOG.md (language switch leaves "更新日志" untranslated)
 - Cursor Template 6 Session Start missing language check instruction (Cursor users bypass language setting)
+
+**Round 6 — Init simulation + variable audit:**
+- `{{GITHUB_LINK_LINE}}` variable used in PROJECT.md but missing from top-level Variable Replacements table
+- CLAUDE.md Template 1 trigger table missing "continue" and "continue full context" entries (undiscoverable for users)
 
 ---
 
