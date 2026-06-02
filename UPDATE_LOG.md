@@ -4,7 +4,7 @@
 
 ### Bug Fixes: Cross-Reference + Flow Consistency
 
-Two rounds of testing (static analysis + deep flow tracing) found and fixed 8 bugs:
+Four rounds of testing (static analysis + deep flow tracing + edge cases + template consistency) found and fixed 15 bugs:
 
 **Round 1 — Cross-reference consistency:**
 - STRUCTURE.md template missing `docs/` in exclusion list (file reorganization could misplace documents)
@@ -24,6 +24,11 @@ Two rounds of testing (static analysis + deep flow tracing) found and fixed 8 bu
 - Fresh init doesn't create `.claude/.file-snapshot.json` — first end session's Mode B would fail without diff baseline
 - Init Step 4 output report and trigger cheat sheet incomplete (missing `.file-snapshot.json` and 2 trigger words)
 - Upgrade Report template missing UPDATE_LOG.md and Coding Guidelines entries
+
+**Round 4 — Template consistency + Cursor parity:**
+- Document archiving Step 1 exclusion list missing `DOCS.md` — could try to archive the index file itself
+- CLAUDE.md Template 1 Session Start Protocol only reads PROJECT.md, not session-handoff.md (Cursor template correctly reads both)
+- Cursor Template 6 description missing "change language" trigger word
 
 ---
 

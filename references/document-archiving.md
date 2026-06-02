@@ -39,7 +39,7 @@ Identify files created or significantly modified during this session that appear
 - Files with `.md` extension that contain structured content (headers, sections, lists)
 - Files created/modified during the session (check tool use history)
 - Files already in `docs/` subdirectories (always process these)
-- Exclude: CLAUDE.md, PROJECT.md, STRUCTURE.md, UPDATE_LOG.md, TODO.md, session-handoff.md, files in log/, files in .claude/
+- Exclude: CLAUDE.md, PROJECT.md, STRUCTURE.md, UPDATE_LOG.md, TODO.md, session-handoff.md, DOCS.md, files in log/, files in .claude/
 
 ### Step 2: Classify
 

@@ -72,7 +72,7 @@ The most critical file — auto-loaded by Claude Code, defines all ongoing behav
 
 At session start:
 
-1. Read `PROJECT.md` for project overview, and check the Language setting in CLAUDE.md to determine output language.
+1. Read `PROJECT.md` for project overview and `session-handoff.md` for current progress / next steps. Check the Language setting in CLAUDE.md to determine output language.
 2. **Read logs (bounded):**
    - Find the highest level with summaries in `log/summaries/` — read all summaries at that level.
    - Read all unarchived raw logs in `log/` (exclude `summaries/` and `archive/`).
@@ -357,7 +357,7 @@ Only create if user answered yes to Q5. Mirror the language setting from CLAUDE.
 
 ```
 ---
-description: Apply at session start and when user says end session / review claude / sync wiki / status / organize files. Defines the project memory stack behavior.
+description: Apply at session start and when user says end session / review claude / sync wiki / status / organize files / change language. Defines the project memory stack behavior.
 ---
 
 # {{PROJECT_NAME}} — Project System Rules
