@@ -168,6 +168,8 @@ Create each file using templates, replacing `{{VARIABLES}}` with user answers. A
 
 Create `log/.gitkeep` (empty file) alongside `log/` directory so git tracks it when empty.
 
+Create `.claude/.file-snapshot.json` with empty content: `{"lastScan":"","files":{}}`.
+
 ### Step 4: Output Report
 
 ```
@@ -183,6 +185,7 @@ Create `log/.gitkeep` (empty file) alongside `log/` directory so git tracks it w
   ✅ STRUCTURE.md        — 文件管理规则（已创建）
   ✅ UPDATE_LOG.md       — 更新日志（已创建）
   ✅ docs/ + DOCS.md      — 文档归档系统（已创建）
+  ✅ .claude/.file-snapshot.json — 文件快照（已创建）
   ✅ .cursor/rules/      — Cursor 规则（已创建 / 已跳过）
   🌐 Language: {{LANGUAGE}}
 
@@ -198,6 +201,8 @@ Create `log/.gitkeep` (empty file) alongside `log/` directory so git tracks it w
   sync wiki / 同步项目         → 强制更新 PROJECT.md
   status / 项目现状            → 朗读 Wiki + handoff 摘要
   整理文件 / organize files → 扫描并整理文件结构
+  切换语言 / change language  → 全系统语言切换
+  接着上次 / continue          → 恢复上次会话上下文
 ```
 
 ---

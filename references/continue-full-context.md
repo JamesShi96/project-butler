@@ -29,6 +29,15 @@ Produce one line per session: `Session <date> — <first user msg> → <last ass
 
 ### 3. Gather broader context
 
+Read the project-butler management files (these are maintained specifically for cross-session recovery):
+
+```
+Read session-handoff.md (next pickup point, current progress)
+Read PROJECT.md (project wiki, module map, progress snapshot)
+```
+
+Run in parallel:
+
 ```bash
 git log --oneline -20 2>/dev/null
 git status --short 2>/dev/null

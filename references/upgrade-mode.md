@@ -72,7 +72,9 @@ Output shows status of each file, plus any legacy migration suggestions:
   ✅ .claude/candidates.md — 已创建（新增）
   ✅ STRUCTURE.md               — 已创建（新增）/ 已存在，跳过
   ✅ .claude/.file-snapshot.json — 已创建（新增）/ 已存在，跳过
+  ✅ UPDATE_LOG.md              — 已创建（新增）/ 已存在，跳过
   ✅ docs/ + DOCS.md      — 已创建（新增）/ 已存在，跳过
+  ✅ Coding Guidelines     — 已添加（新增）/ 已存在，跳过
   🌐 Language setting      — 已添加（默认 bilingual）/ 已存在，跳过
 
 Legacy 检测：

@@ -19,6 +19,12 @@ Two rounds of testing (static analysis + deep flow tracing) found and fixed 8 bu
 - document-archiving.md DOCS.md template lacks `{{PROJECT_NAME}}` prefix vs init Template 9 — clarified fallback vs init usage
 - Inlined Q7 document type recommendation logic in SKILL.md Step 2 (was only in document-archiving.md, loaded too late)
 
+**Round 3 — Edge cases + continue flow gaps:**
+- `continue.md` and `continue-full-context.md` don't read `session-handoff.md` or `PROJECT.md` — the very files maintained for cross-session recovery
+- Fresh init doesn't create `.claude/.file-snapshot.json` — first end session's Mode B would fail without diff baseline
+- Init Step 4 output report and trigger cheat sheet incomplete (missing `.file-snapshot.json` and 2 trigger words)
+- Upgrade Report template missing UPDATE_LOG.md and Coding Guidelines entries
+
 ---
 
 ## v1.3.0 (2026-06-01)

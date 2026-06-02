@@ -36,6 +36,13 @@ If jq fails, fall back to: `cat "$SESSION_FILE"`
 
 ### 2. Gather current context
 
+Read the project-butler management files (these are maintained specifically for cross-session recovery):
+
+```
+Read session-handoff.md (next pickup point, current progress)
+Read PROJECT.md (project wiki, module map, progress snapshot)
+```
+
 Run in parallel:
 
 ```bash
