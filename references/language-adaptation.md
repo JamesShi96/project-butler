@@ -135,7 +135,16 @@ When creating or updating files, adapt based on the configured language:
 |---------|------|---------|
 | Title | 更新日志 | Update Log |
 | Meta line | 记录项目的重大更新（AI 在 end session 时自动判断是否写入） | Records significant project updates (AI auto-evaluates at end session) |
-| Entry format | YYYY-MM-DD — {一句话标题} | YYYY-MM-DD — {one-line title} |
+| Entry format | {版本号} (YYYY-MM-DD) | {version} (YYYY-MM-DD) |
+| Level sub-heading | {Major/Minor/Patch}: {标题} | {Major/Minor/Patch}: {title} |
+| Version style: semantic | 语义版本 (v0.1.0) | Semantic versioning (v0.1.0) |
+| Version style: codename | 代号版本 (Atlas 0.1) | Codename versioning (Atlas 0.1) |
+| Version style: patch | 补丁版本 (Patch 1) | Patch versioning (Patch 1) |
+| Version style: date | 日期版本 (2026.06.1) | Date versioning (2026.06.1) |
+| Version bump: Major | 重大更新 | Major Update |
+| Version bump: Minor | 功能更新 | Minor Update |
+| Version bump: Patch | 补丁更新 | Patch Update |
+| Initial release | 初始发布 | Initial Release |
 | README link | 更新历史见 [UPDATE_LOG.md](UPDATE_LOG.md)。 | For update history, see [UPDATE_LOG.md](UPDATE_LOG.md). |
 
 ### DOCS.md

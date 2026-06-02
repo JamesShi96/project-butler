@@ -13,6 +13,8 @@ All templates use these variables:
 - `{{DATE}}` → today YYYY-MM-DD
 - `{{LANGUAGE}}` → Q6 answer (`en`, `zh`, or `bilingual`)
 - `{{DOC_TYPES}}` → Q7 answers (list of selected document type directories, e.g., `prd, tech-design, research`)
+- `{{VERSION_STYLE}}` → Q8 answer (`semantic`, `codename`, `patch`, or `date`)
+- `{{VERSION_CODE}}` → Q1 answer (project name) only if style is `codename`, otherwise unused
 
 For language adaptation: adapt headers, labels, and descriptions to the configured language. See `references/language-adaptation.md` for glossaries.
 
@@ -47,7 +49,7 @@ The most critical file — auto-loaded by Claude Code, defines all ongoing behav
 
 | Intent | AI Action |
 |--------|-----------|
-| End session / wrap up — any expression of "we're done for now" (end session, 结束会话, 收工, wrap up, done for today, etc.) | Write log + update handoff + sync Wiki + check TODO + collect constitution candidates + file reorganization + document archiving + evaluate update log + output summary in configured language |
+| End session / wrap up — any expression of "we're done for now" (end session, 结束会话, 收工, wrap up, done for today, etc.) | Write log + update handoff + sync Wiki + check TODO + collect constitution candidates + file reorganization + document archiving + evaluate update log + version bump + output summary in configured language |
 | Review constitution — any expression of "check/update rules" (review claude, 更新宪法, check rules, etc.) | Show .claude/candidates.md for confirmation one by one |
 | Sync wiki — any expression of "update project overview" (sync wiki, 同步项目, refresh overview, etc.) | Force rescan and update PROJECT.md |
 | Check status — any expression of "what's the current state" (status, 项目现状, where are we, etc.) | Read PROJECT.md + session-handoff.md summary aloud |
@@ -102,7 +104,7 @@ At session start:
    - 归档到 `docs/` 对应子目录 + 更新 `DOCS.md` 索引元数据
    - 若 DOCS.md 不存在：创建（升级兼容）
 8. **评估并写入 Update Log** → 评估本次会话是否包含重大更新（新功能、重大修改、3+ 文件变更、用户声明里程碑、重要 TODO 完成）
-   - 若是重大更新：在 `UPDATE_LOG.md` 顶部追加一条记录（标题 + 变更要点），可选创建 GitHub Release
+   - 若是重大更新：判断版本递增级别（major/minor/patch），计算新版本号，在 `UPDATE_LOG.md` 顶部追加版本化条目，可选创建 GitHub Release
    - 若不是：静默跳过
 9. **Output summary** → A brief summary of what was done this session, in the configured language
 
@@ -379,13 +381,13 @@ When user says "end session" / "结束会话" / "收工":
 6. Collect CLAUDE.md candidates → append to .claude/candidates.md
 7. File structure reorganization (incremental mode) — only process new/changed files, match against STRUCTURE.md rules, organize (create STRUCTURE.md if missing)
 7.5. Document archiving — read references/document-archiving.md, scan for document output, classify and archive to docs/, update DOCS.md index
-8. Evaluate and write update log — if significant changes, prepend entry to UPDATE_LOG.md; optionally offer GitHub Release
+8. Evaluate and write update log — if significant changes, determine version bump level (major/minor/patch), calculate new version, prepend versioned entry to UPDATE_LOG.md; optionally offer GitHub Release
 9. Output summary in configured language
 
 ## Triggers
 | Intent | Action |
 |--------|--------|
-| End session / wrap up (any language) | Write log, update handoff, sync wiki, check TODO, collect candidates, file reorganization, document archiving, evaluate update log, output summary |
+| End session / wrap up (any language) | Write log, update handoff, sync wiki, check TODO, collect candidates, file reorganization, document archiving, evaluate update log, version bump, output summary |
 | Review constitution (any language) | Show .claude/candidates.md for user to confirm each entry |
 | Sync wiki (any language) | Force rescan and update PROJECT.md |
 | Check status (any language) | Read PROJECT.md + session-handoff.md summary aloud |
@@ -483,13 +485,78 @@ When `bilingual`: English naming preferred; Chinese names acceptable for docs an
 
 ## Template 8: UPDATE_LOG.md
 
-Adapt headers using the UPDATE_LOG glossary. Content language follows the project's configured language.
+Adapt headers using the UPDATE_LOG glossary. Content language follows the project's configured language. Version style comes from Q8 answer.
 
+**Semantic:**
 ```
 # Update Log
 
 > 记录项目的重大更新（AI 在 end session 时自动判断是否写入）。
+
+<!-- version-style: semantic -->
+
+## v0.1.0 ({{DATE}})
+
+### Minor: 初始发布
+
+- 项目管理系统初始化
+
+---
 ```
+
+**Codename:**
+```
+# Update Log
+
+> 记录项目的重大更新（AI 在 end session 时自动判断是否写入）。
+
+<!-- version-style: codename -->
+<!-- version-codename: {{PROJECT_NAME}} -->
+
+## {{PROJECT_NAME}} 0.1 ({{DATE}})
+
+### Minor: 初始发布
+
+- 项目管理系统初始化
+
+---
+```
+
+**Patch:**
+```
+# Update Log
+
+> 记录项目的重大更新（AI 在 end session 时自动判断是否写入）。
+
+<!-- version-style: patch -->
+
+## Patch 1 ({{DATE}})
+
+### Minor: 初始发布
+
+- 项目管理系统初始化
+
+---
+```
+
+**Date:**
+```
+# Update Log
+
+> 记录项目的重大更新（AI 在 end session 时自动判断是否写入）。
+
+<!-- version-style: date -->
+
+## YYYY.MM.1 ({{DATE}})
+
+### Minor: 初始发布
+
+- 项目管理系统初始化
+
+---
+```
+
+Note: For date style, replace `YYYY.MM.1` with the actual current year and month, e.g., `2026.06.1`.
 
 ---
 

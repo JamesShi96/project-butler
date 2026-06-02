@@ -95,7 +95,8 @@ When triggered by "end session" / "结束会话" / "收工", execute in order:
    - Update `DOCS.md` index and metadata
    - If DOCS.md missing: create it (upgrade compatibility)
 8. **Evaluate & write update log** → read `references/update-log.md`
-   - Evaluate session significance; if significant, prepend entry to `UPDATE_LOG.md`
+   - Evaluate session significance
+   - If significant: determine bump level (major/minor/patch), calculate new version from UPDATE_LOG.md metadata, prepend versioned entry
    - Optionally offer GitHub Release creation
    - If not significant, skip silently
 9. **Output summary** → brief summary in the configured language (check CLAUDE.md Language setting)
@@ -159,12 +160,16 @@ Use AskUserQuestion to ask:
    预设选项：PRD / 技术设计 / 设计文档 / 调研 / 会议纪要 / 实验记录
    AI 根据项目描述推荐默认选项：产品类→PRD+技术设计+设计文档 / 运营类→PRD+调研+会议纪要 / 研究类→调研+实验记录 / 内容类→设计文档+调研
    用户可增减
+8. **版本命名方式** — 单选
+   预设选项：Semantic (v0.1.0) / Codename ({project name} 0.1) / Patch (Patch 1) / Date (2026.06.1)
+   默认推荐：Semantic — 适合工程项目
+   AI 根据项目类型推荐：产品/品牌类→Codename / 游戏/内容类→Patch / 日志/研究类→Date / 默认→Semantic
 
 ### Step 3: Create Files
 
 Read `references/file-templates.md` + `references/language-adaptation.md` + `references/document-archiving.md`.
 
-Create each file using templates, replacing `{{VARIABLES}}` with user answers. Apply language adaptation rules and glossary from the reference.
+Create each file using templates, replacing `{{VARIABLES}}` with user answers. For UPDATE_LOG.md, calculate the initial version based on Q8 style selection and current date (e.g., semantic → `v0.1.0`, date → `2026.06.1`). Apply language adaptation rules and glossary from the reference.
 
 Create `log/.gitkeep` (empty file) alongside `log/` directory so git tracks it when empty.
 
@@ -188,6 +193,7 @@ Create `.claude/.file-snapshot.json` with empty content: `{"lastScan":"","files"
   ✅ .claude/.file-snapshot.json — 文件快照（已创建）
   ✅ .cursor/rules/      — Cursor 规则（已创建 / 已跳过）
   🌐 Language: {{LANGUAGE}}
+  🔖 Version Style: {{VERSION_STYLE}} (starting: {{VERSION_INITIAL}})
 
 下一步：
 1. 根据项目需要，在 TODO.md 添加第一批任务

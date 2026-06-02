@@ -26,19 +26,97 @@ After writing the session log (step 1), evaluate it against these criteria. **An
 
 **When uncertain, lean toward recording.** An extra entry costs nothing; a missed milestone loses history.
 
+## Version Styles
+
+During init (Q8), the user selects a version naming style. This is stored as metadata in UPDATE_LOG.md:
+
+<!-- version-style: semantic -->
+<!-- version-codename: {prefix} -->  ← only for codename style
+
+### Style Formats
+
+| Style | Format | Starting Version | Example Progression |
+|-------|--------|-----------------|---------------------|
+| semantic | `v{M}.{m}.{p}` | `v0.1.0` | v0.1.0 → v0.1.1 → v0.2.0 → v1.0.0 |
+| codename | `{prefix} {M}.{m}` | `{prefix} 0.1` | Atlas 0.1 → Atlas 0.2 → Atlas 1.0 |
+| patch | `Patch {n}` | `Patch 1` | Patch 1 → Patch 2 → Patch 3 |
+| date | `YYYY.MM.{n}` | `{current month}.1` | 2026.06.1 → 2026.06.2 → 2026.07.1 |
+
+For codename style, `{prefix}` defaults to the project name (Q1 answer).
+
+### Bump Level Determination
+
+When a session is judged significant, determine the bump level from the session's changes:
+
+| Level | Signals |
+|-------|---------|
+| Major | Architecture changes, breaking changes, core rewrites |
+| Minor | New features, new modules, significant additions |
+| Patch | Bug fixes, doc updates, small optimizations, config changes |
+
+### Version Calculation Per Style
+
+| Style | Major | Minor | Patch |
+|-------|-------|-------|-------|
+| semantic | `v{M+1}.0.0` | `v{M}.{m+1}.0` | `v{M}.{m}.{p+1}` |
+| codename | `{prefix} {M+1}.0` | `{prefix} {M}.{m+1}` | skip |
+| patch | `Patch {n+1}` | `Patch {n+1}` | skip |
+| date | `YYYY.MM.{n+1}` | `YYYY.MM.{n+1}` | skip |
+
+**Rules:**
+- Codename and Patch styles skip patch-level changes (too minor for these formats)
+- Date style: parse month from current version. Same month → increment counter. Different month → reset to 1
+- When uncertain about level, default to Minor
+
+### Version Parsing
+
+At end session step 8, if the session is significant:
+
+1. Read `UPDATE_LOG.md`
+2. Parse `<!-- version-style: X -->` metadata
+3. If codename style, parse `<!-- version-codename: X -->`
+4. Parse current version from the first `##` heading
+5. Determine bump level from session changes
+6. Calculate new version using the table above
+7. Write the versioned entry (new format below)
+
 ## UPDATE_LOG.md Format
+
+### Version Metadata Comments (top of file, before first entry)
+
+```markdown
+<!-- version-style: semantic -->
+```
+```markdown
+<!-- version-style: codename -->
+<!-- version-codename: Atlas -->
+```
+```markdown
+<!-- version-style: patch -->
+```
+```markdown
+<!-- version-style: date -->
+```
+
+### Entry Format
 
 ```markdown
 # Update Log
 
-## YYYY-MM-DD — {one-line title}
+<!-- version-style: semantic -->
+
+## v0.2.0 (2026-06-02)
+
+### Minor: {one-line title}
 
 - {change 1}
 - {change 2}
 
 ---
 
-## YYYY-MM-DD — {one-line title}
+## v0.1.0 (2026-05-30)
+
+### Minor: {one-line title}
 
 - {change 1}
 
@@ -47,15 +125,18 @@ After writing the session log (step 1), evaluate it against these criteria. **An
 
 Rules:
 - **New entries prepend to top** (latest first)
-- **Title**: distilled from session log key actions, written in the project's configured language
+- **Version heading**: `## {version} (YYYY-MM-DD)` — version from bump logic, date from today
+- **Level sub-heading**: `### {Major|Minor|Patch}: {title}` — level from bump determination, title distilled from session log key actions
 - **Bullets**: concise, reader-facing descriptions (not internal notes — written for someone reading the project)
 - **Separator**: `---` between entries
 - **Language**: follows project CLAUDE.md Language setting (en / zh / bilingual)
 
-If the project uses version numbers (git tags, package.json version, etc.), optionally include the version:
-```markdown
-## v1.2.0 (2026-05-05) — {title}
-```
+### Legacy Format
+
+If UPDATE_LOG.md has no `<!-- version-style: X -->` metadata, it was created before the version system. Treat as pre-version and:
+1. Add the version-style metadata line at the top
+2. Continue writing new entries in the versioned format above
+3. Leave existing entries unchanged
 
 ## Writing Flow
 
@@ -65,9 +146,12 @@ When triggered at end session step 8:
 2. **Evaluate significance** using the criteria above
 3. **If significant:**
    a. Generate a title and bullet list from the session's key actions and output files
-   b. Read existing `UPDATE_LOG.md` (if any)
-   c. Prepend the new entry to the top
-   d. Write the updated file
+   b. Parse version style and current version from UPDATE_LOG.md metadata
+   c. Determine bump level (major/minor/patch) based on session changes
+   d. Calculate new version per the style's rules (see Version Calculation Per Style above)
+   e. Read existing `UPDATE_LOG.md` (if any)
+   f. Prepend the versioned entry to the top
+   g. Write the updated file
 4. **If not significant:** skip silently (no empty entries)
 5. **GitHub Release check** (if applicable, see below)
 
@@ -94,7 +178,7 @@ After writing the update log entry, check if a GitHub Release should be created:
 > "This session includes significant changes. Create a GitHub Release?"
 
 If user agrees:
-- **Tag**: if user provides a version number, use it; otherwise use `YYYY-MM-DD`
+- **Tag**: use the new version calculated from the bump logic
 - **Title**: same as the update log entry title
 - **Body**: the bullet list from the update log entry
 - **Command**: `gh release create {tag} --title "{title}" --notes "{body}"`
@@ -115,3 +199,5 @@ Title and bullet language follows the project's CLAUDE.md Language setting. Use 
 | 4 | Overwriting existing UPDATE_LOG.md content | Read existing content, prepend new entry, write full file. |
 | 5 | Creating GitHub Release without asking | Always ask the user first. Creating a release is a visible public action. |
 | 6 | Modifying README during end session | README link is only added during init. End session never touches README. |
+| 7 | Using project-butler's own version (v1.4.1) as the user project version | The user project version is independent. Read it from UPDATE_LOG.md metadata. |
+| 8 | Defaulting to Patch bump when unsure | Default to Minor. It's better to over-version than under-version. |
