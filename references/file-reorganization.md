@@ -193,7 +193,7 @@ Wait for explicit user confirmation before proceeding to Phase 4.
 **Safety checks before each file move:**
 - Cross-reference check: grep for old path in other files, update if found
 - Name collision check: does target already have a same-name file? If yes → flag, do NOT overwrite
-- System file check: never move CLAUDE.md, PROJECT.md, STRUCTURE.md, session-handoff.md, TODO.md, UPDATE_LOG.md
+- System file check: never move CLAUDE.md, PROJECT.md, STRUCTURE.md, session-handoff.md, TODO.md, UPDATE_LOG.md, DOCS.md
 
 **Report:**
 - Files moved (with before → after)
@@ -264,7 +264,7 @@ Wait for explicit user confirmation before proceeding to Phase 4.
 
 ## Important Constraints
 
-- **Never move management files**: CLAUDE.md, PROJECT.md, STRUCTURE.md, session-handoff.md, TODO.md stay at project root
+- **Never move management files**: CLAUDE.md, PROJECT.md, STRUCTURE.md, session-handoff.md, TODO.md, UPDATE_LOG.md, DOCS.md stay at project root
 - **Never move files in exclusion list**: .git/, node_modules/, docs/, etc.
 - **Never move or rename files in docs/**: Document files are managed by DOCS.md and the Document Archiving Protocol, not by file reorganization
 - **Preserve git history**: use `git mv` when in a git repo, not bare `mv`

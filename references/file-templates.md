@@ -363,7 +363,7 @@ description: Apply at session start and when user says end session / review clau
 # {{PROJECT_NAME}} — Project System Rules
 
 ## Session Start
-1. Read PROJECT.md and session-handoff.md at the start of every conversation.
+1. Read PROJECT.md and session-handoff.md at the start of every conversation. Check the Language setting in CLAUDE.md to determine output language.
 2. Read logs (bounded): highest-level summaries in log/summaries/ + all unarchived raw logs in log/. Skip if log/ doesn't exist.
 
 ## End Session Protocol

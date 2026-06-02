@@ -4,7 +4,7 @@
 
 ### Bug Fixes: Cross-Reference + Flow Consistency
 
-Four rounds of testing (static analysis + deep flow tracing + edge cases + template consistency) found and fixed 15 bugs:
+Five rounds of testing (static analysis + deep flow tracing + edge cases + template consistency + path tracing) found and fixed 18 bugs:
 
 **Round 1 — Cross-reference consistency:**
 - STRUCTURE.md template missing `docs/` in exclusion list (file reorganization could misplace documents)
@@ -29,6 +29,11 @@ Four rounds of testing (static analysis + deep flow tracing + edge cases + templ
 - Document archiving Step 1 exclusion list missing `DOCS.md` — could try to archive the index file itself
 - CLAUDE.md Template 1 Session Start Protocol only reads PROJECT.md, not session-handoff.md (Cursor template correctly reads both)
 - Cursor Template 6 description missing "change language" trigger word
+
+**Round 5 — Path tracing + system file completeness:**
+- file-reorganization.md Phase 4 safety checks + Important Constraints missing DOCS.md (could be moved during file reorganization)
+- language-change.md step 3 missing UPDATE_LOG.md (language switch leaves "更新日志" untranslated)
+- Cursor Template 6 Session Start missing language check instruction (Cursor users bypass language setting)
 
 ---
 
