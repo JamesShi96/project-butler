@@ -1,6 +1,19 @@
 # Examples
 
-This page shows how project-butler feels in practice.
+This page shows the product flow first, then the internal details.
+
+## Daily Use
+
+Most users only need this loop:
+
+```text
+/project-butler   # set up project memory once
+end session       # save progress when stopping
+continue          # resume next time
+status            # check the current project state
+```
+
+That loop keeps the AI assistant aligned without requiring the user to understand the underlying files.
 
 ## Example 1: First-Time Setup
 
@@ -10,37 +23,50 @@ User:
 /project-butler
 ```
 
-Assistant asks:
+Assistant asks for the required project basics and offers recommended defaults:
 
 ```text
 Project name?
 One-sentence description?
 Current stage?
-GitHub repository?
-Create Cursor rules?
-Language?
+
+Press Enter to use recommended defaults:
+- Language: bilingual
+- Cursor rules: yes
+- Document types: PRD, Tech Design, Research
+- Version style: semantic
+- GitHub repository: optional
 ```
 
-Generated files:
+Result:
+
+```text
+Project memory is ready.
+
+Daily commands:
+- end session — save progress
+- continue — resume next time
+- status — check current state
+
+Advanced:
+- review claude — approve long-term rules when needed
+```
+
+Generated files include:
 
 ```text
 CLAUDE.md
 PROJECT.md
 STRUCTURE.md
 UPDATE_LOG.md
+DOCS.md
 session-handoff.md
 TODO.md
+docs/
 log/.gitkeep
 .claude/candidates.md
 .claude/.file-snapshot.json
 .cursor/rules/project-system.mdc   # if selected
-```
-
-Result:
-
-```text
-The project now has a durable memory stack.
-Future sessions can read the current state, rules, tasks, and handoff notes.
 ```
 
 ## Example 2: End a Work Session
@@ -51,46 +77,25 @@ User:
 end session
 ```
 
-Assistant does:
+Assistant responds with a result-focused summary:
 
-1. Writes a session log under `log/`.
-2. Updates `session-handoff.md`.
-3. Syncs `PROJECT.md` if the project state changed.
-4. Updates completed items in `TODO.md`.
-5. Adds candidate rules to `.claude/candidates.md`.
-6. Runs incremental file organization.
-7. Evaluates whether the work deserves an `UPDATE_LOG.md` entry.
-8. Offers GitHub Release creation for significant milestones.
+```text
+Session saved.
 
-Example generated session log:
+Updated:
+- Handoff refreshed
+- TODO updated: 3 done, 2 active
+- Project wiki synced
+- Documents archived: 1
+- Update log: v1.5.0 added
 
-```markdown
-# Session 2026-05-05 - Authentication Flow
-
-## Session Goal
-Ship login, refresh token, and logout endpoints.
-
-## Key Actions (Chronological)
-- Added JWT refresh token model.
-- Created login/register/logout routes.
-- Wrote integration tests.
-
-## Decisions & Rationale
-- Store refresh tokens hashed to reduce blast radius.
-- Keep access token TTL short.
-
-## Output Files
-- src/auth/routes.ts
-- src/auth/tokens.ts
-- tests/auth.test.ts
-
-## Unfinished Items / Next Session Pickup
-- Add password reset flow.
-- Document auth environment variables.
-
-## CLAUDE.md Candidates (if any)
-- Always hash long-lived tokens before storing them.
+Next:
+- Add password reset flow
+- Document auth environment variables
+- Review 1 pending rule candidate
 ```
+
+Internally, project-butler writes the session log, refreshes handoff/project/TODO state, organizes new files, archives documents, and records milestone updates when needed.
 
 ## Example 3: Continue the Next Day
 
@@ -100,25 +105,48 @@ User:
 continue
 ```
 
-Assistant reads:
-
-- latest session log,
-- `session-handoff.md`,
-- `PROJECT.md`,
-- active TODOs,
-- relevant project rules.
+Assistant reads the latest session context, handoff, project wiki, active TODOs, update log, document index, and relevant rules.
 
 Assistant responds with:
 
 ```text
 Last session completed login/register/logout and auth tests.
-Remaining work: password reset flow and auth env var docs.
+Remaining work: password reset flow and auth environment docs.
 Recommended next step: implement password reset token generation.
 ```
 
 The user can continue without re-explaining the project.
 
-## Example 4: Full Context Recovery
+## Example 4: Check Status
+
+User:
+
+```text
+status
+```
+
+Assistant responds like a compact project dashboard:
+
+```text
+Current Status
+
+Project:
+- Stage: MVP build
+- Focus: authentication flow and project memory stability
+
+Active Work:
+- Add password reset flow
+- Document auth environment variables
+- Review pending rule candidates
+
+Recent Change:
+- v1.5.0 added versioned update log support
+
+Next Best Step:
+- Implement password reset token generation
+```
+
+## Example 5: Full Context Recovery
 
 User:
 
@@ -126,18 +154,19 @@ User:
 continue full context
 ```
 
-Assistant reads:
+Assistant rebuilds the broader project trajectory from:
 
-- latest session in detail,
+- latest session details,
 - historical session summaries,
 - current project wiki,
 - update log,
+- document index,
 - active TODOs,
 - project rules.
 
 Use this when returning after a long break or when switching assistants.
 
-## Example 5: Review Project Rules
+## Example 6: Review Project Rules
 
 During normal work, project-butler collects candidate rules:
 
@@ -164,7 +193,7 @@ Accept, reject, or rewrite?
 
 Only accepted rules are promoted into the project constitution.
 
-## Example 6: Use with Multiple Assistants
+## Example 7: Use with Multiple Assistants
 
 1. Initialize with Claude Code.
 2. End the session and generate `session-handoff.md`.
@@ -177,6 +206,7 @@ session-handoff.md
 TODO.md
 STRUCTURE.md
 UPDATE_LOG.md
+DOCS.md
 ```
 
 The assistant now has the same project state, even though it is a different tool.

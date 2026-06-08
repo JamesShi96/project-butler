@@ -1,5 +1,71 @@
 # Update Log
 
+<!-- version-style: semantic -->
+
+## v1.5.3 (2026-06-08)
+
+### Patch: Project Profile System PRD Checkpoint
+
+- Added Project Butler's main PRD in `docs/prd/main.md`.
+- Added the Project Profile System feature PRD in `docs/prd/features/project-profile-system.md`.
+- Promoted the profile-system design from proposal discussion into PRD source-of-truth documents.
+- Marked `docs/project-profiles-module-plan.md` as a superseded proposal.
+- Confirmed Foundation Setup, profile JSON state, pending lifecycle, Scoped Full Close, bounded Foundation Repair, Review Queue Escalation, and Stale-Document Detection rules.
+- Clarified that Full Close should confirm scope boundaries and high-risk semantic changes, not every safe patch-level update.
+- Kept runtime implementation pending; `SKILL.md` has not yet been upgraded to execute the Profile System.
+
+---
+
+## v1.5.2 (2026-06-04)
+
+### Patch: Project Profile System Proposal
+
+- Added a proposal-only module plan for Project Profile System in `docs/project-profiles-module-plan.md`.
+- Defined profile composition as Primary Profile + Optional Overlays + Maintenance Level.
+- Added maintenance levels for Lite, Standard, and Deep profile sync to balance token cost and document consistency.
+- Added end-session quality controls, update depth rules, evidence requirements, and initialization questions for future discussion.
+- Kept the proposal disconnected from runtime behavior; no implementation wiring was added.
+
+---
+
+## v1.5.1 (2026-06-03)
+
+### Patch: Product Noise Reduction
+
+- Reframed the public product message around four user-facing actions: `/project-butler`, `end session`, `continue`, and `status`.
+- Split commands into primary and advanced groups in README and generated project rules.
+- Moved the 7-component memory stack explanation behind Internals / How It Works instead of leading with implementation details.
+- Reworked examples around Daily Use, result-focused `end session` summaries, and dashboard-style `status` output.
+- Updated initialization guidance to present required project basics first and recommended defaults second.
+- Updated generated CLAUDE and Cursor templates so new projects inherit the lower-noise product workflow.
+
+---
+
+## v1.5.0 (2026-06-03)
+
+### Versioned Update Log System
+
+- Added setup-time version style selection: Semantic (`v0.1.0`), Codename (`Project Name 0.1`), Patch (`Patch 1`), and Date (`2026.06.1`).
+- Updated the update-log protocol to calculate the next milestone version from the selected style instead of assuming semantic versioning.
+- Clarified that user project versions are independent from project-butler's own release version.
+- Updated README, Chinese README, examples, compatibility docs, continue protocols, skill metadata, generated CLAUDE template, Cursor template, and upgrade rules so public documentation and execution guidance match the current memory stack: `DOCS.md`, `docs/`, document archiving, full context recovery, and version style selection.
+- Corrected generated project templates to describe the current 7-component system: Constitution, Wiki, Structure, Update Log, Docs, Log, and TODO.
+- Hardened upgrade rules so legacy 4/5/6-component projects upgrade directly to the current 7-component model, and removed local `references/` paths from generated user-project instructions.
+- Adjusted the full-context recovery protocol so it reuses continue's reading steps without emitting the shorter continue summary before the full overview.
+- Replaced brittle internal step-number references in document archiving, update-log, and upgrade guidance with semantic phase ordering, and normalized generated end-session flows to continuous 1-10 numbering.
+- Made generated CLAUDE and Cursor templates more self-contained by replacing external protocol-name references with concise executable behavior.
+- Added explicit main-skill routing for review claude, sync wiki, status, and wrap-up/end-session synonyms so documented triggers are executable.
+- Aligned status trigger guidance across the main skill, generated CLAUDE template, and Cursor rules to include TODO and latest update-log context.
+- Clarified CLAUDE.md promotion rules so review claude can write user-confirmed candidates without contradicting the no-automatic-promotion safety rule.
+- Removed remaining internal glossary/protocol references from generated user-project templates and aligned end-session wording with wrap-up synonyms.
+- Clarified upgrade safety language: existing files are never replaced wholesale, but user-confirmed targeted patches to system sections are allowed.
+- Clarified Cursor upgrade behavior so existing custom project rules are preserved while missing project-butler sections can be offered as targeted patches.
+- Made the generated `DOCS.md` template build sections directly from selected document types instead of relying on deleting unselected sample sections.
+- Aligned public status, compatibility, and example docs with the expanded status/context and log-compaction behavior.
+- Reworded internal reference guidance so language change, document archiving, update-log, and file-reorganization references describe executable workflows rather than relying on repository-local names.
+
+---
+
 ## v1.4.1 (2026-06-02)
 
 ### Bug Fixes: Cross-Reference + Flow Consistency

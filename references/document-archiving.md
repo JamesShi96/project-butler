@@ -1,6 +1,6 @@
 # Document Archiving Protocol
 
-> Loaded during: end session (step 7.5), initialization (for template creation).
+> Loaded during: end session document archiving, initialization (for template creation).
 
 ## Document Types
 
@@ -17,7 +17,7 @@ Six preset types. Additional types can be created organically.
 
 ## End Session Archiving Flow
 
-**Trigger:** Embedded in end session step 7.5 (after file reorganization, before update log).
+**Trigger:** Embedded in end session after file reorganization and before update-log evaluation.
 
 **Prerequisites:**
 - Read `DOCS.md` if it exists (for current document index)
@@ -74,7 +74,7 @@ For each classified document:
 
 **After all documents are archived:**
 - Update `.claude/.file-snapshot.json`: update paths for moved files, add new files in docs/
-- Note: step 7 (Mode B) already updated the snapshot earlier this session, so this step only needs to update entries for files that document archiving moved again
+- Note: file reorganization Mode B may already have updated the snapshot earlier this session, so this step only needs to update entries for files that document archiving moved again
 
 ### Step 4: Update DOCS.md
 
@@ -102,7 +102,7 @@ If the session creates a new document type not in the preset six:
 
 ## DOCS.md Template (for end session fallback)
 
-This template is used when DOCS.md is created during end session (step 7.5 upgrade compatibility). For initialization, use the richer Template 9 in `references/file-templates.md` (which includes `{{PROJECT_NAME}}` prefix and main.md placeholders).
+This fallback template is used only when DOCS.md must be created during end session for upgrade compatibility. During initialization, create the richer project-prefixed DOCS.md template with selected document-type sections and optional main.md placeholders.
 
 Adapt headers to language setting. When `en`: "Document Index", section names in English.
 

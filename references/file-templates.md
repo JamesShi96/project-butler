@@ -13,8 +13,9 @@ All templates use these variables:
 - `{{DATE}}` → today YYYY-MM-DD
 - `{{LANGUAGE}}` → Q6 answer (`en`, `zh`, or `bilingual`)
 - `{{DOC_TYPES}}` → Q7 answers (list of selected document type directories, e.g., `prd, tech-design, research`)
+- `{{DOC_SECTIONS}}` → DOCS.md sections generated from Q7 selected document types
 - `{{VERSION_STYLE}}` → Q8 answer (`semantic`, `codename`, `patch`, or `date`)
-- `{{VERSION_CODE}}` → Q1 answer (project name) only if style is `codename`, otherwise unused
+- `{{VERSION_INITIAL}}` → initial version calculated from Q8 (`v0.1.0`, `<project name> 0.1`, `Patch 1`, or `{YYYY.MM}.1`)
 
 For language adaptation: adapt headers, labels, and descriptions to the configured language. See `references/language-adaptation.md` for glossaries.
 
@@ -41,24 +42,35 @@ The most critical file — auto-loaded by Claude Code, defines all ongoing behav
 
 ## 项目管理系统
 
-本项目使用 6 组件管理系统。
+日常只需要记住三个动作：
+
+- `end session` — 保存进度和下一步
+- `continue` — 下次接着干
+- `status` — 查看项目现状
 
 - **Log Compaction Threshold:** 10（每积累 10 个日志文件压缩为 1 个 summary）
 
-### 触发词
+### 主要触发词
 
 | Intent | AI Action |
 |--------|-----------|
-| End session / wrap up — any expression of "we're done for now" (end session, 结束会话, 收工, wrap up, done for today, etc.) | Write log + update handoff + sync Wiki + check TODO + collect constitution candidates + file reorganization + document archiving + evaluate update log + version bump + output summary in configured language |
+| End session / wrap up — any expression of "we're done for now" (end session, 结束会话, 收工, wrap up, done for today, etc.) | Save progress, refresh next steps, and record important changes |
+| Continue — any expression of "pick up where we left off" (接着上次, continue, 上次做到哪了, etc.) | Read last session log + session-handoff.md + PROJECT.md + TODO.md + UPDATE_LOG.md + DOCS.md + rules to recover context |
+| Check status — any expression of "what's the current state" (status, 项目现状, where are we, etc.) | Show compact dashboard: Project, Active Work, Recent Change, Next Best Step |
+
+### 高级触发词
+
+| Intent | AI Action |
+|--------|-----------|
 | Review constitution — any expression of "check/update rules" (review claude, 更新宪法, check rules, etc.) | Show .claude/candidates.md for confirmation one by one |
 | Sync wiki — any expression of "update project overview" (sync wiki, 同步项目, refresh overview, etc.) | Force rescan and update PROJECT.md |
-| Check status — any expression of "what's the current state" (status, 项目现状, where are we, etc.) | Read PROJECT.md + session-handoff.md summary aloud |
 | Organize files — any expression of "clean up files" (organize files, 整理文件, clean up, sort files, etc.) | Scan project files, organize per STRUCTURE.md rules |
-| Change language — any expression of "switch language" (切换语言, change language, switch to English, 换成中文, etc.) | Execute Language Change Protocol |
-| Continue — any expression of "pick up where we left off" (接着上次, continue, 上次做到哪了, etc.) | Read last session log + session-handoff.md + PROJECT.md to recover context |
-| Continue full context — any expression of "full project review" (全面回顾, full context, 项目全景, etc.) | Full project trajectory recovery across all sessions |
+| Change language — any expression of "switch language" (切换语言, change language, switch to English, 换成中文, etc.) | Update Language setting, rewrite management files in the new language, optionally rename user files per STRUCTURE.md |
+| Continue full context — any expression of "full project review" (全面回顾, full context, 项目全景, etc.) | Full project trajectory recovery across all sessions + management files |
 
-### 文件职责
+### 内部机制：文件职责
+
+本项目使用 7 组件管理系统。用户日常不需要手动维护这些文件；AI 按触发词自动更新。
 
 | File | Who writes | When |
 |------|-----------|------|
@@ -77,7 +89,7 @@ The most critical file — auto-loaded by Claude Code, defines all ongoing behav
 
 At session start:
 
-1. Read `PROJECT.md` for project overview and `session-handoff.md` for current progress / next steps. Check the Language setting in CLAUDE.md to determine output language.
+1. Read `PROJECT.md` for project overview, `session-handoff.md` for current progress / next steps, `TODO.md` for active tasks, `UPDATE_LOG.md` for milestone history, and `DOCS.md` for document index if present. Check the Language setting in CLAUDE.md to determine output language.
 2. **Read logs (bounded):**
    - Find the highest level with summaries in `log/summaries/` — read all summaries at that level.
    - Read all unarchived raw logs in `log/` (exclude `summaries/` and `archive/`).
@@ -86,11 +98,11 @@ At session start:
 
 ### Session End Protocol
 
-当用户说 "end session" / "结束会话" / "收工" 时，按顺序执行：
+当用户表达本次工作结束（如 "end session" / "结束会话" / "收工" / "wrap up" / "done for today"）时，按顺序执行：
 
 1. **写会话日志** → `log/session-YYYY-MM-DD-{主题slug}.md`
    - 同日多次会话用 slug 区分（如 `session-2026-04-21-prd-draft.md`）
-2. **Log Compaction** → 检查未归档 raw logs 数量，若 ≥ threshold 则执行压缩（见 Log Compaction Protocol）
+2. **Log Compaction** → 检查未归档 raw logs 数量；若 ≥ threshold，则生成 `log/summaries/L1-{seq}.md` 并把原始日志归档到 `log/archive/raw-{seq}/`（不删除）
 3. **更新 session-handoff.md** → 刷新"当前进度 / 下一步"
 4. **更新 PROJECT.md** → 如有结构/模块状态变化，同步更新
 5. **更新 TODO.md** → 标记本次已完成的任务
@@ -99,18 +111,36 @@ At session start:
    - 若 STRUCTURE.md 不存在：先建立规则表（深度模式），再整理
    - 若 STRUCTURE.md 已存在：只匹配新增文件，不重读已有文件
    - 更新 `.claude/.file-snapshot.json`
-7.5. **文档归档** → read `references/document-archiving.md`，扫描本次会话产出的文档
+8. **文档归档** → 扫描本次会话产出的新增/变更文档，按类型归档并更新文档索引
    - 识别并分类文档（PRD / 技术设计 / 设计文档 / 调研 / 会议纪要 / 实验记录）
    - 归档到 `docs/` 对应子目录 + 更新 `DOCS.md` 索引元数据
    - 若 DOCS.md 不存在：创建（升级兼容）
-8. **评估并写入 Update Log** → 评估本次会话是否包含重大更新（新功能、重大修改、3+ 文件变更、用户声明里程碑、重要 TODO 完成）
+9. **评估并写入 Update Log** → 评估本次会话是否包含重大更新（新功能、重大修改、3+ 文件变更、用户声明里程碑、重要 TODO 完成）
    - 若是重大更新：判断版本递增级别（major/minor/patch），计算新版本号，在 `UPDATE_LOG.md` 顶部追加版本化条目，可选创建 GitHub Release
    - 若不是：静默跳过
-9. **Output summary** → A brief summary of what was done this session, in the configured language
+10. **Output summary** → result-focused summary in the configured language
+
+### Output Style
+
+After `end session`, summarize outcomes instead of listing internal protocol steps:
+
+Shape:
+- `Session saved.`
+- `Updated:` include only applicable outcomes: handoff, TODO counts, wiki sync, archived documents, update-log version or skipped
+- `Next:` list the next concrete actions
+
+Omit lines that do not apply. For `status`, answer as a compact dashboard:
+
+Shape:
+- `Current Status`
+- `Project:` stage and current focus
+- `Active Work:` active TODOs or current work
+- `Recent Change:` latest update-log entry or "No milestone update yet"
+- `Next Best Step:` one recommended next step
 
 ### Session Log Format
 
-Session log headers adapt to the configured language. Use the Session Log entries from the Key Terms Glossary.
+Session log headers adapt to the configured language. Use the headings below, translated to the configured language when needed.
 
 写入 `log/` 的每条日志遵循以下格式：
 
@@ -133,7 +163,7 @@ AI 在工作过程中，遇到以下情况时自动追加条目到 `.claude/cand
 - 涉及命名规范、文件分层、协作流程的决定
 - 涉及技术栈选择、架构约束的决定
 
-**绝对不要直接修改 CLAUDE.md。** 所有候选条目必须经用户 review 后才写入。
+**绝对不要自动把候选条目提升到 CLAUDE.md。** 所有候选条目必须经用户 review 明确确认后才写入。
 
 ### TODO Format
 
@@ -302,7 +332,7 @@ Adapt headers using the session-handoff.md glossary.
 ## 关键设计决策
 | # | 决策 | 理由 | 日期 |
 |---|------|------|------|
-| 1 | 采用 6 组件管理系统 | Log + Wiki + Structure + Constitution + TODO + Docs | {{DATE}} |
+| 1 | 采用 7 组件管理系统 | Constitution + Wiki + Structure + Update Log + Docs + Log + TODO | {{DATE}} |
 
 ## 迭代历史
 | 版本 | 日期 | 变更 |
@@ -362,42 +392,74 @@ Only create if user answered yes to Q5. Mirror the language setting from CLAUDE.
 
 ```
 ---
-description: Apply at session start and when user says end session / review claude / sync wiki / status / organize files / change language. Defines the project memory stack behavior.
+description: Apply at session start and when user says end session / review claude / sync wiki / status / organize files / change language / continue / continue full context. Defines project memory behavior.
 ---
 
 # {{PROJECT_NAME}} — Project System Rules
 
+## Daily Workflow
+Users only need these daily commands:
+
+- `end session` — save progress and next steps
+- `continue` — resume next time
+- `status` — check current project state
+
 ## Session Start
-1. Read PROJECT.md and session-handoff.md at the start of every conversation. Check the Language setting in CLAUDE.md to determine output language.
+1. Read PROJECT.md, session-handoff.md, TODO.md, UPDATE_LOG.md, and DOCS.md if present at the start of every conversation. Check the Language setting in CLAUDE.md to determine output language.
 2. Read logs (bounded): highest-level summaries in log/summaries/ + all unarchived raw logs in log/. Skip if log/ doesn't exist.
 
 ## End Session Protocol
-When user says "end session" / "结束会话" / "收工":
+When user expresses that the work session is done, such as "end session" / "结束会话" / "收工" / "wrap up" / "done for today":
 1. Write log/session-YYYY-MM-DD-{slug}.md (summary, decisions, outputs, next steps)
-2. Log Compaction — compact unarchived raw logs if count ≥ threshold (see Log Compaction Protocol)
+2. Log Compaction — if unarchived raw log count ≥ threshold, write `log/summaries/L1-{seq}.md` and archive raw logs under `log/archive/raw-{seq}/` without deleting history
 3. Update session-handoff.md (refresh progress, next steps)
 4. Update PROJECT.md if structure or module status changed
 5. Update TODO.md (mark completed tasks)
 6. Collect CLAUDE.md candidates → append to .claude/candidates.md
 7. File structure reorganization (incremental mode) — only process new/changed files, match against STRUCTURE.md rules, organize (create STRUCTURE.md if missing)
-7.5. Document archiving — read references/document-archiving.md, scan for document output, classify and archive to docs/, update DOCS.md index
-8. Evaluate and write update log — if significant changes, determine version bump level (major/minor/patch), calculate new version, prepend versioned entry to UPDATE_LOG.md; optionally offer GitHub Release
-9. Output summary in configured language
+8. Document archiving — scan new/changed document output, classify by type, archive under docs/, update DOCS.md index
+9. Evaluate and write update log — if significant changes, determine version bump level (major/minor/patch), calculate new version, prepend versioned entry to UPDATE_LOG.md; optionally offer GitHub Release
+10. Output result-focused summary in configured language
 
-## Triggers
+## Output Style
+After `end session`, summarize outcomes instead of listing internal protocol steps:
+
+Shape:
+- `Session saved.`
+- `Updated:` include only applicable outcomes: handoff, TODO counts, wiki sync, archived documents, update-log version or skipped
+- `Next:` list the next concrete actions
+
+Omit lines that do not apply. For `status`, answer as a compact dashboard:
+
+Shape:
+- `Current Status`
+- `Project:` stage and current focus
+- `Active Work:` active TODOs or current work
+- `Recent Change:` latest update-log entry or "No milestone update yet"
+- `Next Best Step:` one recommended next step
+
+## Primary Triggers
 | Intent | Action |
 |--------|--------|
-| End session / wrap up (any language) | Write log, update handoff, sync wiki, check TODO, collect candidates, file reorganization, document archiving, evaluate update log, version bump, output summary |
+| End session / wrap up (any language) | Save progress, refresh next steps, and record important changes |
+| Continue (any language) | Read last session log + management files to recover the last working context |
+| Check status (any language) | Show compact dashboard: Project, Active Work, Recent Change, Next Best Step |
+
+## Advanced Triggers
+| Intent | Action |
+|--------|--------|
 | Review constitution (any language) | Show .claude/candidates.md for user to confirm each entry |
 | Sync wiki (any language) | Force rescan and update PROJECT.md |
-| Check status (any language) | Read PROJECT.md + session-handoff.md summary aloud |
 | Organize files (any language) | Scan files and reorganize according to STRUCTURE.md rules |
-| Change language (any language) | Execute Language Change Protocol |
+| Change language (any language) | Update language setting, rewrite management files in the new language, optionally rename user files per STRUCTURE.md |
+| Continue full context (any language) | Recover full project trajectory from session history + management files |
 
-## File Roles
+## Internals: File Roles
+This project uses a 7-component memory stack internally. Users should not need to manage these files by hand.
+
 | File | Who writes | When |
 |------|-----------|------|
-| CLAUDE.md | Human only | review claude trigger |
+| CLAUDE.md | Human-confirmed | review claude trigger |
 | PROJECT.md | AI auto | end session + structure changes |
 | session-handoff.md | AI auto | end session |
 | TODO.md | AI + Human | anytime |
@@ -562,27 +624,14 @@ Note: For date style, replace `YYYY.MM.1` with the actual current year and month
 
 ## Template 9: DOCS.md
 
-Adapt headers using the DOCS.md glossary in `references/language-adaptation.md`. Only include sections for document types selected during initialization (Q7).
+Adapt headers using the DOCS.md glossary in `references/language-adaptation.md`. Generate sections only for document types selected during initialization (Q7); do not create sections for unselected types.
 
 ```
 # {{PROJECT_NAME}} — 文档索引
 
 > 最后更新：{{DATE}}
 
-## PRD
-| 文档 | 标题 | 状态 | 最后更新 | Sub 文档 |
-|------|------|------|----------|----------|
-| [docs/prd/main.md](docs/prd/main.md) | 产品需求总览 | 草稿 | {{DATE}} | - |
-
-## 技术设计
-| 文档 | 标题 | 状态 | 最后更新 | Sub 文档 |
-|------|------|------|----------|----------|
-| [docs/tech-design/main.md](docs/tech-design/main.md) | 技术设计总览 | 草稿 | {{DATE}} | - |
-
-## 调研
-| 文档 | 标题 | 状态 | 最后更新 | Sub 文档 |
-|------|------|------|----------|----------|
-| （暂无） | | | | |
+{{DOC_SECTIONS}}
 
 ## 整理历史
 | 日期 | 操作 | 文档数 |
@@ -590,7 +639,21 @@ Adapt headers using the DOCS.md glossary in `references/language-adaptation.md`.
 | {{DATE}} | 初始化 | 0 |
 ```
 
-**Only include sections for types selected by user.** Remove unselected type sections entirely. For each selected type, create a placeholder row with main.md if the type is PRD or 技术设计 (these commonly start with an overview doc). For other types, use the "（暂无）" placeholder.
+Build `{{DOC_SECTIONS}}` from Q7 using this mapping:
+
+- PRD: directory `docs/prd/`, title `## PRD`, initial row `[docs/prd/main.md](docs/prd/main.md) | 产品需求总览 | 草稿 | {{DATE}} | -`
+- 技术设计: directory `docs/tech-design/`, title `## 技术设计`, initial row `[docs/tech-design/main.md](docs/tech-design/main.md) | 技术设计总览 | 草稿 | {{DATE}} | -`
+- 设计文档: directory `docs/design/`, title `## 设计文档`, initial row `（暂无） | | | | |`
+- 调研: directory `docs/research/`, title `## 调研`, initial row `（暂无） | | | | |`
+- 会议纪要: directory `docs/meeting-notes/`, title `## 会议纪要`, initial row `（暂无） | | | | |`
+- 实验记录: directory `docs/experiments/`, title `## 实验记录`, initial row `（暂无） | | | | |`
+
+Each generated section uses this table header:
+
+```
+| 文档 | 标题 | 状态 | 最后更新 | Sub 文档 |
+|------|------|------|----------|----------|
+```
 
 **Directory creation:** For each selected type, create `docs/{type}/` with a `.gitkeep` file. For types with a main.md placeholder, create the placeholder file:
 

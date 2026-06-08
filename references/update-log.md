@@ -1,6 +1,6 @@
 # Update Log Protocol
 
-> Loaded during: end session (step 8, between document archiving and output summary).
+> Loaded during: end session, after document archiving and before output summary.
 
 ## Purpose
 
@@ -70,7 +70,7 @@ When a session is judged significant, determine the bump level from the session'
 
 ### Version Parsing
 
-At end session step 8, if the session is significant:
+At the update-log evaluation stage of end session, if the session is significant:
 
 1. Read `UPDATE_LOG.md`
 2. Parse `<!-- version-style: X -->` metadata
@@ -140,7 +140,7 @@ If UPDATE_LOG.md has no `<!-- version-style: X -->` metadata, it was created bef
 
 ## Writing Flow
 
-When triggered at end session step 8:
+When triggered during end session update-log evaluation:
 
 1. **Read the session log** just written in step 1
 2. **Evaluate significance** using the criteria above
@@ -187,7 +187,7 @@ If `gh` is not available or no remote exists, skip silently.
 
 ## Language Adaptation
 
-Title and bullet language follows the project's CLAUDE.md Language setting. Use the UPDATE_LOG glossary from `references/language-adaptation.md`.
+Title and bullet language follows the project's CLAUDE.md Language setting. Use normal localized wording for update-log headings, bump labels, and status text.
 
 ## Common Mistakes
 
@@ -199,5 +199,5 @@ Title and bullet language follows the project's CLAUDE.md Language setting. Use 
 | 4 | Overwriting existing UPDATE_LOG.md content | Read existing content, prepend new entry, write full file. |
 | 5 | Creating GitHub Release without asking | Always ask the user first. Creating a release is a visible public action. |
 | 6 | Modifying README during end session | README link is only added during init. End session never touches README. |
-| 7 | Using project-butler's own version (v1.4.1) as the user project version | The user project version is independent. Read it from UPDATE_LOG.md metadata. |
+| 7 | Using project-butler's own version (v1.5.0) as the user project version | The user project version is independent. Read it from UPDATE_LOG.md metadata. |
 | 8 | Defaulting to Patch bump when unsure | Default to Minor. It's better to over-version than under-version. |

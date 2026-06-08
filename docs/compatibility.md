@@ -1,6 +1,6 @@
 # Tool Compatibility
 
-project-butler is a project memory system first and a Claude Code skill second.
+project-butler helps AI coding assistants remember a project between sessions. It is a product workflow first and a Claude Code skill second.
 
 The native entry point is Claude Code today, but the output is intentionally file-based: Markdown files that live in your project and can be read by Claude Code, Cursor, Codex, or any other AI coding assistant.
 
@@ -8,10 +8,10 @@ The native entry point is Claude Code today, but the output is intentionally fil
 
 | Tool | Integration level | What works |
 |---|---|---|
-| Claude Code | Native skill | Full `/project-butler` flow, natural-language triggers, session logging, continuation, file organization, language switching, and update log handling. |
+| Claude Code | Native skill | Full `/project-butler` flow, natural-language triggers, session logging, continuation, file organization, document archiving, language switching, versioned update logs, rule review, wiki sync, and status summaries. |
 | Cursor | Project rules | project-butler can generate `.cursor/rules/project-system.mdc`, which points Cursor at the shared memory files and mirrors the main workflow triggers. |
-| Codex | Shared memory files | Codex can read `PROJECT.md`, `TODO.md`, `session-handoff.md`, `UPDATE_LOG.md`, `STRUCTURE.md`, and project rules as context. |
-| Other AI assistants | File-based | Any assistant that can inspect project Markdown files can use the generated memory stack. |
+| Codex | Shared memory files | Codex can read `PROJECT.md`, `TODO.md`, `session-handoff.md`, `UPDATE_LOG.md`, `STRUCTURE.md`, `DOCS.md`, and project rules as context. |
+| Other AI assistants | File-based | Any assistant that can inspect project Markdown files can use the generated project memory. |
 
 ## Current Native Entry Point
 
@@ -27,7 +27,7 @@ Then open a project and run:
 /project-butler
 ```
 
-This creates the memory stack in the project itself. After that, other tools can read those files even if they do not run project-butler natively.
+This creates project memory files in the project itself. After that, other tools can read those files even if they do not run project-butler natively.
 
 ## How Cursor Fits
 
@@ -44,6 +44,7 @@ That file tells Cursor to use the same project memory files:
 - `TODO.md`
 - `STRUCTURE.md`
 - `UPDATE_LOG.md`
+- `DOCS.md`
 - project rules / constitution
 
 Cursor does not need a separate database or memory store.
@@ -57,6 +58,7 @@ Codex support is file-based:
 - `TODO.md` gives Codex the execution plan.
 - `STRUCTURE.md` describes file organization rules.
 - `UPDATE_LOG.md` gives Codex milestone-level history.
+- `DOCS.md` gives Codex the project document index and metadata.
 - project rules / constitution provide stable constraints.
 
 The recommended pattern is to keep these files in the project root and make sure Codex reads them as project context.
@@ -81,7 +83,7 @@ project-butler avoids locking memory into one product by writing durable project
 
 ## Direction
 
-The long-term direction is to keep one shared memory stack while adding better adapters for each assistant:
+The long-term direction is to keep one shared project memory while adding better adapters for each assistant:
 
 - `CLAUDE.md` for Claude Code,
 - `.cursor/rules/project-system.mdc` for Cursor,

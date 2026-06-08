@@ -6,7 +6,7 @@
 
 ### 1. Read last session in detail
 
-Execute steps 1-3 from `references/continue.md` in full (find project path, locate last JSONL, run jq filter, read output). This gives you the detailed last-session context.
+Execute steps 1-2 from `references/continue.md` (find project path, locate last JSONL, run jq filter, read output, gather current management files). Do not present the short continue summary yet; this flow produces a fuller overview in step 4.
 
 ### 2. Summarize historical sessions (bounded)
 
@@ -34,6 +34,10 @@ Read the project-butler management files (these are maintained specifically for 
 ```
 Read session-handoff.md (next pickup point, current progress)
 Read PROJECT.md (project wiki, module map, progress snapshot)
+Read TODO.md (active tasks and blockers)
+Read UPDATE_LOG.md (milestone history)
+Read DOCS.md (document index, if present)
+Read CLAUDE.md (stable project rules, if present)
 ```
 
 Run in parallel:
@@ -42,6 +46,11 @@ Run in parallel:
 git log --oneline -20 2>/dev/null
 git status --short 2>/dev/null
 cat "${PROJECT_PATH}/memory/MEMORY.md" 2>/dev/null
+cat ./session-handoff.md 2>/dev/null
+cat ./PROJECT.md 2>/dev/null
+cat ./TODO.md 2>/dev/null
+cat ./UPDATE_LOG.md 2>/dev/null
+cat ./DOCS.md 2>/dev/null
 cat ./CLAUDE.md 2>/dev/null
 ```
 
@@ -49,6 +58,6 @@ cat ./CLAUDE.md 2>/dev/null
 
 **Project Timeline:** chronological session summaries (historical → last session marked `[LAST]`)
 **Last Session Detail:** the full filtered conversation from step 1
-**Current State:** git branch/status, recent 20 commits, memory, CLAUDE.md highlights
+**Current State:** git branch/status, recent 20 commits, memory, handoff, active TODOs, update log, document index, and CLAUDE.md highlights
 
 Then: "Ready to continue. What would you like to work on next?"

@@ -7,11 +7,18 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![AI Coding Assistants](https://img.shields.io/badge/AI%20Coding%20Assistants-Claude%20Code%20%7C%20Cursor%20%7C%20Codex-6B46C1)](docs/compatibility.md)
 
-> Persistent project memory for AI coding assistants.
+> Make AI coding agents remember your project between sessions.
 
-project-butler gives Claude Code, Cursor, Codex, and similar AI coding assistants a shared project memory stack: session logs, handoff notes, project wiki, TODOs, rules, file structure, and changelog.
+project-butler helps Claude Code, Cursor, Codex, and similar AI coding assistants behave like long-term project teammates instead of starting from scratch every session.
 
-You keep working normally. At the end, say `end session`. Next time, say `continue`.
+For normal use, you only need four actions:
+
+```text
+/project-butler   Set up project memory
+end session       Save progress and next steps
+continue          Resume next time
+status            Check where the project stands
+```
 
 ## Quick Start
 
@@ -21,25 +28,25 @@ Install as a Claude Code skill:
 git clone https://github.com/JamesShi96/project-butler.git ~/.claude/skills/project-butler
 ```
 
-Open any project and initialize the memory stack:
+Open any project and set up project memory:
 
 ```text
 /project-butler
 ```
 
-At the end of a work session:
+Work normally. At the end of a work session:
 
 ```text
 end session
 ```
 
-Next time:
+Next time, resume without re-explaining the project:
 
 ```text
 continue
 ```
 
-For Cursor, Codex, and other assistants, see [Tool Compatibility](docs/compatibility.md).
+That is enough for daily use. For Cursor, Codex, and other assistants, see [Tool Compatibility](docs/compatibility.md).
 
 ## Why It Exists
 
@@ -51,11 +58,34 @@ AI coding assistants are powerful in one session and forgetful across sessions. 
 - **"The AI keeps violating rules I already explained."** Rules live in your head instead of in project memory.
 - **"I switch between Claude Code, Cursor, and Codex."** Different tools need one shared source of truth.
 
-project-butler turns a project folder into that source of truth.
+project-butler turns a project folder into that source of truth, so the next AI session can pick up where the last one stopped.
 
-## What It Creates
+## Main Commands
 
-Run `/project-butler` once. It creates a file-based project memory stack:
+All triggers are natural language. Use slash commands only for first-time setup.
+
+| Command | Use it when |
+|---|---|
+| `/project-butler` | Set up or upgrade project memory. |
+| `end session` / `we're done` | Save progress, refresh next steps, and record important changes. |
+| `continue` / `continue from last time` | Resume the previous session without re-explaining context. |
+| `status` / `where are we` | Get the current project state and the next best step. |
+
+## Advanced Commands
+
+| Command | Use it when |
+|---|---|
+| `continue full context` | Rebuild the full project trajectory after a long break or assistant switch. |
+| `review claude` / `check the rules` | Review candidate project rules before they become long-term rules. |
+| `sync wiki` / `update overview` | Force-refresh `PROJECT.md`. |
+| `organize files` | Clean up new files according to `STRUCTURE.md`. |
+| `change language` | Switch project management files between English, Chinese, and bilingual mode. |
+
+Session recovery (`continue` / `continue full context`) is routed through project-butler internally. There is no separate `/continue` command to install.
+
+## What It Maintains
+
+Run `/project-butler` once. It maintains these plain Markdown files in your project:
 
 ```text
 project-root/
@@ -63,8 +93,10 @@ project-root/
 ├── PROJECT.md                  <- Current project wiki
 ├── STRUCTURE.md                <- File organization rules
 ├── UPDATE_LOG.md               <- Milestone-level changelog
+├── DOCS.md                     <- Document index and metadata
 ├── session-handoff.md          <- Cross-session handoff
 ├── TODO.md                     <- Execution checklist
+├── docs/                       <- Archived project documents
 ├── log/                        <- Session logs
 └── .claude/
     ├── candidates.md           <- Candidate rules for review
@@ -73,23 +105,14 @@ project-root/
 
 The core files are plain Markdown, so other tools can read them even when they do not run the skill natively.
 
-## Common Commands
+What that means in practice:
 
-All triggers are natural language. Use slash commands only for first-time setup.
-
-| You say | What happens |
-|---|---|
-| `/project-butler` | Initialize or upgrade the project memory stack. |
-| `end session` / `we're done` | Write a session log, update handoff, sync wiki, update TODOs, organize new files, and record significant changes. |
-| `continue` / `continue from last time` | Recover the previous session and resume without re-explaining context. |
-| `continue full context` | Rebuild the full project trajectory from the latest session plus historical summaries. |
-| `review claude` / `check the rules` | Review candidate project rules before they are promoted into the constitution. |
-| `sync wiki` / `update overview` | Force-refresh `PROJECT.md`. |
-| `status` / `where are we` | Read the current wiki and handoff summary. |
-| `organize files` | Run file organization based on `STRUCTURE.md`. |
-| `change language` | Switch project management files between English, Chinese, and bilingual mode. |
-
-Session recovery (`continue` / `continue full context`) is routed through project-butler internally. There is no separate `/continue` command to install.
+- Keeps the current project state readable.
+- Keeps next steps clear between sessions.
+- Keeps project documents indexed and findable.
+- Records milestone changes so the project has a clear history.
+- Keeps new files from drifting into random folders.
+- Preserves long-term rules only after user review.
 
 ## Tool Support
 
@@ -97,16 +120,16 @@ Session recovery (`continue` / `continue full context`) is routed through projec
 |---|---|---|
 | Claude Code | Native skill | Install this repo under `~/.claude/skills/project-butler` and run `/project-butler`. |
 | Cursor | Project rules | project-butler can generate `.cursor/rules/project-system.mdc`, which points Cursor at the same project memory files. |
-| Codex | Shared memory files | Codex can read the generated Markdown files (`PROJECT.md`, `TODO.md`, `session-handoff.md`, rules) as project context. |
-| Other AI assistants | File-based | Any assistant that can read project files can use the memory stack as shared context. |
+| Codex | Shared memory files | Codex can read the generated Markdown files (`PROJECT.md`, `TODO.md`, `session-handoff.md`, `STRUCTURE.md`, `UPDATE_LOG.md`, `DOCS.md`, rules) as project context. |
+| Other AI assistants | File-based | Any assistant that can read project files can use the project memory as shared context. |
 
 See [docs/compatibility.md](docs/compatibility.md) for details and caveats.
 
 ## How It Works
 
-### The Memory Stack
+### Internals: The Memory Stack
 
-project-butler organizes project memory by stability:
+project-butler uses a 7-component memory stack internally, organized by stability:
 
 ```text
 Stable rules
@@ -120,6 +143,7 @@ Current state
 │  PROJECT.md                         │  <- What the project is now
 │  STRUCTURE.md                       │  <- Where files belong
 │  UPDATE_LOG.md                      │  <- Milestone-level changes
+│  DOCS.md                            │  <- Document index
 └─────────────────────────────────────┘
             ↑ summarized from facts
 Raw facts
@@ -140,6 +164,7 @@ Bottom feeds top. Top constrains bottom.
 - **Rules / constitution** preserve decisions that should keep guiding the project.
 - **Update log** records significant changes at milestone level.
 - **Structure rules** keep files from drifting into chaos.
+- **Document index** keeps project documents organized under `docs/`.
 
 ### Language Support
 
@@ -153,9 +178,22 @@ project-butler supports three language modes:
 
 You choose the mode during setup, and can later say `change language`.
 
+### Version Naming
+
+During setup, project-butler asks which version style the project should use:
+
+| Style | Example | Best for |
+|---|---|---|
+| Semantic | `v0.1.0` | Engineering projects and libraries |
+| Codename | `Project Name 0.1` | Products, brands, and creative projects |
+| Patch | `Patch 1` | Games and iterative content releases |
+| Date | `2026.06.1` | Research logs, operations, and document-heavy work |
+
+`end session` uses this style when a significant update deserves an `UPDATE_LOG.md` entry.
+
 ### Upgrade Mode
 
-If a project already has some management files, project-butler creates only the missing ones. It does not overwrite existing content. It also detects legacy `.claude/memory/` layouts and suggests migration.
+If a project already has some management files, project-butler creates only the missing ones. It does not replace existing files; when a system section needs an update, it asks before making a small targeted patch. It also detects legacy `.claude/memory/` layouts and suggests migration.
 
 ## Examples
 
@@ -176,26 +214,28 @@ See [docs/examples.md](docs/examples.md) for a complete session flow:
 
 ## Update Log
 
+### v1.5.1 (2026-06-03) - Product Noise Reduction
+- Reframe the README around four primary actions: `/project-butler`, `end session`, `continue`, and `status`.
+- Move internals behind "How it works" and make examples result-focused.
+- Update generated CLAUDE/Cursor rules to separate daily workflow from advanced commands.
+
+### v1.5.0 (2026-06-03) - Versioned Update Log System
+- Add version style selection during setup: Semantic, Codename, Patch, and Date.
+- Teach end-session update logging to calculate the next version from the selected style.
+- Sync README, examples, compatibility docs, generated rules, continue recovery, document archiving, upgrade mode, and trigger routing with the current memory stack.
+
+### v1.4.1 (2026-06-02) - Cross-Reference + Flow Consistency
+- Fix DOCS.md, file snapshot, language switching, continue recovery, and template consistency gaps found through six review rounds.
+- Align document archiving, file reorganization, and Cursor rule templates.
+
+### v1.3.0 (2026-06-01) - Four-Phase File Reorganization
+- Replace template-based file organization with Discover, Ask or Plan, Plan, and Execute phases.
+- Add confidence routing, safe move planning, and a never-delete cleanup policy.
+
 ### v1.2.1 (2026-05-09) - Skill Loader Compatibility
 - Move `continue` reference workflows under `references/` instead of nested `SKILL.md` files.
 - Shorten skill metadata to satisfy loader limits.
 - Keep session recovery routed through the main project-butler skill.
-
-### v1.2.0 (2026-05-05) - Update Log Auto-Tracking
-- Auto-detect significant updates at end session.
-- Add `UPDATE_LOG.md` for milestone-level change history.
-- Offer optional GitHub Release creation for significant updates.
-- Support both code and non-code projects.
-
-### v1.1.0 (2026-05-04) - SKILL.md Refactor + Continue Rename
-- Refactor SKILL.md from 1175 to 196 lines with on-demand reference loading.
-- Rename `/resume` to `continue` and `/resume-full` to `continue full context`.
-- Route all triggers through natural language.
-
-### v1.0.0 (2026-05-01) - Session Recovery + Log Compaction
-- Add session recovery (`continue` / `continue full context`).
-- Add log compaction when raw logs exceed the threshold.
-- Rename from `project-init` to `project-butler`.
 
 Full update log: [UPDATE_LOG.md](UPDATE_LOG.md) | Releases: [GitHub Releases](https://github.com/JamesShi96/project-butler/releases)
 

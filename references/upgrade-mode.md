@@ -6,18 +6,18 @@ When some files already exist:
 
 ## Rules
 
-1. **Never overwrite** any existing file content
-2. **Create only missing files** with templates
+1. **Never overwrite whole existing files**. Existing user content is preserved.
+2. **Create only missing files** with templates. For existing management files, make only small user-confirmed append/patch updates to missing project-butler system sections.
 3. **For existing CLAUDE.md**: check if it contains `## 项目管理系统` section. If missing, offer to append the system rules block. If present, check for missing elements from the project memory stack:
    - Does the trigger words table include `整理文件 / organize files`? If not, add it.
    - Does the file roles table include `STRUCTURE.md` and `.claude/.file-snapshot.json`? If not, add them.
-   - Does the Session End Protocol include step 6 (整理文件结构)? If not, insert it between step 5 (收集宪法候选) and the last step (输出中文总结), and renumber accordingly.
-   - Does it say "4 组件"? If so, update to "5 组件".
-   - Does it say "5 组件"? If so, update to "6 组件".
+   - Does the Session End Protocol include file reorganization after constitution candidate collection? If not, insert it before output summary and renumber accordingly.
+   - Does it say "4 组件", "5 组件", or "6 组件"? If so, update to "7 组件" and list the current components: Constitution, Wiki, Structure, Update Log, Docs, Log, TODO.
    - Does it include `Log Compaction Threshold` in the CLAUDE.md template? If not, add it.
    - Does the Session Start Protocol include bounded log reading (summaries + raw)? If not, update it.
+   - Does the Session Start Protocol read TODO.md, UPDATE_LOG.md, and DOCS.md in addition to PROJECT.md and session-handoff.md? If not, update it.
    - Does the Session End Protocol include a Log Compaction step after writing the session log? If not, insert it and renumber.
-   - Does the Session End Protocol include step 7.5 (文档归档)? If not, insert it after step 7 and renumber accordingly.
+   - Does the Session End Protocol include document archiving after file reorganization and before update-log evaluation? If not, insert it there and renumber accordingly.
    - Does the file roles table include `DOCS.md`? If not, add it.
    - Offer to make these updates for user confirmation before proceeding.
 4. **For existing session-handoff.md / TODO.md**: skip entirely
@@ -26,13 +26,14 @@ When some files already exist:
 7. **For STRUCTURE.md**: create if missing. If exists, never overwrite — user may have custom rules.
 8. **For .claude/.file-snapshot.json**: create if missing (empty `{"lastScan":"","files":{}}`). If exists, skip.
 9. **For old .claude/memory/ directory**: if it exists, treat as legacy system. See Legacy Migration below.
-10. **For existing .cursor/rules/**: check if `project-system.mdc` already exists. If yes, skip. If only other .mdc files exist, create `project-system.mdc` alongside them (not overwrite).
+10. **For existing .cursor/rules/**: check if `project-system.mdc` already exists. If missing, create it alongside any existing `.mdc` files without overwriting them. If it exists, preserve custom content and evaluate missing project-butler sections in step 17.
 11. **For language setting in CLAUDE.md**: if CLAUDE.md exists but has no `## Language` section, add one with default value `bilingual`. If it exists, skip.
 12. **For Coding Guidelines (Karpathy Guidelines) in CLAUDE.md**: if CLAUDE.md exists but has no `## Coding Guidelines` section, append the Karpathy Guidelines section (from Template 1) before the `## Project-Specific Rules` section or at the end of the file. If it exists, skip.
-13. **For UPDATE_LOG.md**: create if missing (empty template with header only). If exists, never overwrite — user has real update history here.
-14. **For Update Log step in CLAUDE.md Session End Protocol**: if the protocol only has 8 steps (ending with "Output summary"), insert step 8 (评估并写入 Update Log) and renumber the old step 8 to step 9.
-15. **For DOCS.md**: create if missing. Use default types: PRD, 技术设计, 调研 (most common combination). Use Template 9 from `references/file-templates.md` (with project name prefix). Create corresponding `docs/` subdirectories with `.gitkeep` files. If exists, never overwrite — user has real document index here.
-16. **For docs/ directory**: create if missing with default subdirectories (`prd/`, `tech-design/`, `research/`) each with `.gitkeep`. If exists, skip.
+13. **For UPDATE_LOG.md**: create if missing using Template 8 from `references/file-templates.md` and the Q8 version style metadata. If exists, never overwrite — user has real update history here. If it exists but has no `<!-- version-style: X -->` metadata, treat it as legacy; ask whether to add metadata before writing future versioned entries.
+14. **For Update Log step in CLAUDE.md Session End Protocol**: if the protocol has no update-log evaluation step, insert it before output summary and renumber accordingly.
+15. **For docs/ directory**: create if missing with default subdirectories (`prd/`, `tech-design/`, `research/`) each with `.gitkeep`. If exists, skip.
+16. **For DOCS.md**: create if missing after ensuring `docs/` exists. Use default types: PRD, 技术设计, 调研 (most common combination). Use Template 9 from `references/file-templates.md` (with project name prefix). If exists, never overwrite — user has real document index here.
+17. **For existing Cursor rules**: if `project-system.mdc` exists, check whether it includes change language, continue, continue full context, document archiving, DOCS.md, and version bump behavior. Offer to patch missing system sections after user confirmation; never overwrite custom Cursor rules wholesale.
 
 ## Legacy Migration (.claude/memory/ → new system)
 
@@ -73,7 +74,9 @@ Output shows status of each file, plus any legacy migration suggestions:
   ✅ STRUCTURE.md               — 已创建（新增）/ 已存在，跳过
   ✅ .claude/.file-snapshot.json — 已创建（新增）/ 已存在，跳过
   ✅ UPDATE_LOG.md              — 已创建（新增）/ 已存在，跳过
+  ✅ UPDATE_LOG version metadata — 已添加（新增）/ 已存在，跳过 / 建议补充
   ✅ docs/ + DOCS.md      — 已创建（新增）/ 已存在，跳过
+  ✅ Cursor project rules  — 已创建（新增）/ 已存在，建议补齐触发词
   ✅ Coding Guidelines     — 已添加（新增）/ 已存在，跳过
   🌐 Language setting      — 已添加（默认 bilingual）/ 已存在，跳过
 
@@ -90,13 +93,14 @@ Legacy 检测：
 
 | Mistake | Correct Behavior |
 |---------|-----------------|
-| Overwriting existing files in upgrade mode | Never overwrite. Create only missing files. |
+| Overwriting existing files in upgrade mode | Never replace whole files. Create missing files, or make small user-confirmed patches to system sections only. |
 | Putting session logs in .claude/memory/ | Use log/ in project root. It's git-visible. |
 | Auto-migrating legacy .claude/memory/ files | Always ask user to confirm migration. Never auto-move. |
 | Leaving conflicting old+new path references in CLAUDE.md | When appending system section, flag and offer to resolve conflicts with existing sections. |
-| AI directly editing CLAUDE.md | Only write to .claude/candidates.md. User confirms via "review claude". |
+| AI directly editing CLAUDE.md during normal work | Outside initialization/upgrade, only write to .claude/candidates.md. User confirms via "review claude". During init/upgrade, append or patch system sections only after user confirmation. |
 | Creating logs without updating Wiki/handoff | end session must do ALL steps, not pick and choose. |
 | Empty TODO items without owner/deadline/deps | Always ask user to fill in the three required fields. |
 | Forgetting to read PROJECT.md at session start | CLAUDE.md template explicitly instructs this. |
 | Creating .cursor rules when user doesn't use Cursor | Only create when user answers yes to Q5. |
 | Creating duplicate .cursor/rules/ files | Check if project-system.mdc already exists before creating. Create alongside existing .mdc files, never overwrite. |
+| Keeping old component counts after adding Update Log and Docs | Current system is 7 components: Constitution, Wiki, Structure, Update Log, Docs, Log, TODO. |

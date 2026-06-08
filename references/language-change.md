@@ -14,7 +14,7 @@ Triggered when user expresses intent to change language (any expression: 切换�
 2. Update CLAUDE.md:
    - Change the Language section: - **Language:** {new language}
    - Update all headers and content in CLAUDE.md to the new language
-   (Use the Key Terms Glossary from references/language-adaptation.md for translations)
+   (Use the language adaptation glossary loaded with this protocol for translations)
 
 3. Rewrite all system management files in the new language:
    - PROJECT.md — translate all headers, descriptions, table column names
@@ -24,8 +24,8 @@ Triggered when user expresses intent to change language (any expression: 切换�
    - STRUCTURE.md — translate all headers and table column names;
      update 命名规范 column to reflect new language's naming conventions
    - .cursor/rules/project-system.mdc — translate all content (if exists)
-   - DOCS.md — translate section headers and status values (use DOCS.md glossary from references/language-adaptation.md)
-   - UPDATE_LOG.md — translate title and meta line only (use UPDATE_LOG glossary); keep individual entries as-is
+   - DOCS.md — translate section headers and status values using the DOCS.md glossary
+   - UPDATE_LOG.md — translate title and meta line only using the UPDATE_LOG glossary; keep individual entries as-is
 
 4. Ask user about user file renaming:
    "是否要按新语言的命名规范重命名用户文件？(Rename user files to match new language naming conventions?)"

@@ -41,6 +41,10 @@ Read the project-butler management files (these are maintained specifically for 
 ```
 Read session-handoff.md (next pickup point, current progress)
 Read PROJECT.md (project wiki, module map, progress snapshot)
+Read TODO.md (active tasks and blockers)
+Read UPDATE_LOG.md (recent milestone history)
+Read DOCS.md (document index, if present)
+Read CLAUDE.md (stable project rules, if present)
 ```
 
 Run in parallel:
@@ -49,11 +53,17 @@ Run in parallel:
 git status --short 2>/dev/null
 git log --oneline -5 2>/dev/null
 cat "${PROJECT_PATH}/memory/MEMORY.md" 2>/dev/null
+cat ./session-handoff.md 2>/dev/null
+cat ./PROJECT.md 2>/dev/null
+cat ./TODO.md 2>/dev/null
+cat ./UPDATE_LOG.md 2>/dev/null
+cat ./DOCS.md 2>/dev/null
+cat ./CLAUDE.md 2>/dev/null
 ```
 
 ### 3. Present summary
 
 **Last Session:** what was being worked on, key decisions, files modified (from tool_use entries).
-**Current State:** git status + recent commits.
+**Current State:** git status, recent commits, handoff, active TODOs, milestone history, document index, and CLAUDE.md highlights.
 
 Then: "Ready to continue. What would you like to work on next?"
