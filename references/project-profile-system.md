@@ -146,6 +146,8 @@ After confirmation:
 
 Baseline drafts must be honest about uncertainty. Use Open Questions rather than pretending weak evidence is confirmed.
 
+When creating `.claude/project-profile.json`, do not leave `directories` or `doc_policies` empty if profile docs were confirmed. Populate them from the approved Required / Recommended / Optional tiers and created baseline docs.
+
 ---
 
 ## Profile JSON Schema
@@ -187,6 +189,40 @@ Minimum `.claude/project-profile.json`:
     "custom": []
   },
   "doc_policies": {}
+}
+```
+
+Creation rules:
+
+- `generated_project_shape` must match the approved project-shape summary.
+- `reference_archetypes_used` and `overlays` must include confidence and evidence when used.
+- `directories.required` must list confirmed Required directories.
+- `directories.recommended` must list confirmed Recommended directories that the user kept selected.
+- `directories.optional` must list Optional directories that were shown but not created.
+- `directories.custom` must list custom directories only after user confirmation.
+- `doc_policies` must include every created profile baseline doc.
+
+Default policy for created baseline `main.md` docs:
+
+```json
+{
+  "role": "stable_baseline_index",
+  "owner": null,
+  "status": "draft",
+  "update_policy": "patch_active_sections_only",
+  "protected_sections": ["Stable Baseline", "Confirmed Decisions", "Signed-off Scope", "Accepted Architecture"]
+}
+```
+
+Default policy for created sub-doc drafts:
+
+```json
+{
+  "role": "working_subdoc",
+  "owner": null,
+  "status": "draft",
+  "update_policy": "patch_active_sections_only",
+  "protected_sections": ["Confirmed Decisions", "Accepted Architecture"]
 }
 ```
 
@@ -367,6 +403,15 @@ Full Close may auto-apply only when all are true:
 3. `doc_policies` allows the update.
 4. Evidence is clear.
 5. Change is append, branch, or active-section patch only.
+
+If an existing affected document has no `doc_policies` entry, treat it conservatively:
+
+- no automatic patch to the document body,
+- no protected-section changes,
+- no inferred policy write,
+- record a pending/review item or propose a document policy change for user confirmation.
+
+New sub-docs created inside an approved Scope Plan must receive a `doc_policies` entry in the same Full Close.
 
 Allowed:
 

@@ -13,6 +13,7 @@
 - Updated continue and full-context recovery so profile shape, document policies, pending profile updates, profile debt, and review queue items are restored when profile files exist.
 - Updated upgrade mode to preserve existing profile files, offer companion JSON repair, and avoid enabling Profile System during ordinary upgrade without user intent.
 - Updated README, Chinese README, examples, and compatibility docs to describe Project Profile System as an optional profile-aware layer on top of the base 7-component memory stack.
+- Added a three-scenario simulation report for fresh project, existing baseline project, and large project validation.
 
 ---
 
