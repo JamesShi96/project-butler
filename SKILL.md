@@ -218,15 +218,15 @@ If user provides a task missing required fields, ask them to fill in. Completed 
 
 Scan project root for: CLAUDE.md, PROJECT.md, session-handoff.md, TODO.md, log/, STRUCTURE.md, UPDATE_LOG.md, DOCS.md, docs/, .claude/.file-snapshot.json, .claude/candidates.md, .claude/project-profile.json, .claude/profile-pending.json
 
-- **Fresh**: None exist → create the base 7-component memory stack by default. Enable Profile System only when the user asks for profile-aware setup, chooses the profile option, or confirms the assistant's recommendation after seeing the inferred project-shape proposal.
-- **Upgrade**: Some exist → read `references/upgrade-mode.md`; if profile files are missing and the user asked for profile-aware behavior, also read `references/project-profile-system.md` and offer Profile System activation
-- **Profile enabled**: profile files exist → preserve existing profile state and patch only schema-compatible missing fields
+- **Fresh**: None exist → read `references/project-profile-system.md` and run Foundation Setup as the default setup path. Create the base 7-component memory stack, `.claude/project-profile.json`, `.claude/profile-pending.json`, and only the user-confirmed baseline docs. For lightweight projects, use `maintenance.preference = "lightweight"` and keep Required docs minimal instead of skipping profile state.
+- **Upgrade**: Some exist → read `references/upgrade-mode.md`; if profile files are missing, also read `references/project-profile-system.md` and offer profile-aware upgrade using the latest Foundation Setup model
+- **Profile files present**: profile files exist → preserve existing profile state and patch only schema-compatible missing fields
 
 ### Step 2: Ask Questions
 
-For Fresh initialization, ask the user for the required setup basics and whether this project needs the optional Profile System layer. Recommend Profile System only when the project likely needs long-lived PRD, architecture, roadmap, research, eval, delivery, or operating-model alignment. If the user enables it, follow Foundation Setup in `references/project-profile-system.md`: ask for a natural project description, infer the project shape, generate project-specific foundation areas, ask only targeted follow-up questions, and propose Required / Recommended / Optional documents before file creation.
+For Fresh initialization, follow Foundation Setup in `references/project-profile-system.md`: ask for the required setup basics, ask for a natural project description, infer the project shape, generate project-specific foundation areas, ask only targeted follow-up questions, and propose Required / Recommended / Optional documents before file creation.
 
-For legacy setup without Profile System, use AskUserQuestion to ask in two groups. Make clear that the user can press Enter for recommended defaults.
+AskUserQuestion should still keep setup lightweight. Make clear that the user can press Enter for recommended defaults.
 
 Required:
 
@@ -239,25 +239,21 @@ Recommended defaults:
 4. **GitHub 仓库** — optional, e.g., "org/repo-name" (default empty)
 5. **是否创建 Cursor 规则文件** — yes/no (default yes)
 6. **语言 / Language** — `en` / `zh` / `bilingual` (default bilingual)
-7. **文档类型** — choose document types to manage (default AI recommendation)
-   预设选项：PRD / 技术设计 / 设计文档 / 调研 / 会议纪要 / 实验记录
-   AI 根据项目描述推荐默认选项：产品类→PRD+技术设计+设计文档 / 运营类→PRD+调研+会议纪要 / 研究类→调研+实验记录 / 内容类→设计文档+调研
-   用户可增减
-8. **版本命名方式** — choose one (default AI recommendation, fallback Semantic)
+7. **版本命名方式** — choose one (default AI recommendation, fallback Semantic)
    预设选项：Semantic (v0.1.0) / Codename ({project name} 0.1) / Patch (Patch 1) / Date (2026.06.1)
    AI 根据项目类型推荐：产品/品牌类→Codename / 游戏/内容类→Patch / 日志/研究类→Date / 默认→Semantic
 
 ### Step 3: Create Files
 
-Read `references/file-templates.md` + `references/language-adaptation.md` + `references/document-archiving.md`. If Profile System is enabled, also read `references/project-profile-system.md`.
+Read `references/file-templates.md` + `references/language-adaptation.md` + `references/document-archiving.md` + `references/project-profile-system.md`.
 
-Create each file using templates, replacing `{{VARIABLES}}` with user answers. For UPDATE_LOG.md, calculate the initial version based on Q8 style selection and current date (e.g., semantic → `v0.1.0`, date → `2026.06.1`). Apply language adaptation rules and glossary from the reference.
+Create each file using templates, replacing `{{VARIABLES}}` with user answers. For UPDATE_LOG.md, calculate the initial version based on the version style selection and current date (e.g., semantic → `v0.1.0`, date → `2026.06.1`). Apply language adaptation rules and glossary from the reference.
 
 Create `log/.gitkeep` (empty file) alongside `log/` directory so git tracks it when empty.
 
 Create `.claude/.file-snapshot.json` with empty content: `{"lastScan":"","files":{}}`.
 
-If Profile System is enabled, also create `.claude/project-profile.json`, `.claude/profile-pending.json`, and confirmed Required profile baseline docs from the approved Foundation Setup proposal.
+Create `.claude/project-profile.json`, `.claude/profile-pending.json`, and confirmed Required profile baseline docs from the approved Foundation Setup proposal.
 
 ### Step 4: Output Report
 
@@ -279,7 +275,7 @@ Created:
 - TODO tracking
 - Document index
 - Update log
-- Profile config and pending queue: created / skipped
+- Profile config and pending queue: created
 - File organization rules
 - Cursor rules: created / skipped
 
@@ -294,8 +290,8 @@ Settings:
 
 | Trigger | Read these files |
 |---------|-----------------|
-| Init (fresh) | `references/file-templates.md` + `references/language-adaptation.md` + `references/document-archiving.md`; include `references/project-profile-system.md` only when Profile System is enabled or being proposed |
-| Init (upgrade) | above + `references/upgrade-mode.md`; include `references/project-profile-system.md` when enabling or preserving profile files |
+| Init (fresh) | `references/file-templates.md` + `references/language-adaptation.md` + `references/document-archiving.md` + `references/project-profile-system.md` |
+| Init (upgrade) | above + `references/upgrade-mode.md`; include `references/project-profile-system.md` when creating, repairing, or preserving profile files |
 | End session | `references/file-reorganization.md` + `references/document-archiving.md` + `references/update-log.md` + `references/log-compaction.md` (if logs ≥ threshold); include `references/project-profile-system.md` when profile files exist or Normal/Full Close is requested |
 | 整理文件 / organize files | `references/file-reorganization.md` |
 | 切换语言 / change language | `references/language-change.md` + `references/language-adaptation.md` |

@@ -10,12 +10,12 @@ Current checkpoint:
 
 - `references/project-profile-system.md` now exists as the runtime reference for Profile System behavior.
 - `SKILL.md` now routes profile setup, Normal Close, Full Close, profile sync, Foundation Repair, and profile-aware status into that reference.
-- Fresh initialization now keeps the base 7-component memory stack as the default and enables Profile System only when explicitly requested, already present, or user-confirmed after recommendation.
+- Fresh initialization now uses profile-aware Foundation Setup by default; lightweight projects use `maintenance.preference = "lightweight"` and minimal confirmed docs instead of skipping profile state.
 - Project profiles now include project-specific `foundation_areas`, and Foundation Repair now runs as a bounded, profile-driven repair batch instead of a fixed PRD/engineering workflow.
 - Phase 5 Advanced Consistency is intentionally lightweight: profile evolution proposals, stale finding routing, and review queue compaction only. It does not do automatic stale scoring, profile rewrites, or whole-project scans.
-- Generated templates, continue, full-context recovery, and upgrade mode now know how to read/preserve optional profile JSON files.
-- README, examples, compatibility docs, and `UPDATE_LOG.md` describe the optional Profile System layer.
-- Disposable sample validation found no runtime-rule bug, but the detailed sample artifacts are intentionally not retained in the user-facing package.
+- Generated templates, continue, full-context recovery, and upgrade mode now know how to read/preserve profile JSON files.
+- README, examples, compatibility docs, and `UPDATE_LOG.md` describe Profile System as internal profile-aware runtime behavior.
+- Disposable sample validation found no runtime-rule bug. After switching Fresh setup to always create profile state, a lightweight profile fixture check confirmed `maintenance.preference = "lightweight"` with no required docs. Detailed sample artifacts are intentionally not retained in the user-facing package.
 
 ## Next Session Start
 

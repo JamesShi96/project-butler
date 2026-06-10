@@ -12,12 +12,12 @@ All templates use these variables:
 - `{{GITHUB_LINK_LINE}}` → `- GitHub: https://github.com/{{answer}}` if Q4 provided, else `- （待添加）`
 - `{{DATE}}` → today YYYY-MM-DD
 - `{{LANGUAGE}}` → Q6 answer (`en`, `zh`, or `bilingual`)
-- `{{DOC_TYPES}}` → Q7 answers (list of selected document type directories, e.g., `prd, tech-design, research`)
-- `{{DOC_SECTIONS}}` → DOCS.md sections generated from Q7 selected document types
-- `{{VERSION_STYLE}}` → Q8 answer (`semantic`, `codename`, `patch`, or `date`)
-- `{{VERSION_INITIAL}}` → initial version calculated from Q8 (`v0.1.0`, `<project name> 0.1`, `Patch 1`, or `{YYYY.MM}.1`)
-- `{{PROFILE_STATUS}}` → `enabled` when Foundation Setup creates profile files, otherwise `not enabled`
-- `{{PROFILE_SHAPE}}` → generated project shape label from Foundation Setup, or empty when profile is not enabled
+- `{{DOC_TYPES}}` → confirmed Foundation Setup document directories (e.g., `prd, tech-design, research`)
+- `{{DOC_SECTIONS}}` → DOCS.md sections generated from confirmed Foundation Setup document tiers
+- `{{VERSION_STYLE}}` → version style answer (`semantic`, `codename`, `patch`, or `date`)
+- `{{VERSION_INITIAL}}` → initial version calculated from version style (`v0.1.0`, `<project name> 0.1`, `Patch 1`, or `{YYYY.MM}.1`)
+- `{{PROFILE_STATUS}}` → profile maintenance preference (`lightweight`, `standard`, or `strict`)
+- `{{PROFILE_SHAPE}}` → generated project shape label from Foundation Setup
 
 For language adaptation: adapt headers, labels, and descriptions to the configured language. See `references/language-adaptation.md` for glossaries.
 
@@ -74,7 +74,7 @@ The most critical file — auto-loaded by Claude Code, defines all ongoing behav
 
 ### 内部机制：文件职责
 
-本项目使用 7 组件基础管理系统。若启用 Profile System，会额外维护 2 个可选 profile JSON 文件。用户日常不需要手动维护这些文件；AI 按触发词自动更新。
+本项目使用 7 组件基础管理系统，并维护 2 个 profile JSON 文件作为内部运行状态。用户日常不需要手动维护这些文件；AI 按触发词自动更新。
 
 | File | Who writes | When |
 |------|-----------|------|
@@ -291,8 +291,8 @@ Adapt headers using the PROJECT.md glossary. In bilingual mode, use Chinese head
 ├── log/                        ← 会话日志
 └── .claude/
     ├── candidates.md           ← 宪法候选池
-    ├── project-profile.json    ← Project Profile 配置（可选）
-    ├── profile-pending.json    ← Profile 待处理队列（可选）
+    ├── project-profile.json    ← Project Profile 配置
+    ├── profile-pending.json    ← Profile 待处理队列
     └── .file-snapshot.json     ← 文件整理快照
 ```
 
@@ -347,7 +347,7 @@ Adapt headers using the session-handoff.md glossary.
 ## 关键设计决策
 | # | 决策 | 理由 | 日期 |
 |---|------|------|------|
-| 1 | 采用 7 组件基础管理系统 | Constitution + Wiki + Structure + Update Log + Docs + Log + TODO；Profile System 为可选扩展 | {{DATE}} |
+| 1 | 采用 7 组件基础管理系统 | Constitution + Wiki + Structure + Update Log + Docs + Log + TODO；Profile System 为内部 profile-aware runtime | {{DATE}} |
 
 ## 迭代历史
 | 版本 | 日期 | 变更 |
@@ -474,7 +474,7 @@ Shape:
 | Profile setup / foundation repair (any language) | Create or repair project profile files and baseline reference docs after confirmation |
 
 ## Internals: File Roles
-This project uses a 7-component base memory stack internally. When Profile System is enabled, it also maintains 2 optional profile JSON files. Users should not need to manage these files by hand.
+This project uses a 7-component base memory stack internally and maintains 2 profile JSON files as runtime state. Users should not need to manage these files by hand.
 
 | File | Who writes | When |
 |------|-----------|------|
@@ -568,7 +568,7 @@ When `bilingual`: English naming preferred; Chinese names acceptable for docs an
 
 ## Template 8: UPDATE_LOG.md
 
-Adapt headers using the UPDATE_LOG glossary. Content language follows the project's configured language. Version style comes from Q8 answer.
+Adapt headers using the UPDATE_LOG glossary. Content language follows the project's configured language. Version style comes from the setup answer.
 
 **Semantic:**
 ```
@@ -645,7 +645,7 @@ Note: For date style, replace `YYYY.MM.1` with the actual current year and month
 
 ## Template 9: DOCS.md
 
-Adapt headers using the DOCS.md glossary in `references/language-adaptation.md`. Generate sections only for document types selected during initialization (Q7) or confirmed by Foundation Setup; do not create sections for unselected types.
+Adapt headers using the DOCS.md glossary in `references/language-adaptation.md`. Generate sections only for document tiers confirmed by Foundation Setup; do not create sections for unselected types.
 
 ```
 # {{PROJECT_NAME}} — 文档索引
@@ -660,7 +660,7 @@ Adapt headers using the DOCS.md glossary in `references/language-adaptation.md`.
 | {{DATE}} | 初始化 | 0 |
 ```
 
-Build `{{DOC_SECTIONS}}` from Q7 using this mapping:
+Build `{{DOC_SECTIONS}}` from confirmed Foundation Setup document tiers using this mapping:
 
 - PRD: directory `docs/prd/`, title `## PRD`, initial row `[docs/prd/main.md](docs/prd/main.md) | 产品需求总览 | 草稿 | {{DATE}} | -`
 - 技术设计: directory `docs/tech-design/`, title `## 技术设计`, initial row `[docs/tech-design/main.md](docs/tech-design/main.md) | 技术设计总览 | 草稿 | {{DATE}} | -`
@@ -693,7 +693,7 @@ Each generated section uses this table header:
 
 ## Profile System Template Notes
 
-When Foundation Setup is enabled, use `references/project-profile-system.md` as the source of truth for `.claude/project-profile.json`, `.claude/profile-pending.json`, document tiers, protected sections, and profile-aware close behavior.
+Use `references/project-profile-system.md` as the source of truth for `.claude/project-profile.json`, `.claude/profile-pending.json`, document tiers, protected sections, and profile-aware close behavior.
 
 Do not duplicate the full profile schema in this file. This file only needs generated project rules to know that profile files may exist and should be read during session start, status, and end session.
 

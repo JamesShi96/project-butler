@@ -8,9 +8,9 @@ The native entry point is Claude Code today, but the output is intentionally fil
 
 | Tool | Integration level | What works |
 |---|---|---|
-| Claude Code | Native skill | Full `/project-butler` flow, natural-language triggers, session logging, continuation, file organization, document archiving, language switching, versioned update logs, rule review, wiki sync, status summaries, and optional Project Profile System behavior. |
+| Claude Code | Native skill | Full `/project-butler` flow, natural-language triggers, session logging, continuation, file organization, document archiving, language switching, versioned update logs, rule review, wiki sync, status summaries, and profile-aware setup/close behavior. |
 | Cursor | Project rules | project-butler can generate `.cursor/rules/project-system.mdc`, which points Cursor at the shared memory files and mirrors the main workflow triggers. |
-| Codex | Shared memory files | Codex can read `PROJECT.md`, `TODO.md`, `session-handoff.md`, `UPDATE_LOG.md`, `STRUCTURE.md`, `DOCS.md`, optional profile JSON files, and project rules as context. |
+| Codex | Shared memory files | Codex can read `PROJECT.md`, `TODO.md`, `session-handoff.md`, `UPDATE_LOG.md`, `STRUCTURE.md`, `DOCS.md`, profile JSON files, and project rules as context. |
 | Other AI assistants | File-based | Any assistant that can inspect project Markdown files can use the generated project memory. |
 
 ## Current Native Entry Point
@@ -45,8 +45,8 @@ That file tells Cursor to use the same project memory files:
 - `STRUCTURE.md`
 - `UPDATE_LOG.md`
 - `DOCS.md`
-- `.claude/project-profile.json` if Profile System is enabled
-- `.claude/profile-pending.json` if Profile System is enabled
+- `.claude/project-profile.json`
+- `.claude/profile-pending.json`
 - project rules / constitution
 
 Cursor does not need a separate database or memory store.
@@ -61,8 +61,8 @@ Codex support is file-based:
 - `STRUCTURE.md` describes file organization rules.
 - `UPDATE_LOG.md` gives Codex milestone-level history.
 - `DOCS.md` gives Codex the project document index and metadata.
-- `.claude/project-profile.json` gives Codex the generated project shape, document tiers, document policies, and protected sections when Profile System is enabled.
-- `.claude/profile-pending.json` gives Codex pending profile updates, profile debt, and review queue items when Profile System is enabled.
+- `.claude/project-profile.json` gives Codex the generated project shape, document tiers, document policies, and protected sections.
+- `.claude/profile-pending.json` gives Codex pending profile updates, profile debt, and review queue items.
 - project rules / constitution provide stable constraints.
 
 The recommended pattern is to keep these files in the project root and make sure Codex reads them as project context.
@@ -84,7 +84,7 @@ project-butler avoids locking memory into one product by writing durable project
 - Cursor integration is generated as project rules, not as a Cursor extension.
 - Codex support currently relies on shared project files, not a separate Codex-native marketplace package.
 - The main rule file is currently named `CLAUDE.md` because Claude Code is the native entry point. The project memory model is broader than that filename.
-- Project Profile System is optional. Projects without `.claude/project-profile.json` continue to use the base project memory stack.
+- Existing projects without `.claude/project-profile.json` can still use the base project memory stack, but upgrade should offer the current profile-aware setup model before writing profile files.
 
 ## Direction
 
@@ -93,5 +93,5 @@ The long-term direction is to keep one shared project memory while adding better
 - `CLAUDE.md` for Claude Code,
 - `.cursor/rules/project-system.mdc` for Cursor,
 - Codex-friendly project instructions and skill packaging where appropriate,
-- optional profile JSON files for profile-aware adapters,
+- profile JSON files for profile-aware adapters,
 - plain Markdown files for every other tool.

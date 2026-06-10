@@ -1,13 +1,13 @@
 # Project Profile System PRD
 
-Status: Draft
-Last updated: 2026-06-08
+Status: Runtime checkpoint
+Last updated: 2026-06-11
 Parent PRD: [../main.md](../main.md)
 Source proposal: [../../project-profiles-module-plan.md](../../project-profiles-module-plan.md)
 
 ## Product Definition
 
-Project Profile System lets Project Butler generate and maintain a project-specific memory structure from the user's natural description of the project.
+Project Profile System lets Project Butler generate and maintain a project-specific memory structure from the user's natural description of the project. It is internal runtime behavior, not a user-facing setup switch.
 
 It replaces fixed project-type selection with a conversational profile builder:
 
@@ -74,8 +74,8 @@ These decisions are confirmed by the 2026-06-08 three-stage simulation review.
 10. **Full Close may auto-apply safe patch-level updates.**
    Auto-apply is allowed only when the file is in scope, the section is unprotected, policy allows the update, evidence is clear, and the change is append/branch/active-section patch only.
 
-11. **Document policy changes require confirmation.**
-   Changes to status, owner, update policy, protected sections, or document role affect future permissions and must not happen silently.
+11. **Existing document policy changes require confirmation.**
+   Changes to status, owner, update policy, protected sections, or document role on existing documents affect future permissions and must not happen silently. Default policies for new docs created by an approved Scope Plan or Repair Plan are part of the approved creation boundary.
 
 12. **Full Close confirms boundaries, not every safe edit.**
    The user should approve the Scope Plan and high-risk changes, then Project Butler should batch safe updates inside that boundary without repeated prompts.
@@ -321,7 +321,7 @@ dismiss
 
 ### Foundation Setup
 
-Foundation Setup is the initialization path after Profile System has been enabled or confirmed.
+Foundation Setup is the default setup path.
 
 It should:
 
@@ -651,7 +651,7 @@ Full Close must not change these sections without explicit confirmation.
 
 ### Document Policy Changes
 
-Document policy changes always require confirmation.
+Existing document policy changes always require confirmation.
 
 This includes:
 
@@ -660,6 +660,8 @@ This includes:
 - `update_policy` changes,
 - `protected_sections` changes,
 - `role` changes.
+
+Default `doc_policies` for new docs created by an approved Scope Plan or Repair Plan are part of the approved creation boundary and may be written automatically. This prevents new docs from becoming unsafe, policy-less profile documents.
 
 Example:
 

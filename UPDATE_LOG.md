@@ -9,14 +9,16 @@
 - Added `references/project-profile-system.md` as the runtime reference for Foundation Setup, profile-aware end session, Normal Close, Full Close, Scope Plans, pending lifecycle, review queue escalation, stale-document detection, and profile-aware status.
 - Updated `SKILL.md` routing so profile setup, Normal Close, Full Close, profile sync, and Foundation Repair load the Profile System reference.
 - Updated fresh initialization guidance so Foundation Setup can infer project shape from natural-language project descriptions and propose Required / Recommended / Optional docs before file creation.
-- Updated generated CLAUDE/Cursor templates so new projects can read optional profile JSON files, perform profile impact scans, and support Normal Close / Full Close.
+- Updated generated CLAUDE/Cursor templates so new projects can read profile JSON files, perform profile impact scans, and support Normal Close / Full Close.
 - Updated continue and full-context recovery so profile shape, document policies, pending profile updates, profile debt, and review queue items are restored when profile files exist.
-- Updated upgrade mode to preserve existing profile files, offer companion JSON repair, and avoid enabling Profile System during ordinary upgrade without user intent.
-- Updated README, Chinese README, examples, and compatibility docs to describe Project Profile System as an optional profile-aware layer on top of the base 7-component memory stack.
+- Updated upgrade mode to preserve existing profile files, offer companion JSON repair, and move existing projects toward the current profile-aware setup model with confirmation.
+- Updated README, Chinese README, examples, and compatibility docs to describe Project Profile System as internal profile-aware runtime behavior on top of the base 7-component memory stack.
 - Added a three-scenario simulation report for fresh project, existing baseline project, and large project validation.
-- Tightened fresh initialization so the base 7-component memory stack remains the default, and Profile System is enabled only by explicit request, existing profile files, or user-confirmed recommendation.
+- Tightened fresh initialization so Foundation Setup is the default setup path; lightweight projects use `maintenance.preference = "lightweight"` and minimal confirmed docs rather than skipping profile state.
 - Added profile-driven `foundation_areas` and a bounded Foundation Repair runtime flow with Repair Queue, Repair Plan, batch limits, write rules, and stop conditions.
 - Added lightweight Advanced Consistency runtime rules for Profile Evolution Proposal, Stale Finding Routing, and Review Queue Compaction without automatic scoring or profile rewrites.
+- Clarified `doc_policies`: default policies for newly created docs are part of an approved Scope/Repair Plan, while existing document policy changes require explicit confirmation.
+- Verified the lightweight Fresh setup shape with profile files present, `maintenance.preference = "lightweight"`, no required docs, and an empty pending queue.
 
 ---
 

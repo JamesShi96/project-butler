@@ -105,8 +105,8 @@ project-root/
 ├── log/                        <- Session logs
 └── .claude/
     ├── candidates.md           <- Candidate rules for review
-    ├── project-profile.json    <- Optional project profile config
-    ├── profile-pending.json    <- Optional profile pending/debt queue
+    ├── project-profile.json    <- Project profile config
+    ├── profile-pending.json    <- Profile pending/debt queue
     └── .file-snapshot.json     <- File organization snapshot
 ```
 
@@ -121,7 +121,7 @@ What that means in practice:
 - Keeps new files from drifting into random folders.
 - Preserves long-term rules only after user review.
 
-When Project Profile System is enabled, it also keeps a small machine-readable profile so the assistant can understand which long-lived docs matter, which sections are protected, and which profile updates have been deferred.
+Project Butler also keeps a small machine-readable profile so the assistant can understand which long-lived docs matter, which sections are protected, and which profile updates have been deferred.
 
 ## Tool Support
 
@@ -153,8 +153,8 @@ Current state
 │  STRUCTURE.md                       │  <- Where files belong
 │  UPDATE_LOG.md                      │  <- Milestone-level changes
 │  DOCS.md                            │  <- Document index
-│  .claude/project-profile.json       │  <- Optional profile config
-│  .claude/profile-pending.json       │  <- Optional profile debt queue
+│  .claude/project-profile.json       │  <- Profile config
+│  .claude/profile-pending.json       │  <- Profile debt queue
 └─────────────────────────────────────┘
             ↑ summarized from facts
 Raw facts
@@ -176,13 +176,13 @@ Bottom feeds top. Top constrains bottom.
 - **Update log** records significant changes at milestone level.
 - **Structure rules** keep files from drifting into chaos.
 - **Document index** keeps project documents organized under `docs/`.
-- **Project profile** optionally tracks project shape, document tiers, document policies, pending profile updates, and review queue items.
+- **Project profile** tracks project shape, document tiers, document policies, pending profile updates, and review queue items.
 
 ### Project Profiles
 
-Project Profile System is optional profile-aware behavior for projects that need stronger long-term alignment. Fresh setup can stay lightweight and create only the base memory stack.
+Project Profile System is internal profile-aware behavior for setup and close. Fresh setup stays conversational and can remain lightweight by creating only minimal confirmed docs.
 
-During setup, project-butler can ask what you are trying to do in natural language, infer the project shape, ask a few targeted follow-up questions, and propose Required / Recommended / Optional reference docs. It does not force you to pick a fixed project type.
+During setup, project-butler asks what you are trying to do in natural language, infers the project shape, asks a few targeted follow-up questions, and proposes Required / Recommended / Optional reference docs. It does not force you to pick a fixed project type or expose Profile System as a setup switch.
 
 During close, profile-aware projects can use:
 
@@ -222,7 +222,7 @@ During setup, project-butler asks which version style the project should use:
 
 If a project already has some management files, project-butler creates only the missing ones. It does not replace existing files; when a system section needs an update, it asks before making a small targeted patch. It also detects legacy `.claude/memory/` layouts and suggests migration.
 
-Profile System is not forced during ordinary upgrade. If a project already has profile files, project-butler preserves them. If the user asks for profile setup, full close, or foundation repair, project-butler can infer a profile from existing project docs and ask for confirmation before writing profile files.
+During upgrade, project-butler preserves existing files and offers to bring the project into the current profile-aware setup model. It infers profile state from existing project docs and asks for confirmation before writing profile files or changing existing document policies.
 
 ## Examples
 
@@ -245,8 +245,8 @@ See [docs/examples.md](docs/examples.md) for a complete session flow:
 
 ### v1.6.0 (2026-06-10) - Project Profile System Runtime Wiring
 - Add `references/project-profile-system.md` and route profile setup, Normal Close, Full Close, Foundation Repair, and profile-aware status through the main skill.
-- Teach generated project rules, continue, full context recovery, and upgrade mode to read and preserve optional profile files.
-- Document Project Profile System as optional profile-aware behavior, not part of the base 7-component memory stack.
+- Teach generated project rules, continue, full context recovery, and upgrade mode to read and preserve profile files.
+- Document Project Profile System as internal profile-aware runtime behavior on top of the base 7-component memory stack.
 
 ### v1.5.1 (2026-06-03) - Product Noise Reduction
 - Reframe the README around four primary actions: `/project-butler`, `end session`, `continue`, and `status`.

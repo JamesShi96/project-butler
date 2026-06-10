@@ -4,8 +4,8 @@ This reference defines the runtime behavior for Project Butler's profile-aware s
 
 Use it when:
 
-- initializing a fresh project with Profile System enabled or being proposed,
-- upgrading an existing project into Profile System,
+- initializing a fresh project,
+- upgrading an existing project into the current profile-aware setup model,
 - handling `end session` when `.claude/project-profile.json` exists,
 - handling explicit `normal close`, `full close`, `foundation repair`, or `profile repair`,
 - rendering `status` when `.claude/project-profile.json` or `.claude/profile-pending.json` exists.
@@ -14,30 +14,27 @@ Do not treat this as a separate user-facing product. It is a profile-aware layer
 
 ---
 
-## Enablement Model
+## Runtime Model
 
-Profile System is optional. It should not be created for every fresh project automatically.
+Profile System is internal runtime behavior, not a user-facing setup switch.
 
-Enable Profile System when:
+All fresh setup should use the profile-aware Foundation Setup model:
 
-- the user explicitly asks for `profile setup`, `foundation setup`, Full Close, Foundation Repair, or profile-aware behavior,
-- an existing project already has `.claude/project-profile.json` or `.claude/profile-pending.json`,
-- or the assistant recommends it for a project with clear long-lived alignment needs and the user confirms.
+- create the base Project Butler memory stack,
+- infer project shape from natural-language intake,
+- generate project-specific foundation areas,
+- create `.claude/project-profile.json`,
+- create `.claude/profile-pending.json`,
+- create only user-confirmed baseline docs.
 
-Good recommendation signals:
+For lightweight, short-lived, solo, or mostly code-only projects, do not skip profile state. Instead:
 
-- product scope, roadmap, architecture, research, evals, delivery, compliance, or operating model will change across sessions,
-- AI behavior, prompts, datasets, or evals need stable references,
-- multiple people or tools need to stay aligned on project documents,
-- the user asks for stronger long-term memory than the base 7-component stack.
+- set `maintenance.preference` to `lightweight`,
+- keep Required docs minimal,
+- keep Recommended / Optional docs uncreated unless selected,
+- default future close behavior toward Normal Close unless the user asks for Full Close.
 
-Do not enable Profile System by default when:
-
-- the project is small, short-lived, or mostly code-only,
-- the user only asked for ordinary `/project-butler` setup and gave no signal that long-lived profile docs are needed,
-- the user declines the profile proposal.
-
-If Profile System is skipped, create only the base Project Butler memory stack. The user can enable Profile System later with `profile setup` or `foundation setup`.
+Users should not be asked whether they want "Profile System". They should only confirm the project understanding, document structure, and whether they want Normal Close or Full Close during close.
 
 ---
 
@@ -58,7 +55,7 @@ Profile System uses two machine-readable files:
 
 ## Foundation Setup
 
-Foundation Setup is the fresh initialization path after Profile System has been enabled or confirmed. It replaces fixed document-type selection with conversational profile generation.
+Foundation Setup is the default fresh initialization path. It replaces fixed document-type selection with conversational profile generation.
 
 ### Step 1: Gather Basic Setup Inputs
 
@@ -248,6 +245,7 @@ Creation rules:
 
 - `generated_project_shape` must match the approved project-shape summary.
 - `reference_archetypes_used` and `overlays` must include confidence and evidence when used.
+- `maintenance.preference` should be `lightweight`, `standard`, or `strict`. Use `lightweight` for small or short-lived projects instead of skipping profile state.
 - `foundation_areas` must be project-specific. Use internal archetypes only as hints; do not write a fixed template category as the user's foundation area.
 - Each `foundation_areas[]` item must include `id`, `label`, `purpose`, `docs`, `status`, and `evidence`.
 - `foundation_areas[].status` should be one of `active`, `missing`, `stale`, `under_specified`, or `deferred`.
@@ -468,6 +466,10 @@ If an existing affected document has no `doc_policies` entry, treat it conservat
 - record a pending/review item or propose a document policy change for user confirmation.
 
 New sub-docs created inside an approved Scope Plan must receive a `doc_policies` entry in the same Full Close.
+
+Default `doc_policies` for new docs created by an approved Scope Plan or Repair Plan are part of the approved creation boundary and may be written automatically.
+
+Changing `doc_policies` for existing docs is different. Any existing document policy change requires explicit confirmation.
 
 Allowed:
 
@@ -862,13 +864,12 @@ Only show this section when profile files exist or profile-impacting issues were
 
 ## Upgrade Behavior
 
-For existing Project Butler projects without Profile System:
+For existing Project Butler projects without profile files:
 
-1. Do not force profile creation during ordinary upgrade.
-2. Offer Profile System only when the user asks for setup, profile setup, Full Close, Foundation Repair, or profile-aware behavior.
-3. If user enables it, infer profile from existing `PROJECT.md`, `DOCS.md`, `UPDATE_LOG.md`, `docs/`, and recent logs.
-4. Mark uncertain inferences with lower confidence and open questions.
-5. Ask for confirmation before writing `.claude/project-profile.json`, `.claude/profile-pending.json`, or baseline profile docs.
+1. Offer a profile-aware upgrade to the current setup model.
+2. Infer profile from existing `PROJECT.md`, `DOCS.md`, `UPDATE_LOG.md`, `docs/`, and recent logs.
+3. Mark uncertain inferences with lower confidence and open questions.
+4. Ask for confirmation before writing `.claude/project-profile.json`, `.claude/profile-pending.json`, baseline profile docs, or existing document policy changes.
 
 For existing projects with profile files:
 

@@ -23,18 +23,17 @@ User:
 /project-butler
 ```
 
-Assistant asks for the required project basics and offers recommended defaults. For a lightweight project, it can create only the base memory stack. If the user enables Profile System, it proposes profile-aware reference docs:
+Assistant asks for the required project basics and offers recommended defaults. Setup is conversational and profile-aware by default; lightweight projects get minimal confirmed docs:
 
 ```text
 Project name?
 What are you trying to do with this project?
 Current stage?
-Need stronger profile-aware docs for PRD, architecture, roadmap, evals, research, or delivery? (optional)
-
 I understand this as:
 - Project shape: AI agent SaaS MVP
 - Main output: web product with agent behavior
 - Main drift risks: product scope, eval quality, architecture boundaries
+- Foundation areas: product scope, AI quality baseline, architecture boundaries
 
 Recommended structure:
 - Required: docs/prd/, docs/architecture/, docs/evals/
@@ -71,8 +70,8 @@ TODO.md
 docs/
 log/.gitkeep
 .claude/candidates.md
-.claude/project-profile.json       # when Profile System is enabled
-.claude/profile-pending.json       # when Profile System is enabled
+.claude/project-profile.json
+.claude/profile-pending.json
 .claude/.file-snapshot.json
 .cursor/rules/project-system.mdc   # if selected
 ```
