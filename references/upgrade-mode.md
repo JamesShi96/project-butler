@@ -12,7 +12,7 @@ When some files already exist:
    - Does the trigger words table include `整理文件 / organize files`? If not, add it.
    - Does the file roles table include `STRUCTURE.md` and `.claude/.file-snapshot.json`? If not, add them.
    - Does the Session End Protocol include file reorganization after constitution candidate collection? If not, insert it before output summary and renumber accordingly.
-   - Does it say "4 组件", "5 组件", or "6 组件"? If so, update to "7 组件" and list the current components: Constitution, Wiki, Structure, Update Log, Docs, Log, TODO.
+   - Does it say "4 组件", "5 组件", or "6 组件"? If so, update to "7 组件基础系统" and list the current base components: Constitution, Wiki, Structure, Update Log, Docs, Log, TODO. Profile System is an optional extension, not part of the base component count.
    - Does it include `Log Compaction Threshold` in the CLAUDE.md template? If not, add it.
    - Does the Session Start Protocol include bounded log reading (summaries + raw)? If not, update it.
    - Does the Session Start Protocol read TODO.md, UPDATE_LOG.md, and DOCS.md in addition to PROJECT.md and session-handoff.md? If not, update it.
@@ -34,6 +34,15 @@ When some files already exist:
 15. **For docs/ directory**: create if missing with default subdirectories (`prd/`, `tech-design/`, `research/`) each with `.gitkeep`. If exists, skip.
 16. **For DOCS.md**: create if missing after ensuring `docs/` exists. Use default types: PRD, 技术设计, 调研 (most common combination). Use Template 9 from `references/file-templates.md` (with project name prefix). If exists, never overwrite — user has real document index here.
 17. **For existing Cursor rules**: if `project-system.mdc` exists, check whether it includes change language, continue, continue full context, document archiving, DOCS.md, and version bump behavior. Offer to patch missing system sections after user confirmation; never overwrite custom Cursor rules wholesale.
+18. **For Profile System files**:
+   - If `.claude/project-profile.json` and `.claude/profile-pending.json` exist, preserve them. Patch only schema-compatible missing fields after user confirmation.
+   - If one exists without the other, offer to create the missing companion file using `references/project-profile-system.md`.
+   - If neither exists, do not create them during ordinary upgrade unless the user asked for profile setup, Foundation Setup, Full Close, Foundation Repair, or profile-aware behavior.
+   - When enabling Profile System for an existing project, infer the profile from `PROJECT.md`, `DOCS.md`, `UPDATE_LOG.md`, existing `docs/`, and recent logs. Mark uncertain inferences with lower confidence and Open Questions.
+   - Ask for confirmation before writing `.claude/project-profile.json`, `.claude/profile-pending.json`, baseline profile docs, or document policy metadata.
+19. **For existing CLAUDE.md / Cursor rules and Profile System**:
+   - If profile files exist but generated project rules do not mention them, offer to patch session-start, status, and end-session sections so they read profile files and support Normal Close / Full Close.
+   - Never patch project rules silently.
 
 ## Legacy Migration (.claude/memory/ → new system)
 
@@ -76,6 +85,7 @@ Output shows status of each file, plus any legacy migration suggestions:
   ✅ UPDATE_LOG.md              — 已创建（新增）/ 已存在，跳过
   ✅ UPDATE_LOG version metadata — 已添加（新增）/ 已存在，跳过 / 建议补充
   ✅ docs/ + DOCS.md      — 已创建（新增）/ 已存在，跳过
+  ✅ Profile System        — 未启用 / 已存在，跳过 / 建议补齐 companion JSON / 可选启用
   ✅ Cursor project rules  — 已创建（新增）/ 已存在，建议补齐触发词
   ✅ Coding Guidelines     — 已添加（新增）/ 已存在，跳过
   🌐 Language setting      — 已添加（默认 bilingual）/ 已存在，跳过
@@ -103,4 +113,7 @@ Legacy 检测：
 | Forgetting to read PROJECT.md at session start | CLAUDE.md template explicitly instructs this. |
 | Creating .cursor rules when user doesn't use Cursor | Only create when user answers yes to Q5. |
 | Creating duplicate .cursor/rules/ files | Check if project-system.mdc already exists before creating. Create alongside existing .mdc files, never overwrite. |
-| Keeping old component counts after adding Update Log and Docs | Current system is 7 components: Constitution, Wiki, Structure, Update Log, Docs, Log, TODO. |
+| Keeping old component counts after adding Update Log and Docs | Current base system is 7 components: Constitution, Wiki, Structure, Update Log, Docs, Log, TODO. Profile System is optional extension state. |
+| Creating profile JSON during ordinary upgrade without user intent | Only offer Profile System unless the user explicitly asks for profile setup/full close/foundation repair/profile-aware behavior. |
+| Rewriting existing profile metadata | Preserve existing profile files; patch only schema-compatible missing fields after confirmation. |
+| Treating profile debt as TODO by default | Keep profile debt in `.claude/profile-pending.json` unless it is a concrete execution task. |

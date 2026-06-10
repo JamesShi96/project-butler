@@ -27,15 +27,20 @@ Assistant asks for the required project basics and offers recommended defaults:
 
 ```text
 Project name?
-One-sentence description?
+What are you trying to do with this project?
 Current stage?
 
-Press Enter to use recommended defaults:
-- Language: bilingual
-- Cursor rules: yes
-- Document types: PRD, Tech Design, Research
-- Version style: semantic
-- GitHub repository: optional
+I understand this as:
+- Project shape: AI agent SaaS MVP
+- Main output: web product with agent behavior
+- Main drift risks: product scope, eval quality, architecture boundaries
+
+Recommended structure:
+- Required: docs/prd/, docs/architecture/, docs/evals/
+- Recommended: docs/roadmap/, docs/failure-cases/
+- Optional: docs/design-system/, docs/research/
+
+Confirm or edit before files are created?
 ```
 
 Result:
@@ -65,6 +70,8 @@ TODO.md
 docs/
 log/.gitkeep
 .claude/candidates.md
+.claude/project-profile.json       # when Profile System is enabled
+.claude/profile-pending.json       # when Profile System is enabled
 .claude/.file-snapshot.json
 .cursor/rules/project-system.mdc   # if selected
 ```
@@ -85,6 +92,7 @@ Session saved.
 Updated:
 - Handoff refreshed
 - TODO updated: 3 done, 2 active
+- Profile: no profile impact
 - Project wiki synced
 - Documents archived: 1
 - Update log: v1.5.0 added
@@ -97,6 +105,71 @@ Next:
 
 Internally, project-butler writes the session log, refreshes handoff/project/TODO state, organizes new files, archives documents, and records milestone updates when needed.
 
+## Example 2B: Normal Close With Profile Impact
+
+User:
+
+```text
+normal close
+```
+
+Assistant detects that the session touched a long-lived profile area:
+
+```text
+Session saved.
+
+Updated:
+- Handoff refreshed
+- TODO updated: 1 done, 3 active
+- Profile: 2 updates recorded as pending
+- Project wiki synced
+
+Pending profile updates:
+- PRD: billing capability may need a feature sub-doc
+- Evals: new agent behavior needs an eval case
+
+Next:
+- Run full close when you want affected profile docs aligned
+```
+
+Normal Close is low-friction. It does not patch PRD, architecture, roadmap, evals, or other long-lived profile docs.
+
+## Example 2C: Full Close With Scope Plan
+
+User:
+
+```text
+full close
+```
+
+Assistant first presents a bounded plan:
+
+```text
+Full Close Scope Plan
+
+Will read:
+- docs/prd/features/billing.md
+- docs/evals/cases/agent-billing.md
+
+May change:
+- docs/prd/features/billing.md
+- docs/evals/cases/agent-billing.md
+- docs/prd/main.md Feature Index
+
+Auto-apply:
+- update feature index link
+- append eval case note
+
+Requires confirmation:
+- add billing to Stable Baseline
+
+Will not touch:
+- docs/prd/main.md Stable Baseline
+- unrelated architecture modules
+```
+
+After the user approves the Scope Plan, project-butler applies safe updates inside that boundary and leaves high-risk semantic changes as proposals.
+
 ## Example 3: Continue the Next Day
 
 User:
@@ -106,6 +179,7 @@ continue
 ```
 
 Assistant reads the latest session context, handoff, project wiki, active TODOs, update log, document index, and relevant rules.
+If profile files exist, it also reads `.claude/project-profile.json` and `.claude/profile-pending.json`.
 
 Assistant responds with:
 
@@ -142,6 +216,12 @@ Active Work:
 Recent Change:
 - v1.5.0 added versioned update log support
 
+Profile:
+- Shape: AI agent SaaS MVP
+- Pending profile updates: 2
+- Profile debt: 0
+- Review needed: 0
+
 Next Best Step:
 - Implement password reset token generation
 ```
@@ -161,6 +241,7 @@ Assistant rebuilds the broader project trajectory from:
 - current project wiki,
 - update log,
 - document index,
+- project profile and pending profile queue, when present,
 - active TODOs,
 - project rules.
 
@@ -207,6 +288,8 @@ TODO.md
 STRUCTURE.md
 UPDATE_LOG.md
 DOCS.md
+.claude/project-profile.json
+.claude/profile-pending.json
 ```
 
 The assistant now has the same project state, even though it is a different tool.

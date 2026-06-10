@@ -1,6 +1,6 @@
 ---
 name: project-butler
-description: "Project memory workflow for init/upgrade, end session, file organization, document archiving, language switching, versioned update logs, rule review, status, wiki sync, and context recovery. Use for /project-butler, setup/初始化, end session/收工, organize files/整理文件, change language/切换语言, continue/接着上次, continue full context/全面回顾, review claude, sync wiki, status. Maintains project memory files."
+description: "Project memory workflow for init/upgrade, profile-aware setup, end session, normal/full close, file organization, document archiving, language switching, versioned update logs, rule review, status, wiki sync, and context recovery. Use for /project-butler, setup/初始化, foundation setup, profile setup, end session/收工, normal close, full close, foundation repair, organize files/整理文件, change language/切换语言, continue/接着上次, continue full context/全面回顾, review claude, sync wiki, status. Maintains project memory files."
 ---
 
 # Project Butler — Project Memory Stack
@@ -22,6 +22,8 @@ Initialize standardized project memory:
 │  目录规则 / 匹配条件 / 整理历史       │
 │  UPDATE_LOG.md（里程碑变化）← AI 自动 │
 │  DOCS.md（文档索引 + 元数据）← AI 自动 │
+│  .claude/project-profile.json（画像配置）│
+│  .claude/profile-pending.json（画像待处理）│
 └─────────────────────────────────────┘
         ↑ 状态汇总
 下层（事实流水）
@@ -49,7 +51,7 @@ Determine how this skill was triggered:
 2. Execute **Mode A: Four-Phase Organize** (Discover → Ask or Plan → Plan → Execute)
 3. Report and stop
 
-**B. "收工" / "end session" / "结束会话" / "we're done" / "wrap up" / "done for today":**
+**B. "收工" / "end session" / "结束会话" / "we're done" / "wrap up" / "done for today" / "normal close" / "full close":**
 1. Execute the **End Session Flow** below (inline)
 2. Report and stop
 
@@ -87,14 +89,20 @@ Determine how this skill was triggered:
 **I. "status" / "项目现状" / "where are we":**
 1. Read PROJECT.md and session-handoff.md
 2. Also read TODO.md and latest UPDATE_LOG.md entry if present
-3. Present a compact project dashboard in the configured language: Project, Active Work, Recent Change, Next Best Step
-4. Report and stop
+3. If `.claude/project-profile.json` or `.claude/profile-pending.json` exists, read `references/project-profile-system.md` and include profile debt / review queue in the dashboard
+4. Present a compact project dashboard in the configured language: Project, Active Work, Recent Change, Profile, Next Best Step
+5. Report and stop
+
+**J. "foundation setup" / "profile setup" / "foundation repair" / "profile repair" / "profile sync":**
+1. Read `references/project-profile-system.md`
+2. Execute the matching Profile System flow
+3. Report and stop
 
 ---
 
 ## End Session Flow
 
-When triggered by "end session" / "结束会话" / "收工" / "we're done" / "wrap up" / "done for today", execute in order:
+When triggered by "end session" / "结束会话" / "收工" / "we're done" / "wrap up" / "done for today" / "normal close" / "full close", execute in order:
 
 1. **Write session log** → `log/session-YYYY-MM-DD-{slug}.md`
    - Same-day multiple sessions: use slug to distinguish (e.g., `session-2026-04-21-prd-draft.md`)
@@ -105,20 +113,26 @@ When triggered by "end session" / "结束会话" / "收工" / "we're done" / "wr
 4. **Update PROJECT.md** → if structure/module status changed
 5. **Update TODO.md** → mark completed tasks
 6. **Collect constitution candidates** → append to `.claude/candidates.md` (see rules below)
-7. **File reorganization (incremental)** → read `references/file-reorganization.md`, execute Mode B
+7. **Profile impact scan** → if `.claude/project-profile.json` exists, `.claude/profile-pending.json` exists, or the user explicitly requested Normal Close / Full Close / profile sync:
+   - Read `references/project-profile-system.md`
+   - Run the Profile-Aware End Session flow
+   - For Normal Close: record profile-impacting changes in `.claude/profile-pending.json`
+   - For Full Close: produce a Scope Plan before changing profile docs
+   - Do not rewrite protected sections, document policies, or stable baselines without explicit confirmation
+8. **File reorganization (incremental)** → read `references/file-reorganization.md`, execute Mode B
    - If STRUCTURE.md missing: execute Mode A first to establish baseline
    - Update `.claude/.file-snapshot.json`
-8. **Document archiving** → read `references/document-archiving.md`, scan and archive document output
+9. **Document archiving** → read `references/document-archiving.md`, scan and archive document output
    - Identify documents created/modified this session
    - Classify by type, archive to `docs/` subdirectories
    - Update `DOCS.md` index and metadata
    - If DOCS.md missing: create it (upgrade compatibility)
-9. **Evaluate & write update log** → read `references/update-log.md`
+10. **Evaluate & write update log** → read `references/update-log.md`
    - Evaluate session significance
    - If significant: determine bump level (major/minor/patch), calculate new version from UPDATE_LOG.md metadata, prepend versioned entry
    - Optionally offer GitHub Release creation
    - If not significant, skip silently
-10. **Output summary** → result-focused summary in the configured language (check CLAUDE.md Language setting)
+11. **Output summary** → result-focused summary in the configured language (check CLAUDE.md Language setting)
 
 ### User-Facing Output Style
 
@@ -131,6 +145,7 @@ Updated:
 - Handoff refreshed
 - TODO updated: {done count} done, {active count} active
 - Project wiki synced
+- Profile: {normal close / full close / no profile impact / profile pending count}
 - Documents archived: {count}
 - Update log: {version added or skipped}
 
@@ -153,6 +168,9 @@ Active Work:
 
 Recent Change:
 - {latest update log entry or "No milestone update yet"}
+
+Profile:
+- {profile shape / pending debt / review needed, only when profile files exist}
 
 Next Best Step:
 - {single recommended next step}
@@ -198,14 +216,17 @@ If user provides a task missing required fields, ask them to fill in. Completed 
 
 ### Step 1: Detect Mode
 
-Scan project root for: CLAUDE.md, PROJECT.md, session-handoff.md, TODO.md, log/, STRUCTURE.md, UPDATE_LOG.md, DOCS.md, docs/, .claude/.file-snapshot.json, .claude/candidates.md
+Scan project root for: CLAUDE.md, PROJECT.md, session-handoff.md, TODO.md, log/, STRUCTURE.md, UPDATE_LOG.md, DOCS.md, docs/, .claude/.file-snapshot.json, .claude/candidates.md, .claude/project-profile.json, .claude/profile-pending.json
 
-- **Fresh**: None exist → create all
-- **Upgrade**: Some exist → read `references/upgrade-mode.md`, create missing files and make only user-confirmed targeted patches to existing system sections
+- **Fresh**: None exist → read `references/project-profile-system.md` and execute Foundation Setup, then create all confirmed memory/profile files
+- **Upgrade**: Some exist → read `references/upgrade-mode.md`; if profile files are missing and the user asked for profile-aware behavior, also read `references/project-profile-system.md` and offer Profile System activation
+- **Profile enabled**: profile files exist → preserve existing profile state and patch only schema-compatible missing fields
 
 ### Step 2: Ask Questions
 
-Use AskUserQuestion to ask in two groups. Make clear that the user can press Enter for recommended defaults.
+For Fresh initialization, follow Foundation Setup in `references/project-profile-system.md`. Ask the user to describe the project naturally, infer the project shape, ask only targeted follow-up questions, and propose Required / Recommended / Optional documents before file creation.
+
+For legacy setup without Profile System, use AskUserQuestion to ask in two groups. Make clear that the user can press Enter for recommended defaults.
 
 Required:
 
@@ -228,13 +249,15 @@ Recommended defaults:
 
 ### Step 3: Create Files
 
-Read `references/file-templates.md` + `references/language-adaptation.md` + `references/document-archiving.md`.
+Read `references/file-templates.md` + `references/language-adaptation.md` + `references/document-archiving.md`. If Profile System is enabled, also read `references/project-profile-system.md`.
 
 Create each file using templates, replacing `{{VARIABLES}}` with user answers. For UPDATE_LOG.md, calculate the initial version based on Q8 style selection and current date (e.g., semantic → `v0.1.0`, date → `2026.06.1`). Apply language adaptation rules and glossary from the reference.
 
 Create `log/.gitkeep` (empty file) alongside `log/` directory so git tracks it when empty.
 
 Create `.claude/.file-snapshot.json` with empty content: `{"lastScan":"","files":{}}`.
+
+If Profile System is enabled, also create `.claude/project-profile.json`, `.claude/profile-pending.json`, and confirmed Required profile baseline docs from the approved Foundation Setup proposal.
 
 ### Step 4: Output Report
 
@@ -256,6 +279,7 @@ Created:
 - TODO tracking
 - Document index
 - Update log
+- Profile config and pending queue: created / skipped
 - File organization rules
 - Cursor rules: created / skipped
 
@@ -270,13 +294,14 @@ Settings:
 
 | Trigger | Read these files |
 |---------|-----------------|
-| Init (fresh) | `references/file-templates.md` + `references/language-adaptation.md` + `references/document-archiving.md` |
-| Init (upgrade) | above + `references/upgrade-mode.md` |
-| End session | `references/file-reorganization.md` + `references/document-archiving.md` + `references/update-log.md` + `references/log-compaction.md` (if logs ≥ threshold) |
+| Init (fresh) | `references/project-profile-system.md` + `references/file-templates.md` + `references/language-adaptation.md` + `references/document-archiving.md` |
+| Init (upgrade) | above + `references/upgrade-mode.md`; include `references/project-profile-system.md` when enabling or preserving profile files |
+| End session | `references/file-reorganization.md` + `references/document-archiving.md` + `references/update-log.md` + `references/log-compaction.md` (if logs ≥ threshold); include `references/project-profile-system.md` when profile files exist or Normal/Full Close is requested |
 | 整理文件 / organize files | `references/file-reorganization.md` |
 | 切换语言 / change language | `references/language-change.md` + `references/language-adaptation.md` |
 | continue / 接着上次 | `references/continue.md` |
 | continue full context / 全面回顾 | `references/continue-full-context.md` |
 | review claude / 审查规则 | Inline workflow in Step 0 |
 | sync wiki / 同步项目 | Inline workflow in Step 0 |
-| status / 项目现状 | Inline workflow in Step 0 |
+| status / 项目现状 | Inline workflow in Step 0; include `references/project-profile-system.md` when profile files exist |
+| profile setup / full close / foundation repair | `references/project-profile-system.md` |

@@ -38,6 +38,8 @@ Read TODO.md (active tasks and blockers)
 Read UPDATE_LOG.md (milestone history)
 Read DOCS.md (document index, if present)
 Read CLAUDE.md (stable project rules, if present)
+Read .claude/project-profile.json (profile shape and document policies, if present)
+Read .claude/profile-pending.json (profile pending/debt/review queue, if present)
 ```
 
 Run in parallel:
@@ -52,12 +54,24 @@ cat ./TODO.md 2>/dev/null
 cat ./UPDATE_LOG.md 2>/dev/null
 cat ./DOCS.md 2>/dev/null
 cat ./CLAUDE.md 2>/dev/null
+cat ./.claude/project-profile.json 2>/dev/null
+cat ./.claude/profile-pending.json 2>/dev/null
 ```
 
 ### 4. Present full project overview
 
 **Project Timeline:** chronological session summaries (historical → last session marked `[LAST]`)
 **Last Session Detail:** the full filtered conversation from step 1
-**Current State:** git branch/status, recent 20 commits, memory, handoff, active TODOs, update log, document index, and CLAUDE.md highlights
+**Current State:** git branch/status, recent 20 commits, memory, handoff, active TODOs, update log, document index, CLAUDE.md highlights, and profile state if profile files exist
+
+If profile files exist, include:
+
+- project profile shape and overlays,
+- required/recommended/optional profile docs,
+- document policy highlights,
+- pending profile updates,
+- profile debt,
+- review queue items,
+- any stale-document or Foundation Repair signals visible from pending items.
 
 Then: "Ready to continue. What would you like to work on next?"
