@@ -10,7 +10,7 @@ When some files already exist:
 2. **Create only missing files** with templates. For existing management files, make only small user-confirmed append/patch updates to missing project-butler system sections.
 3. **For existing CLAUDE.md**: check if it contains `## 项目管理系统` section. If missing, offer to append the system rules block. If present, check for missing elements from the project memory stack:
    - Does the trigger words table include `整理文件 / organize files`? If not, add it.
-   - Does the file roles table include `STRUCTURE.md` and `.claude/.file-snapshot.json`? If not, add them.
+   - Does the file roles table include `STRUCTURE.md` and `.claude/file-snapshot.json`? If not, add them.
    - Does the Session End Protocol include file reorganization after constitution candidate collection? If not, insert it before output summary and renumber accordingly.
    - Does it say "4 组件", "5 组件", or "6 组件"? If so, update to "7 组件基础系统" and list the current base components: Constitution, Wiki, Structure, Update Log, Docs, Log, TODO. Profile System is an optional extension, not part of the base component count.
    - Does it include `Log Compaction Threshold` in the CLAUDE.md template? If not, add it.
@@ -24,7 +24,11 @@ When some files already exist:
 5. **For log/ directory**: create if missing (with `log/.gitkeep`), never touch existing log files
 6. **For .claude/candidates.md**: create if missing, skip if exists
 7. **For STRUCTURE.md**: create if missing. If exists, never overwrite — user may have custom rules.
-8. **For .claude/.file-snapshot.json**: create if missing (empty `{"lastScan":"","files":{}}`). If exists, skip.
+8. **For `.claude/file-snapshot.json`**:
+   - If `.claude/file-snapshot.json` exists, skip.
+   - If legacy `.claude/.file-snapshot.json` exists, offer to migrate it to `.claude/file-snapshot.json` and update references.
+   - If neither exists, create `.claude/file-snapshot.json` with empty `{"lastScan":"","files":{}}`.
+   - Do not keep both snapshot files as active sources.
 9. **For old .claude/memory/ directory**: if it exists, treat as legacy system. See Legacy Migration below.
 10. **For existing .cursor/rules/**: check if `project-system.mdc` already exists. If missing, create it alongside any existing `.mdc` files without overwriting them. If it exists, preserve custom content and evaluate missing project-butler sections in step 17.
 11. **For language setting in CLAUDE.md**: if CLAUDE.md exists but has no `## Language` section, add one with default value `bilingual`. If it exists, skip.
@@ -81,7 +85,7 @@ Output shows status of each file, plus any legacy migration suggestions:
   ✅ log/                 — 已创建（新增）
   ✅ .claude/candidates.md — 已创建（新增）
   ✅ STRUCTURE.md               — 已创建（新增）/ 已存在，跳过
-  ✅ .claude/.file-snapshot.json — 已创建（新增）/ 已存在，跳过
+  ✅ .claude/file-snapshot.json — 已创建（新增）/ 已存在，跳过 / 建议从旧路径迁移
   ✅ UPDATE_LOG.md              — 已创建（新增）/ 已存在，跳过
   ✅ UPDATE_LOG version metadata — 已添加（新增）/ 已存在，跳过 / 建议补充
   ✅ docs/ + DOCS.md      — 已创建（新增）/ 已存在，跳过

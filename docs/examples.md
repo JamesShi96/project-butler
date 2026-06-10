@@ -72,7 +72,7 @@ log/.gitkeep
 .claude/candidates.md
 .claude/project-profile.json       # when Profile System is enabled
 .claude/profile-pending.json       # when Profile System is enabled
-.claude/.file-snapshot.json
+.claude/file-snapshot.json
 .cursor/rules/project-system.mdc   # if selected
 ```
 

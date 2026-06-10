@@ -73,7 +73,7 @@ For each classified document:
 - When splitting: create main.md (overview + index) + sub-documents, update DOCS.md hierarchy
 
 **After all documents are archived:**
-- Update `.claude/.file-snapshot.json`: update paths for moved files, add new files in docs/
+- Update `.claude/file-snapshot.json`: update paths for moved files, add new files in docs/
 - Note: file reorganization Mode B may already have updated the snapshot earlier this session, so this step only needs to update entries for files that document archiving moved again
 
 ### Step 4: Update DOCS.md
@@ -157,4 +157,4 @@ When initializing, present these options:
 | Reading entire document contents for classification | Only read first 3-5 paragraphs. Filename and directory should be sufficient for most cases |
 | Auto-splitting documents without asking | Large documents: suggest splitting, but let user decide |
 | Removing DOCS.md entries for deleted documents | If a document was deleted, mark entry as "已废弃" rather than removing the row |
-| Not updating .file-snapshot.json after moving documents | After archiving, update .file-snapshot.json with new paths. Otherwise Mode B will see moved files as "new" next session |
+| Not updating file-snapshot.json after moving documents | After archiving, update file-snapshot.json with new paths. Otherwise Mode B will see moved files as "new" next session |

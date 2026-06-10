@@ -40,7 +40,7 @@ Triggered when user expresses intent to change language (any expression: 切换�
       - Rename using `git mv` if in git repo
       - Update all references in other files
    d. Update STRUCTURE.md 整理历史 with the rename operation
-   e. Update .claude/.file-snapshot.json
+   e. Update .claude/file-snapshot.json
 
 6. Report:
    - Language changed from {old} to {new}

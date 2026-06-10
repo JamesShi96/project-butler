@@ -121,7 +121,7 @@ When triggered by "end session" / "结束会话" / "收工" / "we're done" / "wr
    - Do not rewrite protected sections, document policies, or stable baselines without explicit confirmation
 8. **File reorganization (incremental)** → read `references/file-reorganization.md`, execute Mode B
    - If STRUCTURE.md missing: execute Mode A first to establish baseline
-   - Update `.claude/.file-snapshot.json`
+   - Update `.claude/file-snapshot.json`
 9. **Document archiving** → read `references/document-archiving.md`, scan and archive document output
    - Identify documents created/modified this session
    - Classify by type, archive to `docs/` subdirectories
@@ -216,7 +216,7 @@ If user provides a task missing required fields, ask them to fill in. Completed 
 
 ### Step 1: Detect Mode
 
-Scan project root for: CLAUDE.md, PROJECT.md, session-handoff.md, TODO.md, log/, STRUCTURE.md, UPDATE_LOG.md, DOCS.md, docs/, .claude/.file-snapshot.json, .claude/candidates.md, .claude/project-profile.json, .claude/profile-pending.json
+Scan project root for: CLAUDE.md, PROJECT.md, session-handoff.md, TODO.md, log/, STRUCTURE.md, UPDATE_LOG.md, DOCS.md, docs/, .claude/file-snapshot.json, .claude/candidates.md, .claude/project-profile.json, .claude/profile-pending.json
 
 - **Fresh**: None exist → read `references/project-profile-system.md` and execute Foundation Setup, then create all confirmed memory/profile files
 - **Upgrade**: Some exist → read `references/upgrade-mode.md`; if profile files are missing and the user asked for profile-aware behavior, also read `references/project-profile-system.md` and offer Profile System activation
@@ -255,7 +255,7 @@ Create each file using templates, replacing `{{VARIABLES}}` with user answers. F
 
 Create `log/.gitkeep` (empty file) alongside `log/` directory so git tracks it when empty.
 
-Create `.claude/.file-snapshot.json` with empty content: `{"lastScan":"","files":{}}`.
+Create `.claude/file-snapshot.json` with empty content: `{"lastScan":"","files":{}}`.
 
 If Profile System is enabled, also create `.claude/project-profile.json`, `.claude/profile-pending.json`, and confirmed Required profile baseline docs from the approved Foundation Setup proposal.
 

@@ -87,7 +87,7 @@ Project Butler creates or upgrades the project memory system:
 - `docs/`
 - `log/`
 - `.claude/candidates.md`
-- `.claude/.file-snapshot.json`
+- `.claude/file-snapshot.json`
 
 Future Profile System behavior should extend this setup with a generated project profile and profile-aware document recommendations.
 
