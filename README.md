@@ -180,7 +180,7 @@ Bottom feeds top. Top constrains bottom.
 
 ### Project Profiles
 
-Project Profile System is optional profile-aware behavior for projects that need stronger long-term alignment.
+Project Profile System is optional profile-aware behavior for projects that need stronger long-term alignment. Fresh setup can stay lightweight and create only the base memory stack.
 
 During setup, project-butler can ask what you are trying to do in natural language, infer the project shape, ask a few targeted follow-up questions, and propose Required / Recommended / Optional reference docs. It does not force you to pick a fixed project type.
 

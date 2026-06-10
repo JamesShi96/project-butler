@@ -180,7 +180,7 @@ session-handoff.md       <- 下个 session 从哪里继续
 
 ### Project Profiles
 
-Project Profile System 是可选的 profile-aware 行为，适合需要更强长期对齐的项目。
+Project Profile System 是可选的 profile-aware 行为，适合需要更强长期对齐的项目。Fresh setup 可以保持轻量，只创建基础记忆栈。
 
 初始化时，project-butler 可以让用户自然描述项目，AI 推断项目形态，问少量有价值的追问，然后提出 Required / Recommended / Optional 参考文档结构。它不会强迫用户选择固定项目类型。
 

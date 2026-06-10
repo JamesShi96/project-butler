@@ -4,13 +4,40 @@ This reference defines the runtime behavior for Project Butler's profile-aware s
 
 Use it when:
 
-- initializing a fresh project,
+- initializing a fresh project with Profile System enabled or being proposed,
 - upgrading an existing project into Profile System,
 - handling `end session` when `.claude/project-profile.json` exists,
 - handling explicit `normal close`, `full close`, `foundation repair`, or `profile repair`,
 - rendering `status` when `.claude/project-profile.json` or `.claude/profile-pending.json` exists.
 
 Do not treat this as a separate user-facing product. It is a profile-aware layer on top of the existing Project Butler memory stack.
+
+---
+
+## Enablement Model
+
+Profile System is optional. It should not be created for every fresh project automatically.
+
+Enable Profile System when:
+
+- the user explicitly asks for `profile setup`, `foundation setup`, Full Close, Foundation Repair, or profile-aware behavior,
+- an existing project already has `.claude/project-profile.json` or `.claude/profile-pending.json`,
+- or the assistant recommends it for a project with clear long-lived alignment needs and the user confirms.
+
+Good recommendation signals:
+
+- product scope, roadmap, architecture, research, evals, delivery, compliance, or operating model will change across sessions,
+- AI behavior, prompts, datasets, or evals need stable references,
+- multiple people or tools need to stay aligned on project documents,
+- the user asks for stronger long-term memory than the base 7-component stack.
+
+Do not enable Profile System by default when:
+
+- the project is small, short-lived, or mostly code-only,
+- the user only asked for ordinary `/project-butler` setup and gave no signal that long-lived profile docs are needed,
+- the user declines the profile proposal.
+
+If Profile System is skipped, create only the base Project Butler memory stack. The user can enable Profile System later with `profile setup` or `foundation setup`.
 
 ---
 
@@ -31,7 +58,7 @@ Profile System uses two machine-readable files:
 
 ## Foundation Setup
 
-Foundation Setup is the default fresh initialization path when Profile System is enabled. It replaces fixed document-type selection with conversational profile generation.
+Foundation Setup is the fresh initialization path after Profile System has been enabled or confirmed. It replaces fixed document-type selection with conversational profile generation.
 
 ### Step 1: Gather Basic Setup Inputs
 
@@ -63,6 +90,7 @@ I understand this as:
 - Project shape: {generated label}
 - Main output: {what the project delivers}
 - Main drift risks: {2-4 risks}
+- Foundation areas: {2-5 project-specific long-lived reference areas}
 - Likely reference docs: {short list}
 
 Is this right?
@@ -84,6 +112,10 @@ Avoid taxonomy-heavy questions. The user should not need to learn Project Butler
 Propose a small, evidence-backed structure:
 
 ```text
+Foundation areas
+- Product scope — feature boundaries and user-facing behavior need a stable reference
+- AI quality baseline — prompts, evals, and failure cases need tracking
+
 Required
 - docs/prd/ — product scope needs a stable reference
 - docs/architecture/ — modules and responsibilities need a baseline
@@ -99,6 +131,8 @@ Optional
 
 Guardrails:
 
+- Foundation areas must be generated from the user's actual project, not chosen from a fixed list.
+- Each Required directory should map to at least one foundation area.
 - Required directories should usually be capped at 3-4.
 - Recommended directories should usually be capped at 5-6.
 - Optional directories are listed but not created by default.
@@ -146,7 +180,7 @@ After confirmation:
 
 Baseline drafts must be honest about uncertainty. Use Open Questions rather than pretending weak evidence is confirmed.
 
-When creating `.claude/project-profile.json`, do not leave `directories` or `doc_policies` empty if profile docs were confirmed. Populate them from the approved Required / Recommended / Optional tiers and created baseline docs.
+When creating `.claude/project-profile.json`, do not leave `foundation_areas`, `directories`, or `doc_policies` empty if profile docs were confirmed. Populate them from the approved project-shape summary, Required / Recommended / Optional tiers, and created baseline docs.
 
 ---
 
@@ -182,6 +216,24 @@ Minimum `.claude/project-profile.json`:
     "normal_close": "save_and_defer_profile_updates",
     "full_close": "sync_affected_profile_docs"
   },
+  "foundation_areas": [
+    {
+      "id": "product_scope",
+      "label": "Product Scope",
+      "purpose": "Keep feature boundaries and user-facing behavior stable.",
+      "docs": ["docs/prd/main.md"],
+      "status": "active",
+      "evidence": ["User described a SaaS product with user-facing workflows."]
+    },
+    {
+      "id": "ai_quality_baseline",
+      "label": "AI Quality Baseline",
+      "purpose": "Track AI behavior expectations, evals, and failure cases.",
+      "docs": ["docs/evals/main.md", "docs/failure-cases/main.md"],
+      "status": "missing",
+      "evidence": ["Project includes agent behavior but eval docs were not created yet."]
+    }
+  ],
   "directories": {
     "required": [],
     "recommended": [],
@@ -196,6 +248,10 @@ Creation rules:
 
 - `generated_project_shape` must match the approved project-shape summary.
 - `reference_archetypes_used` and `overlays` must include confidence and evidence when used.
+- `foundation_areas` must be project-specific. Use internal archetypes only as hints; do not write a fixed template category as the user's foundation area.
+- Each `foundation_areas[]` item must include `id`, `label`, `purpose`, `docs`, `status`, and `evidence`.
+- `foundation_areas[].status` should be one of `active`, `missing`, `stale`, `under_specified`, or `deferred`.
+- `foundation_areas[].docs` should list existing or proposed docs that carry that foundation area.
 - `directories.required` must list confirmed Required directories.
 - `directories.recommended` must list confirmed Recommended directories that the user kept selected.
 - `directories.optional` must list Optional directories that were shown but not created.
@@ -468,6 +524,134 @@ Keep review queue items in `.claude/profile-pending.json` by default. Do not cre
 
 ---
 
+## Foundation Repair
+
+Foundation Repair fixes missing, stale, or under-specified project-specific foundation areas. It is not a full project cleanup pass.
+
+Run Foundation Repair when:
+
+- the user explicitly asks for `foundation repair` or `profile repair`,
+- `status` surfaces profile debt that points to a missing or stale foundation area,
+- Normal Close sees the same foundation gap repeatedly,
+- Full Close needs an affected foundation doc that does not exist,
+- or `.claude/project-profile.json` has a `foundation_areas[]` item with `status` of `missing`, `stale`, or `under_specified` and current work depends on it.
+
+### Foundation Areas Are Profile-Driven
+
+Do not use a fixed list of foundation areas. Read them from `.claude/project-profile.json`.
+
+If `foundation_areas` is missing in an older profile, infer candidate areas from:
+
+- `generated_project_shape`,
+- `directories`,
+- `doc_policies`,
+- `DOCS.md`,
+- `.claude/profile-pending.json`,
+- recent `session-handoff.md` and `UPDATE_LOG.md` facts.
+
+Treat inferred areas as proposals. Ask for confirmation before writing them into `.claude/project-profile.json`.
+
+Foundation Repair must not invent a new foundation area silently. If current work no longer fits the existing foundation areas, propose profile evolution and wait for confirmation.
+
+### Gap Clustering
+
+Repair one bounded batch at a time, not necessarily one file at a time.
+
+Allowed:
+
+- one foundation area,
+- or one tightly-coupled gap cluster inside the same foundation area,
+- usually 1-3 strongly related docs.
+
+Do not auto-repair gaps across unrelated foundation areas in the same batch. If several areas need work, produce a Repair Queue and recommend the first batch.
+
+Example:
+
+```text
+Foundation gaps found:
+1. AI Quality Baseline
+   - docs/evals/main.md is missing
+   - docs/failure-cases/main.md is missing
+   - pending items mention assistant behavior quality 3 times
+
+2. Campaign Measurement
+   - metrics baseline is missing
+
+Recommended first repair batch:
+- AI Quality Baseline, because current work changes assistant behavior.
+```
+
+### Repair Plan
+
+Before changing files, present a bounded plan:
+
+```text
+Foundation Repair Plan
+
+Foundation area:
+- {project-specific area label}
+
+Gap:
+- {missing, stale, or under-specified foundation}
+
+Evidence:
+- {session / pending / docs / profile evidence}
+
+Will read:
+- {existing docs needed for this batch}
+
+Will create:
+- {new baseline docs}
+
+Will update:
+- DOCS.md index
+- .claude/project-profile.json foundation_areas / doc_policies
+- .claude/profile-pending.json item status
+
+May patch:
+- {non-protected index, active section, or open questions}
+
+Requires confirmation:
+- {stable baseline, signed-off scope, owner policy, strategic decision}
+
+Will not touch:
+- {unrelated foundation areas, protected sections, unrelated docs}
+
+Completion criteria:
+- {what makes this repair batch done}
+```
+
+Ask for one approval of the Repair Plan. Do not ask for every safe index, policy, or pending-status update inside the approved batch.
+
+### Write Rules
+
+Foundation Repair may:
+
+- create honest baseline drafts for approved missing docs,
+- append Open Questions instead of pretending uncertain facts are confirmed,
+- update `DOCS.md` indexes,
+- add `doc_policies` for newly created docs,
+- update the relevant `foundation_areas[]` item status and docs list,
+- mark related pending items as `resolved`, `profile_debt`, `review_queue`, or `converted_to_todo`.
+
+Foundation Repair must not:
+
+- rewrite stable baselines,
+- change protected sections without confirmation,
+- change project shape or foundation areas without confirmation,
+- repair unrelated foundation areas in the same batch,
+- create every Recommended or Optional doc just because an area exists.
+
+Stop when:
+
+1. The approved repair batch has a baseline doc or explicit pending/review item.
+2. `DOCS.md`, `doc_policies`, and `foundation_areas` match the created docs.
+3. Related pending items have updated status.
+4. Open questions capture unresolved uncertainty.
+5. Unrelated foundation areas remain untouched.
+
+---
+
 ## Stale-Document Detection
 
 Stale-document detection flags mismatch between documented project reality and current project reality.
@@ -512,6 +696,136 @@ Confirmation is required when stale detection implies:
 - reversal of a confirmed decision,
 - document policy change,
 - protected-section update.
+
+---
+
+## Advanced Consistency
+
+Advanced Consistency is a lightweight routing layer. It should not become automated project governance.
+
+Use it for:
+
+- profile evolution proposals,
+- stale finding routing,
+- review queue compaction.
+
+Do not use it for:
+
+- automatic stale scoring,
+- deep whole-project scans,
+- automatic profile shape changes,
+- automatic document policy changes,
+- separate review queue files by default.
+
+### Profile Evolution Proposal
+
+Profile evolution is needed when current work no longer fits the existing `generated_project_shape` or `foundation_areas`.
+
+Signals:
+
+- repeated pending items do not map to any current foundation area,
+- current work creates a new long-lived area that is not represented in `foundation_areas`,
+- existing foundation areas no longer explain the project's main output,
+- the user explicitly says the project direction changed,
+- Full Close or Foundation Repair would need to invent a new foundation area to proceed.
+
+When detected, propose. Do not edit `.claude/project-profile.json` automatically.
+
+Output shape:
+
+```text
+Profile evolution may be needed.
+
+Current profile:
+- Shape: {generated_project_shape.label}
+- Foundation areas: {current areas}
+
+New evidence:
+- {evidence from session / docs / pending items}
+
+Proposed profile evolution:
+- Add foundation area: {label}
+- Update docs: {paths}
+- Update doc_policies: {policy changes}
+
+Requires confirmation:
+- Update .claude/project-profile.json?
+```
+
+If the user declines, record a pending or review queue item instead of changing the profile.
+
+### Stale Finding Routing
+
+Stale findings must route to one of these outcomes:
+
+```text
+Full Close
+- Existing affected docs exist.
+- Safe index / active-section / open-question updates can align them.
+
+Foundation Repair
+- A required foundation area is missing, stale, or under-specified.
+- The current work depends on that foundation area.
+
+Review Queue
+- The stale finding implies a strategic decision, protected section change, owner policy change, or profile evolution.
+
+Normal Close Pending
+- The finding is real but not urgent, or the user does not want to align docs now.
+```
+
+Each routed finding must include:
+
+- affected foundation area or doc,
+- evidence,
+- recommended route,
+- why safer routes were not chosen,
+- whether user confirmation is required.
+
+### Review Queue Compaction
+
+Keep review queue items in `.claude/profile-pending.json` by default.
+
+Compact pending items into a review queue item when:
+
+- 3 or more pending items point to the same foundation area,
+- several pending items ask for the same product, project, research, delivery, or operating decision,
+- pending output becomes too noisy for compact `status`,
+- repeated items cannot be resolved by Normal Close, Full Close, or Foundation Repair without a user decision.
+
+Compaction rules:
+
+- preserve source pending item IDs in `source_item_ids`,
+- summarize the decision needed,
+- keep evidence short and concrete,
+- mark source items as `review_queue` or `resolved` only when the new item clearly covers them,
+- do not create a separate review queue file unless `.claude/profile-pending.json` becomes impractically large.
+
+Example compacted item:
+
+```json
+{
+  "id": "review-YYYY-MM-DD-001",
+  "area": "AI Quality Baseline",
+  "summary": "Decide whether assistant behavior requires eval gates before release.",
+  "evidence": [
+    "pending-2026-06-10-001 mentioned missing eval coverage.",
+    "pending-2026-06-11-002 mentioned failure cases.",
+    "Full Close could not resolve without release policy decision."
+  ],
+  "source_item_ids": ["pending-2026-06-10-001", "pending-2026-06-11-002"],
+  "status": "review_queue",
+  "recommended_action": "review_decision",
+  "priority": "high"
+}
+```
+
+Stop when:
+
+1. The queue is compact enough for `status`.
+2. Each review queue item asks for a real decision.
+3. No pending evidence is lost.
+4. No new files were introduced.
 
 ---
 

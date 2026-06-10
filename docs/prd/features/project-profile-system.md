@@ -229,6 +229,24 @@ Human-readable summaries can live in `PROJECT.md`. Document metadata lives in `D
     "normal_close": "save_and_defer_profile_updates",
     "full_close": "sync_affected_profile_docs"
   },
+  "foundation_areas": [
+    {
+      "id": "product_scope",
+      "label": "Product Scope",
+      "purpose": "Keep feature boundaries and user-facing behavior stable.",
+      "docs": ["docs/prd/main.md"],
+      "status": "active",
+      "evidence": ["User described a SaaS product with user-facing workflows."]
+    },
+    {
+      "id": "ai_quality_baseline",
+      "label": "AI Quality Baseline",
+      "purpose": "Track AI behavior expectations, evals, and failure cases.",
+      "docs": ["docs/evals/main.md", "docs/failure-cases/main.md"],
+      "status": "missing",
+      "evidence": ["Project includes agent behavior but eval docs were not created yet."]
+    }
+  ],
   "directories": {
     "required": [
       {
@@ -303,13 +321,14 @@ dismiss
 
 ### Foundation Setup
 
-Foundation Setup is the initialization path.
+Foundation Setup is the initialization path after Profile System has been enabled or confirmed.
 
 It should:
 
 - run conversational intake,
 - summarize the generated project shape,
 - ask up to 3 adaptive clarification questions,
+- generate project-specific foundation areas,
 - propose Required / Recommended / Optional directories,
 - create `.claude/project-profile.json`,
 - create `.claude/profile-pending.json`,
@@ -815,35 +834,55 @@ Stale-document detection should feed Full Close, Foundation Repair, and Review Q
 
 ## Foundation Repair
 
-Foundation Repair is triggered when the project lacks a core reference doc that current work clearly needs.
+Foundation Repair is triggered when the project lacks, has stale docs for, or under-specifies a foundation area that current work clearly needs.
 
-Examples:
+Foundation areas are not a fixed Project Butler taxonomy. They are generated or confirmed during Foundation Setup and stored in `.claude/project-profile.json`.
 
-- PRD is missing, but product scope is changing.
-- Architecture is missing, but code already has multiple modules.
-- Evals are missing, but AI behavior has changed repeatedly.
-- Roadmap is missing, but release or scope decisions keep appearing.
-- The same pending update appears 3+ times.
+Examples by project shape:
+
+- AI product: AI Quality Baseline is missing while assistant behavior keeps changing.
+- Marketing project: Campaign Measurement is missing while launch metrics keep appearing in TODOs.
+- Client delivery project: Acceptance Criteria is missing while deliverables are being scoped.
+- Research project: Evidence Baseline is missing while sources and findings keep accumulating.
 
 Foundation Repair must be bounded.
 
-It should first propose a repair plan:
+It should first produce a Repair Queue when multiple gaps exist, then recommend one bounded repair batch:
 
 ```text
-Foundation gap detected:
-- PRD is missing.
-- AI Architecture is missing.
-- Evals are missing.
+Foundation gaps found:
+1. AI Quality Baseline
+   - docs/evals/main.md is missing
+   - docs/failure-cases/main.md is missing
+   - pending items mention assistant behavior quality 3 times
 
-Recommended Foundation Repair:
-1. Create PRD baseline from current evidence.
-2. Create AI Architecture baseline from implementation and session notes.
-3. Create Eval Plan baseline with open questions.
+2. Campaign Measurement
+   - metrics baseline is missing
 
-Proceed?
+Recommended first repair batch:
+- AI Quality Baseline, because current work changes assistant behavior.
 ```
 
-Large projects should repair one foundation gap at a time unless the user explicitly approves a broader pass.
+A repair batch may cover one foundation area or one tightly-coupled gap cluster inside that area. It should not repair unrelated foundation areas in the same pass unless the user explicitly approves a broader plan.
+
+Before changing files, Foundation Repair should present:
+
+```text
+Foundation Repair Plan
+
+Foundation area:
+Gap:
+Evidence:
+Will read:
+Will create:
+Will update:
+May patch:
+Requires confirmation:
+Will not touch:
+Completion criteria:
+```
+
+Foundation Repair can create honest baseline drafts, update `DOCS.md`, add `doc_policies`, update `foundation_areas`, and resolve related pending items. It must not silently change project shape, protected sections, owner policy, or unrelated foundation areas.
 
 ## Full Close Stop Conditions
 
@@ -918,7 +957,7 @@ Confirmed rules:
 - Full Close must produce a scope plan before execution.
 - Scope plan must list files to read, files to change, and files it will not touch.
 - Support document ownership and update policy metadata.
-- Large-project Foundation Repair should fix one foundation gap at a time by default.
+- Large-project Foundation Repair should fix one bounded repair batch at a time by default.
 - Stable baselines and owner-protected sections require explicit confirmation.
 
 ## Complete Capability Set
@@ -932,22 +971,23 @@ The complete Profile System should support:
 5. `.claude/project-profile.json`.
 6. `.claude/profile-pending.json`.
 7. Foundation Setup baseline drafts.
-8. Profile-aware `status`.
-9. Normal Close pending profile updates.
-10. Pending Lifecycle with `seen_count`.
-11. Profile debt surfacing.
-12. Full Close impact scan.
-13. Scoped Full Close planning.
-14. Safe patch-level auto-apply.
-15. Core document branching.
-16. Protected section enforcement.
-17. Document policy management.
-18. Foundation gap detection.
-19. Bounded Foundation Repair.
-20. Stale-document detection.
-21. Profile evolution proposals.
-22. Review queue escalation when pending grows too large.
-23. Boundary-level Full Close confirmation.
+8. Project-specific foundation areas.
+9. Profile-aware `status`.
+10. Normal Close pending profile updates.
+11. Pending Lifecycle with `seen_count`.
+12. Profile debt surfacing.
+13. Full Close impact scan.
+14. Scoped Full Close planning.
+15. Safe patch-level auto-apply.
+16. Core document branching.
+17. Protected section enforcement.
+18. Document policy management.
+19. Foundation gap detection.
+20. Bounded Foundation Repair.
+21. Stale-document detection.
+22. Profile evolution proposals.
+23. Review queue escalation when pending grows too large.
+24. Boundary-level Full Close confirmation.
 
 ## Runtime Phases
 
@@ -959,6 +999,7 @@ These are execution phases, not version cuts. The full system includes all of th
 - Summarize inferred project shape.
 - Ask adaptive clarification questions.
 - Generate Required / Recommended / Optional documents.
+- Generate project-specific foundation areas.
 - Create `.claude/project-profile.json`.
 - Create `.claude/profile-pending.json`.
 - Create baseline drafts for confirmed Required documents.
@@ -984,18 +1025,50 @@ These are execution phases, not version cuts. The full system includes all of th
 
 ### Phase 4: Foundation Repair
 
-- Detect missing or stale foundation docs.
-- Produce bounded repair plan.
+- Detect missing, stale, or under-specified project-specific foundation areas.
+- Produce Repair Queue and bounded Repair Plan when needed.
 - Create or update baseline drafts with evidence.
-- Large projects repair one foundation gap at a time by default.
+- Repair one bounded batch at a time by default.
 - Multi-document Foundation Repair requires explicit user approval.
 
 ### Phase 5: Advanced Consistency
 
-- Detect stale documents with evidence.
-- Propose profile evolution when project shape changes.
-- Escalate large pending queues into a review queue.
-- Suggest document policy changes, always with confirmation.
+Phase 5 is a lightweight routing layer, not automated project governance.
+
+It should support:
+
+- Profile Evolution Proposal when current work no longer fits existing `generated_project_shape` or `foundation_areas`.
+- Stale Finding Routing to Full Close, Foundation Repair, Review Queue, or Normal Close Pending.
+- Review Queue Compaction when repeated pending items become too noisy for compact `status`.
+
+It should not support in the first implementation:
+
+- automatic stale scoring,
+- deep whole-project scans,
+- automatic profile shape changes,
+- automatic document policy changes,
+- separate review queue files by default.
+
+Profile Evolution Proposal should:
+
+- cite evidence from session facts, docs, pending items, or user statements,
+- propose exact profile changes,
+- ask before editing `.claude/project-profile.json`,
+- record a pending or review queue item if the user declines.
+
+Stale Finding Routing should:
+
+- route existing-doc alignment to Full Close,
+- route missing or under-specified foundation areas to Foundation Repair,
+- route strategic or protected changes to Review Queue,
+- route non-urgent findings to Normal Close Pending.
+
+Review Queue Compaction should:
+
+- merge repeated pending items that point to the same foundation area or decision,
+- preserve source pending item IDs,
+- keep evidence short and concrete,
+- keep review queue items in `.claude/profile-pending.json` by default.
 
 ## Advanced Capability Safety Gates
 
@@ -1004,7 +1077,9 @@ These are execution phases, not version cuts. The full system includes all of th
 - Profile evolution detection may propose changes to `.claude/project-profile.json`, but policy/profile changes require confirmation.
 - Review queue escalation is allowed when `.claude/profile-pending.json` becomes too large or contains repeated profile debt.
 - Review queue escalation should stay inside `.claude/profile-pending.json` by default.
+- Review queue compaction must preserve source pending item IDs and must not lose evidence.
 - Full Close should ask for one Scope Plan approval, then batch safe L1/L2 updates.
 - Section rewrites require confirmation.
 - Document rewrites are never automatic.
 - Multi-document Foundation Repair requires an approved repair plan.
+- Foundation Repair must be profile-driven, not based on a fixed PRD/engineering taxonomy.

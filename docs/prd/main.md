@@ -89,8 +89,6 @@ Project Butler creates or upgrades the project memory system:
 - `.claude/candidates.md`
 - `.claude/.file-snapshot.json`
 
-Future Profile System behavior should extend this setup with a generated project profile and profile-aware document recommendations.
-
 With Profile System enabled, setup becomes Foundation Setup: Project Butler creates a small baseline reference system from natural-language intake, writes `.claude/project-profile.json` and `.claude/profile-pending.json`, and avoids pretending uncertain projects are fully specified.
 
 ### Continue
@@ -139,8 +137,8 @@ Current state
 ├── STRUCTURE.md
 ├── UPDATE_LOG.md
 ├── DOCS.md
-├── .claude/project-profile.json   # planned stable Profile System config
-└── .claude/profile-pending.json   # planned Profile System pending queue
+├── .claude/project-profile.json   # optional stable Profile System config
+└── .claude/profile-pending.json   # optional Profile System pending queue
 
 Raw facts
 ├── log/
@@ -154,7 +152,7 @@ Handoff
 
 | Feature | Status | Document | Notes |
 |---|---|---|---|
-| Project Profile System | Draft | [features/project-profile-system.md](features/project-profile-system.md) | Conversational profile builder, Foundation Setup, profile-aware docs, Normal/Full Close, pending lifecycle, Scoped Full Close, Foundation Repair |
+| Project Profile System | Runtime checkpoint | [features/project-profile-system.md](features/project-profile-system.md) | Conversational profile builder, Foundation Setup, profile-aware docs, Normal/Full Close, pending lifecycle, Scoped Full Close, Foundation Repair |
 | Document Archiving | Existing | TBD | Current behavior lives in `references/document-archiving.md`; should get its own feature PRD later |
 | File Reorganization | Existing | TBD | Current behavior lives in `references/file-reorganization.md`; should get its own feature PRD later |
 | Versioned Update Log | Existing | TBD | Current behavior lives in `references/update-log.md`; should get its own feature PRD later |
@@ -185,4 +183,4 @@ Handoff
 
 1. Which existing behaviors should get their own feature PRDs next?
 2. Should `DOCS.md` index `docs/prd/` feature PRDs once this repo adopts Project Butler's own document archive pattern?
-3. Should `.claude/project-profile.json` and `.claude/profile-pending.json` be created only when Profile System is enabled, or during all new setup flows?
+3. What additional real-world fixture examples should be kept after the first formal Profile System release?

@@ -171,4 +171,4 @@ The current implementation passes text-level simulation for the three target pro
 - profile file creation now requires populated directories and document policies,
 - affected docs without policies now default to conservative no-auto-patch behavior.
 
-Next validation should use disposable sample projects and run manual end-to-end setup, Normal Close, Full Close, status, continue, and upgrade flows.
+Disposable sample validation was run locally and found no runtime-rule bug. The next validation should use real interactive sessions before formal release.

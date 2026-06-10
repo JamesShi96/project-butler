@@ -23,12 +23,13 @@ User:
 /project-butler
 ```
 
-Assistant asks for the required project basics and offers recommended defaults:
+Assistant asks for the required project basics and offers recommended defaults. For a lightweight project, it can create only the base memory stack. If the user enables Profile System, it proposes profile-aware reference docs:
 
 ```text
 Project name?
 What are you trying to do with this project?
 Current stage?
+Need stronger profile-aware docs for PRD, architecture, roadmap, evals, research, or delivery? (optional)
 
 I understand this as:
 - Project shape: AI agent SaaS MVP

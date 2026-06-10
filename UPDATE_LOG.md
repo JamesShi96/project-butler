@@ -14,6 +14,9 @@
 - Updated upgrade mode to preserve existing profile files, offer companion JSON repair, and avoid enabling Profile System during ordinary upgrade without user intent.
 - Updated README, Chinese README, examples, and compatibility docs to describe Project Profile System as an optional profile-aware layer on top of the base 7-component memory stack.
 - Added a three-scenario simulation report for fresh project, existing baseline project, and large project validation.
+- Tightened fresh initialization so the base 7-component memory stack remains the default, and Profile System is enabled only by explicit request, existing profile files, or user-confirmed recommendation.
+- Added profile-driven `foundation_areas` and a bounded Foundation Repair runtime flow with Repair Queue, Repair Plan, batch limits, write rules, and stop conditions.
+- Added lightweight Advanced Consistency runtime rules for Profile Evolution Proposal, Stale Finding Routing, and Review Queue Compaction without automatic scoring or profile rewrites.
 
 ---
 

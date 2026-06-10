@@ -218,13 +218,13 @@ If user provides a task missing required fields, ask them to fill in. Completed 
 
 Scan project root for: CLAUDE.md, PROJECT.md, session-handoff.md, TODO.md, log/, STRUCTURE.md, UPDATE_LOG.md, DOCS.md, docs/, .claude/.file-snapshot.json, .claude/candidates.md, .claude/project-profile.json, .claude/profile-pending.json
 
-- **Fresh**: None exist → read `references/project-profile-system.md` and execute Foundation Setup, then create all confirmed memory/profile files
+- **Fresh**: None exist → create the base 7-component memory stack by default. Enable Profile System only when the user asks for profile-aware setup, chooses the profile option, or confirms the assistant's recommendation after seeing the inferred project-shape proposal.
 - **Upgrade**: Some exist → read `references/upgrade-mode.md`; if profile files are missing and the user asked for profile-aware behavior, also read `references/project-profile-system.md` and offer Profile System activation
 - **Profile enabled**: profile files exist → preserve existing profile state and patch only schema-compatible missing fields
 
 ### Step 2: Ask Questions
 
-For Fresh initialization, follow Foundation Setup in `references/project-profile-system.md`. Ask the user to describe the project naturally, infer the project shape, ask only targeted follow-up questions, and propose Required / Recommended / Optional documents before file creation.
+For Fresh initialization, ask the user for the required setup basics and whether this project needs the optional Profile System layer. Recommend Profile System only when the project likely needs long-lived PRD, architecture, roadmap, research, eval, delivery, or operating-model alignment. If the user enables it, follow Foundation Setup in `references/project-profile-system.md`: ask for a natural project description, infer the project shape, generate project-specific foundation areas, ask only targeted follow-up questions, and propose Required / Recommended / Optional documents before file creation.
 
 For legacy setup without Profile System, use AskUserQuestion to ask in two groups. Make clear that the user can press Enter for recommended defaults.
 
@@ -294,7 +294,7 @@ Settings:
 
 | Trigger | Read these files |
 |---------|-----------------|
-| Init (fresh) | `references/project-profile-system.md` + `references/file-templates.md` + `references/language-adaptation.md` + `references/document-archiving.md` |
+| Init (fresh) | `references/file-templates.md` + `references/language-adaptation.md` + `references/document-archiving.md`; include `references/project-profile-system.md` only when Profile System is enabled or being proposed |
 | Init (upgrade) | above + `references/upgrade-mode.md`; include `references/project-profile-system.md` when enabling or preserving profile files |
 | End session | `references/file-reorganization.md` + `references/document-archiving.md` + `references/update-log.md` + `references/log-compaction.md` (if logs ≥ threshold); include `references/project-profile-system.md` when profile files exist or Normal/Full Close is requested |
 | 整理文件 / organize files | `references/file-reorganization.md` |
