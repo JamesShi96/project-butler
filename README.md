@@ -134,6 +134,19 @@ When Project Profile System is enabled, it also keeps a small machine-readable p
 
 See [docs/compatibility.md](docs/compatibility.md) for details and caveats.
 
+## CLI Utilities
+
+The repository also includes an experimental Node.js CLI for deterministic checks and bookkeeping:
+
+```bash
+npm install
+npm run build
+node dist/src/cli.js doctor
+node dist/src/cli.js profile validate
+```
+
+See [docs/cli.md](docs/cli.md) for available commands. The Skill remains the interaction layer; the CLI handles validation, snapshots, document indexes, changelog entries, and profile JSON checks.
+
 ## How It Works
 
 ### Internals: The Memory Stack

@@ -134,6 +134,19 @@ project-root/
 
 细节和边界见 [docs/compatibility.md](docs/compatibility.md)。
 
+## CLI 工具
+
+仓库也包含一组实验性的 Node.js CLI，用于处理确定性的检查和记账操作：
+
+```bash
+npm install
+npm run build
+node dist/src/cli.js doctor
+node dist/src/cli.js profile validate
+```
+
+可用命令见 [docs/cli.md](docs/cli.md)。Skill 仍然负责交互和判断；CLI 负责校验、快照、文档索引、更新日志和 profile JSON 检查。
+
 ## 工作原理
 
 ### 内部机制：记忆栈

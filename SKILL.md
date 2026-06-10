@@ -40,6 +40,18 @@ Core idea: bottom feeds top, top constrains bottom. Logs and TODOs are raw facts
 
 Supports 3 language modes: English (`en`), Chinese (`zh`), or bilingual. All content adapts to the selected language.
 
+Optional CLI utilities can validate deterministic state after the Skill decides what should happen:
+
+```bash
+node dist/src/cli.js doctor
+node dist/src/cli.js snapshot --write
+node dist/src/cli.js docs sync --write
+node dist/src/cli.js profile validate
+node dist/src/cli.js changelog bump --level minor --title "Title" --bullet "Change" --write
+```
+
+Use the CLI as a check/bookkeeping layer, not as a replacement for user-facing confirmation.
+
 ---
 
 ## Step 0: Trigger Routing
