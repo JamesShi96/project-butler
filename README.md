@@ -1,6 +1,6 @@
 # project-butler
 
-**[English](README.md)** | [中文](README_zh.md)
+**[English](README.md)** | [中文](README.zh.md)
 
 [![GitHub stars](https://img.shields.io/github/stars/JamesShi96/project-butler?style=social)](https://github.com/JamesShi96/project-butler/stargazers)
 [![GitHub release](https://img.shields.io/github/v/release/JamesShi96/project-butler?display_name=tag)](https://github.com/JamesShi96/project-butler/releases)
@@ -107,7 +107,7 @@ project-root/
     ├── candidates.md           <- Candidate rules for review
     ├── project-profile.json    <- Optional project profile config
     ├── profile-pending.json    <- Optional profile pending/debt queue
-    └── .file-snapshot.json     <- File organization snapshot
+    └── file-snapshot.json      <- File organization snapshot
 ```
 
 The core files are plain Markdown, so other tools can read them even when they do not run the skill natively.
@@ -133,6 +133,12 @@ When Project Profile System is enabled, it also keeps a small machine-readable p
 | Other AI assistants | File-based | Any assistant that can read project files can use the project memory as shared context. |
 
 See [docs/compatibility.md](docs/compatibility.md) for details and caveats.
+
+## Naming Conventions
+
+Repository files use `kebab-case` by default. Ecosystem entry points such as `README.md`, `LICENSE`, and `SKILL.md` keep their standard names, while generated project memory files such as `PROJECT.md`, `TODO.md`, and `UPDATE_LOG.md` keep their documented protocol names.
+
+See [docs/naming-conventions.md](docs/naming-conventions.md) for the full convention and migration note for `.claude/file-snapshot.json`.
 
 ## How It Works
 

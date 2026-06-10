@@ -23,7 +23,7 @@ It does not claim a formal release. The goal is to find whether the current `SKI
 - `references/upgrade-mode.md`
 - `docs/examples.md`
 - `README.md`
-- `README_zh.md`
+- `README.zh.md`
 - `docs/compatibility.md`
 
 ## Scenario 1: Fresh Project Initialization

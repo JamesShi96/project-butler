@@ -1,6 +1,6 @@
 # project-butler
 
-[English](README.md) | **[中文](README_zh.md)**
+[English](README.md) | **[中文](README.zh.md)**
 
 [![GitHub stars](https://img.shields.io/github/stars/JamesShi96/project-butler?style=social)](https://github.com/JamesShi96/project-butler/stargazers)
 [![GitHub release](https://img.shields.io/github/v/release/JamesShi96/project-butler?display_name=tag)](https://github.com/JamesShi96/project-butler/releases)
@@ -107,7 +107,7 @@ project-root/
     ├── candidates.md           <- 待审核规则候选
     ├── project-profile.json    <- 可选 Project Profile 配置
     ├── profile-pending.json    <- 可选 Profile pending / debt 队列
-    └── .file-snapshot.json     <- 文件组织快照
+    └── file-snapshot.json      <- 文件组织快照
 ```
 
 核心文件都是普通 Markdown，因此即使某个工具不能原生运行这个 skill，也可以读取这些文件作为共享上下文。
@@ -133,6 +133,12 @@ project-root/
 | 其他 AI 助手 | 文件式接入 | 只要能读取项目文件，就能使用这套记忆栈作为共享上下文。 |
 
 细节和边界见 [docs/compatibility.md](docs/compatibility.md)。
+
+## 命名规范
+
+仓库自身文件默认使用 `kebab-case`。`README.md`、`LICENSE`、`SKILL.md` 等生态入口文件保留标准命名；`PROJECT.md`、`TODO.md`、`UPDATE_LOG.md` 等生成到用户项目里的记忆文件保留协议命名。
+
+完整规则和 `.claude/file-snapshot.json` 迁移说明见 [docs/naming-conventions.md](docs/naming-conventions.md)。
 
 ## 工作原理
 

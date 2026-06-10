@@ -85,7 +85,7 @@ The most critical file — auto-loaded by Claude Code, defines all ongoing behav
 | log/session-*.md | AI | end session 时 |
 | .claude/candidates.md | AI 自动 | 过程中识别到稳定规则时 |
 | STRUCTURE.md | AI 自动 | end session + 文件结构变化时 |
-| .claude/.file-snapshot.json | AI 自动 | end session 时 |
+| .claude/file-snapshot.json | AI 自动 | end session 时 |
 | UPDATE_LOG.md | AI 自动 | end session + 重大更新时 |
 | DOCS.md | AI 自动 | end session + 文档归档时 |
 | .claude/project-profile.json | AI 自动 | Foundation Setup + 用户确认的 profile 变更时 |
@@ -120,7 +120,7 @@ At session start:
 8. **整理文件结构（增量模式）** → 只处理新增/变更文件，按 STRUCTURE.md 规则快速归类
    - 若 STRUCTURE.md 不存在：先建立规则表（深度模式），再整理
    - 若 STRUCTURE.md 已存在：只匹配新增文件，不重读已有文件
-   - 更新 `.claude/.file-snapshot.json`
+   - 更新 `.claude/file-snapshot.json`
 9. **文档归档** → 扫描本次会话产出的新增/变更文档，按类型归档并更新文档索引
    - 识别并分类文档（PRD / 技术设计 / 设计文档 / 调研 / 会议纪要 / 实验记录）
    - 归档到 `docs/` 对应子目录 + 更新 `DOCS.md` 索引元数据
@@ -293,7 +293,7 @@ Adapt headers using the PROJECT.md glossary. In bilingual mode, use Chinese head
     ├── candidates.md           ← 宪法候选池
     ├── project-profile.json    ← Project Profile 配置（可选）
     ├── profile-pending.json    ← Profile 待处理队列（可选）
-    └── .file-snapshot.json     ← 文件整理快照
+    └── file-snapshot.json     ← 文件整理快照
 ```
 
 ## 关键文件索引
@@ -485,7 +485,7 @@ This project uses a 7-component base memory stack internally. When Profile Syste
 | log/session-*.md | AI | end session |
 | .claude/candidates.md | AI auto | when stable rules identified |
 | STRUCTURE.md | AI auto | end session + file structure changes |
-| .claude/.file-snapshot.json | AI auto | end session |
+| .claude/file-snapshot.json | AI auto | end session |
 | UPDATE_LOG.md | AI auto | end session + significant updates |
 | DOCS.md | AI auto | end session + document archiving |
 | .claude/project-profile.json | AI auto | Foundation Setup + confirmed profile changes |

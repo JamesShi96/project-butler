@@ -12,7 +12,7 @@ Two modes with different depth levels, triggered by different commands. Mode A i
 
 **Prerequisites:**
 - Read STRUCTURE.md if it exists
-- Read `.claude/.file-snapshot.json` if it exists
+- Read `.claude/file-snapshot.json` if it exists
 - Read PROJECT.md if it exists (for known module info)
 
 **Flow:**
@@ -186,7 +186,7 @@ Wait for explicit user confirmation before proceeding to Phase 4.
 5. Clean empty directories       → remove dirs that became empty
 6. Update management files:
    - STRUCTURE.md                → replace with plan's rule table
-   - .file-snapshot.json         → full refresh
+   - file-snapshot.json         → full refresh
    - PROJECT.md                  → update file structure section
 ```
 
@@ -211,7 +211,7 @@ Wait for explicit user confirmation before proceeding to Phase 4.
 **Philosophy:** Lightweight maintenance. Only process files that are new or changed since last snapshot. Fast, minimal token usage.
 
 **Prerequisites:**
-- Read `.claude/.file-snapshot.json` (required — this is the diff baseline)
+- Read `.claude/file-snapshot.json` (required — this is the diff baseline)
 - Read STRUCTURE.md for rules (no need to read all file contents)
 
 **Flow:**
@@ -219,7 +219,7 @@ Wait for explicit user confirmation before proceeding to Phase 4.
 ```
 1. Diff Scan:
    a. List all project files recursively (same exclusions as Mode A)
-   b. Compare against .file-snapshot.json
+   b. Compare against file-snapshot.json
    c. Identify ONLY:
       - New files (not in snapshot)
       - Moved/renamed files (path changed)
@@ -243,7 +243,7 @@ Wait for explicit user confirmation before proceeding to Phase 4.
    - Name collision check
    - System file check
 
-5. Update .claude/.file-snapshot.json:
+5. Update .claude/file-snapshot.json:
    - Add new files
    - Update paths for moved files
    - Remove entries for deleted files
@@ -286,7 +286,7 @@ Wait for explicit user confirmation before proceeding to Phase 4.
 | Using bare mv instead of git mv | In git repos, use git mv to preserve history |
 | Removing user-written STRUCTURE.md rules | Only add new rules. Never remove without confirmation |
 | Using Mode A (deep) when Mode B (incremental) was triggered | "收工" → Mode B. "整理文件" → Mode A. Never mix them. |
-| Re-reading unchanged files in Mode B | Mode B only processes files NOT in .file-snapshot.json |
+| Re-reading unchanged files in Mode B | Mode B only processes files NOT in file-snapshot.json |
 | Doing content-aware naming in Mode B | Mode B only places new files. Renaming existing files is Mode A's job. |
 | Reading every file content in Step 1 of Discover | Step 1 is structural signals only (glob/grep). Content reading is Step 2, only for uncertain files. |
 | Not falling back to Mode A when STRUCTURE.md is missing in Mode B | If STRUCTURE.md doesn't exist, Mode B cannot function. Fall back to Mode A. |
