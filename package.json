@@ -1,0 +1,18 @@
+{
+  "name": "project-butler",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "bin": {
+    "project-butler": "dist/src/cli.js"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "test": "npm run build && node --test dist/test/*.test.js",
+    "check": "npm run build && npm run test"
+  },
+  "devDependencies": {
+    "@types/node": "^20.14.10",
+    "typescript": "^5.5.3"
+  }
+}
