@@ -157,6 +157,9 @@ Organizing dimension: {by module / by client / by type / ...}
 ### Suggested Cleanup (AI will NOT delete — for your review)
 ⚠️ {file path} — {reason: likely temp/cache/dupe, consider deleting or adding to .gitignore}
 
+### Sensitive Files (requires separate confirmation)
+🔒 {file path} — {reason: credential/key/certificate/env-like file; proposed action}
+
 ### STRUCTURE.md Rule Updates
 | Path | Purpose | Match Condition | Naming Convention |
 |------|---------|-----------------|-------------------|
@@ -171,6 +174,7 @@ Key rules:
 - STRUCTURE.md rules shown inline — one confirmation covers both
 - User can partially modify: "don't touch X, do the rest"
 - **Suggested Cleanup** lists files that look like temp/cache/duplicate files, but AI NEVER deletes them — only flags them for the user to review
+- **Sensitive Files** lists credential-like files separately. Do not read sensitive file contents, move them, or include them in bulk confirmation unless the user explicitly confirms the sensitive-file action.
 
 Wait for explicit user confirmation before proceeding to Phase 4.
 
@@ -180,11 +184,12 @@ Wait for explicit user confirmation before proceeding to Phase 4.
 
 ```
 1. Create new directories        → mkdir -p
-2. Move files                    → git mv (preserves git history)
-3. Rename files                  → git mv
+2. Move files                    → git mv in git repos; mv only outside git repos
+3. Rename files                  → git mv in git repos; mv only outside git repos
 4. Fix references                → grep old paths → update .md, imports, config
-5. Clean empty directories       → remove dirs that became empty
-6. Update management files:
+5. Validate moved references     → run cheap link/script/config checks when feasible
+6. Clean empty directories       → remove dirs that became empty
+7. Update management files:
    - STRUCTURE.md                → replace with plan's rule table
    - .file-snapshot.json         → full refresh
    - PROJECT.md                  → update file structure section
@@ -194,12 +199,37 @@ Wait for explicit user confirmation before proceeding to Phase 4.
 - Cross-reference check: grep for old path in other files, update if found
 - Name collision check: does target already have a same-name file? If yes → flag, do NOT overwrite
 - System file check: never move CLAUDE.md, PROJECT.md, STRUCTURE.md, session-handoff.md, TODO.md, UPDATE_LOG.md, DOCS.md
+- Sensitive file check: files matching secret/key/certificate/env patterns require separate user confirmation before move or rename
+
+**Sensitive file patterns:**
+- `.env`, `.env.*`
+- `*.pem`, `*.key`, `*.pfx`, `*.p12`, `*.crt`, `*.cer`
+- `credentials*.json`, `*credential*`, `*secret*`, `*token*`, `*api_key*`, `*apikey*`
+- cloud/provider credential names such as `service-account*.json`, `id_rsa`, `id_ed25519`
+
+When sensitive files are found:
+- show them in the Sensitive Files section of the plan
+- default to leaving them unchanged or moving them only into a clearly named secure directory after explicit confirmation
+- do not read their contents unless the user explicitly asks for inspection
+- do not include sensitive-file moves in broad "confirm all" execution unless the confirmation specifically mentions sensitive files
+
+**Move command selection:**
+- In a git repository: use `git mv` for tracked files to preserve history; use `mv` only for untracked files that Git does not know about
+- Outside a git repository: use `mv`
+- In all cases: create target directories first, check for collisions, and never overwrite existing files
+
+**Post-move validation:**
+- Markdown links: verify updated relative links point to existing files when practical
+- Code imports / config paths: run a cheap parse, unit test, or smoke command when available
+- Script-relative file paths: avoid naive string replacement when current working directory matters; prefer path resolution based on the script/config location when appropriate
+- Snapshot consistency: refresh `.claude/.file-snapshot.json` after all file moves, generated reports, and management-file updates are complete
 
 **Report:**
 - Files moved (with before → after)
 - Files renamed (with before → after)
 - Directories created
 - References updated
+- Validations run and any skipped validations
 - Files in 待分类 (if any)
 
 ---
@@ -267,9 +297,11 @@ Wait for explicit user confirmation before proceeding to Phase 4.
 - **Never move management files**: CLAUDE.md, PROJECT.md, STRUCTURE.md, session-handoff.md, TODO.md, UPDATE_LOG.md, DOCS.md stay at project root
 - **Never move files in exclusion list**: .git/, node_modules/, docs/, etc.
 - **Never move or rename files in docs/**: Document files are managed by DOCS.md and the document archiving workflow, not by file reorganization
-- **Preserve git history**: use `git mv` when in a git repo, not bare `mv`
+- **Preserve git history**: use `git mv` for tracked files in a git repo; use plain `mv` only outside git repos or for untracked files
 - **Update references**: after moving a file, search for and update any imports/links to its old path
+- **Validate moved references**: after updating references, run cheap link/script/config checks when available and report what was validated
 - **No overwrites**: if target has a same-name file, flag instead of clobbering
+- **Protect sensitive files**: credential-like files require separate plan visibility and explicit confirmation before move/rename
 - **Respect human edits**: if user manually modified STRUCTURE.md rules, honor them. Only add new rules, never remove user-written rules without confirmation
 
 ## Common Mistakes
@@ -281,9 +313,11 @@ Wait for explicit user confirmation before proceeding to Phase 4.
 | Showing a plan without labeling the organizing dimension | Every plan must state its dimension (by module, by client, by type, etc.) so the user can verify. |
 | Executing Phase 4 without explicit user confirmation | The plan is a proposal. Wait for the user to say yes (or partially modify) before touching files. |
 | Moving files without checking cross-references | Always grep for imports/links to old path and update them |
+| Updating references with blind string replacement only | Validate moved references; for scripts/configs, account for the new file location and current working directory |
 | Overwriting files on name collision | If same-name file exists at target, flag for manual resolution instead |
 | Moving management files (CLAUDE.md, PROJECT.md, etc.) | These must stay at project root. Never reorganize them |
-| Using bare mv instead of git mv | In git repos, use git mv to preserve history |
+| Using bare mv for tracked files in a git repo | In git repos, use git mv for tracked files; outside git repos, plain mv is acceptable after collision checks |
+| Moving credential-like files in a bulk operation | Sensitive files require a separate plan section and explicit confirmation |
 | Removing user-written STRUCTURE.md rules | Only add new rules. Never remove without confirmation |
 | Using Mode A (deep) when Mode B (incremental) was triggered | "收工" → Mode B. "整理文件" → Mode A. Never mix them. |
 | Re-reading unchanged files in Mode B | Mode B only processes files NOT in .file-snapshot.json |
@@ -293,3 +327,4 @@ Wait for explicit user confirmation before proceeding to Phase 4.
 | Forcing the full flow when the project is already well-organized | If all files match STRUCTURE.md rules and no issues found, use the early exit. Don't make the user confirm an empty plan. |
 | Deleting files during reorganization | NEVER delete any file. Flag suspected temp/cache/duplicate files in "Suggested Cleanup" for the user to handle. |
 | Reorganizing files in docs/ directory | docs/ is managed by DOCS.md and the document archiving workflow. File reorganization should skip docs/ entirely. |
+| Updating .file-snapshot.json before generated reports are written | Refresh the snapshot after all moves, generated reports, and management-file updates are complete. |
