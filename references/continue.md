@@ -7,7 +7,7 @@
 ### 1. Find and read the last session
 
 ```bash
-PROJECT_PATH="$HOME/.claude/projects/-$(pwd | sed 's|/|-|g' | sed 's|^-||')"
+PROJECT_PATH="$HOME/.claude/projects/-$(pwd | sed 's|[^a-zA-Z0-9]|-|g' | sed 's|^-||')"
 SESSION_FILE=$(ls -t "${PROJECT_PATH}"/*.jsonl 2>/dev/null | head -1)
 ```
 

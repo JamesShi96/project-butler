@@ -13,7 +13,7 @@ Execute steps 1-2 from `references/continue.md` (find project path, locate last 
 List all sessions and pick the historical ones (everything except the last):
 
 ```bash
-PROJECT_PATH="$HOME/.claude/projects/-$(pwd | sed 's|/|-|g' | sed 's|^-||')"
+PROJECT_PATH="$HOME/.claude/projects/-$(pwd | sed 's|[^a-zA-Z0-9]|-|g' | sed 's|^-||')"
 ls -t "${PROJECT_PATH}"/*.jsonl 2>/dev/null
 ```
 
