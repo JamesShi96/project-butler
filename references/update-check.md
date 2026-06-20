@@ -66,35 +66,17 @@ fi
 - Silence switch matches the literal string `"1"` only. `=0`, `=false`, empty do NOT silence.
 - Run the snippet as a single Bash tool call. Variables do not persist across separate invocations.
 
-## Cache
-
-Path: `<SKILL_DIR>/.claude/.version-check.txt` (gitignored).
-
-Three lines, `key=value`:
-- `last_check` — Unix timestamp of last successful fetch.
-- `behind_by` — commit count of `HEAD..origin/main` at last fetch.
-- `head_sha` — SHA of `HEAD` at last fetch.
-
-Cache is valid only when **both** hold:
-- age < 24 hours (`now - last_check < 86400`)
-- current `HEAD` SHA == cached `head_sha`
-
-Either failing triggers a fresh fetch. The SHA check ensures the
-banner disappears immediately after the user pulls.
-
 ## Edge Cases
 
 | Situation | Behavior |
 |---|---|
 | No "Base directory" line in CC prompt | Skip silently |
-| `.claude/` directory missing | `mkdir -p` on first successful fetch |
-| Cache missing or corrupt | Fetch, create cache |
-| Cache stale (time expired or SHA mismatch) | Fetch |
-| `git fetch` fails (offline, port 22 blocked, non-git path) | Use cached `behind_by`, no banner update |
-| SSH port 22 blocked | `ConnectTimeout=5` bounds hang to ~5s (not ~2min) |
+| Cache missing, corrupt, or SHA mismatch | Fetch |
+| `git fetch` fails (offline, port 22 blocked, non-git path) | Use cached `behind_by`; no banner update |
+| SSH port 22 blocked (firewall, China mainland, corp net) | `ConnectTimeout=5` bounds hang to ~5s (vs ~2min default) |
 | `mkdir -p` or cache write fails | Silently degrade to no-cache mode |
 
 ## Source
 
-Design rationale and history: `docs/prd/features/version-freshness-check.md`.
+Design rationale and full failure modes: `docs/prd/features/version-freshness-check.md`.
 Live-validated 2026-06-20 (Phase 1+2+3 — first install, cache hit, pull recovery, SSH fail-fast, banner verbatim).
