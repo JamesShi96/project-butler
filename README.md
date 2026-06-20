@@ -50,6 +50,46 @@ continue
 
 That is enough for daily use. For Cursor, Codex, and other assistants, see [Tool Compatibility](docs/compatibility.md).
 
+## Updating project-butler
+
+The skill auto-checks for updates on every invocation. Once per day per
+machine, it runs `git fetch` against its own repo and compares local
+`HEAD` to `origin/main`. If behind, the next response carries this
+banner block:
+
+```
+VERSION_NOTICE: project-butler is N commits behind upstream.
+  → Update: cd <path> && git pull
+  → Silence: PROJECT_BUTLER_NO_UPDATE_CHECK=1
+```
+
+The banner disappears on the next invocation after you pull — cache is
+keyed on commit SHA, not just time.
+
+**Side effect on `git status`**: after the auto-fetch, `git status`
+inside the skill directory may show "behind origin/main by N commits".
+This is expected and harmless — the skill never modifies the working
+tree.
+
+**Silencing**: `export PROJECT_BUTLER_NO_UPDATE_CHECK=1`. Only the
+literal value `"1"` silences — `=0`, `=false`, or empty does **not**
+silence (counter-intuitive but intentional).
+
+**Debugging missing banners**: from an external shell only, run the
+snippet in `references/update-check.md` with
+`PROJECT_BUTLER_UPDATE_CHECK_DEBUG=1`. Never enable debug inside
+Claude Code — CC captures stderr into the LLM context and debug output
+will leak into responses.
+
+**Reach limitation**: if you installed project-butler before v1.7.0,
+you do not have this auto-check feature yet. Pull once manually:
+
+```bash
+cd ~/.claude/skills/project-butler && git pull
+```
+
+After that, future updates are announced automatically.
+
 ## Why It Exists
 
 AI coding assistants are powerful in one session and forgetful across sessions. If any of these sound familiar, project-butler is for you:

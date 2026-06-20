@@ -1,6 +1,6 @@
 ---
 name: project-butler
-description: "Project memory workflow for init/upgrade, profile-aware setup, end session, normal/full close, file organization, document archiving, language switching, versioned update logs, rule review, status, wiki sync, and context recovery. Use for /project-butler, setup/初始化, foundation setup, profile setup, end session/收工, normal close, full close, foundation repair, organize files/整理文件, change language/切换语言, continue/接着上次, continue full context/全面回顾, review claude, sync wiki, status. Maintains project memory files."
+description: "Project memory workflow for init/upgrade, profile-aware setup, end session, normal/full close, file organization, document archiving, language switching, versioned update logs, rule review, status, wiki sync, and context recovery. Use for /project-butler, setup/初始化, foundation setup, profile setup, end session/收工, normal close, full close, foundation repair, organize files/整理文件, change language/切换语言, continue/接着上次, continue full context/全面回顾, review claude, sync wiki, status. Maintains project memory files. Runs version freshness check before trigger routing."
 ---
 
 # Project Butler — Project Memory Stack
@@ -39,6 +39,31 @@ session-handoff.md（下次接手点）
 Core idea: bottom feeds top, top constrains bottom. Logs and TODOs are raw facts. Handoff marks the next resume point. Wiki is the current snapshot. Structure manages file organization. Docs index manages document output. Update Log records versioned milestone changes. Constitution is stable principles.
 
 Supports 3 language modes: English (`en`), Chinese (`zh`), or bilingual. All content adapts to the selected language.
+
+---
+
+## Step -1: Version Freshness Check (always run first)
+
+<EXTREMELY_IMPORTANT>
+Before any other step, read `references/update-check.md` and execute
+the version freshness check described there.
+
+- If the check prints nothing → continue to Step 0 silently.
+- If the check prints a `VERSION_NOTICE:` block (three lines starting
+  with `VERSION_NOTICE:`) → prepend that exact block to your first
+  user-facing response for read triggers (`status`, `continue`,
+  `continue full context`, `sync wiki`, `review claude`), or append
+  it as a footnote at the end of your response for write triggers
+  (`init`, `end session`, `organize files`, `change language`,
+  `profile setup`, `foundation repair`, `normal close`, `full close`).
+  Deliver the block verbatim — never paraphrase, summarize, or merge.
+- Never run `git pull` on the skill directory yourself, even if the
+  user asks. Always show the upgrade command and let the user run it
+  in their own shell.
+- If you cannot find the "Base directory for this skill: <path>" line
+  in the current skill loading prompt, skip the check silently and
+  continue to Step 0.
+</EXTREMELY_IMPORTANT>
 
 ---
 

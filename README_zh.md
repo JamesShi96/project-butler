@@ -50,6 +50,32 @@ continue
 
 这已经足够日常使用。Cursor、Codex 和其他 AI 助手的使用方式见 [工具兼容性](docs/compatibility.md)。
 
+## 更新 project-butler
+
+skill 每次触发都会自动检查更新。每台机器每天最多跑一次 `git fetch`，对比本地 `HEAD` 和 `origin/main`。如果落后，下一次响应会带这个 banner：
+
+```
+VERSION_NOTICE: project-butler is N commits behind upstream.
+  → Update: cd <path> && git pull
+  → Silence: PROJECT_BUTLER_NO_UPDATE_CHECK=1
+```
+
+升级（`git pull`）之后，下一次触发 banner 消失——缓存同时按时间窗口和 commit SHA 失效。
+
+**`git status` 副作用**：自动 fetch 之后，skill 目录里跑 `git status` 可能显示 "behind origin/main by N commits"。这是预期行为，无害——skill 不会改工作树。
+
+**关闭检查**：`export PROJECT_BUTLER_NO_UPDATE_CHECK=1`。只有字面值 `"1"` 才关闭——`=0`、`=false`、空都**不**关闭（反直觉，但是有意为之）。
+
+**诊断 banner 不出现**：仅在外部 shell 跑 `references/update-check.md` 里的脚本，并设置 `PROJECT_BUTLER_UPDATE_CHECK_DEBUG=1`。不要在 Claude Code 里开 debug——CC 会把 stderr 喂给 LLM，debug 输出会泄漏到响应里。
+
+**覆盖范围限制**：如果你在 v1.7.0 之前装的 project-butler，你还没有这个自动检查功能。手动拉一次：
+
+```bash
+cd ~/.claude/skills/project-butler && git pull
+```
+
+之后未来更新会自动通知。
+
 ## 为什么需要它
 
 AI 编程助手在一个 session 里很强，但跨 session 很健忘。如果你遇到过这些情况，project-butler 就是为你准备的：

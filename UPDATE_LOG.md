@@ -2,6 +2,23 @@
 
 <!-- version-style: semantic -->
 
+## v1.7.0 (2026-06-20)
+
+### Minor: Version Freshness Check
+
+- Added automatic version-freshness check that runs on every skill invocation before trigger routing (Step -1). Detects when the locally installed skill is behind `origin/main` and notifies the user with a three-line banner block; never auto-pulls.
+- Detection uses `git fetch origin main` + `rev-list --count HEAD..origin/main` against the skill's own repository. No `VERSION` file — git is the single source of truth.
+- Cache lives at `<SKILL_DIR>/.claude/.version-check.txt`, plain `key=value` text (no `jq` dependency — macOS-safe). Dual-keyed invalidation: 24-hour time window AND `HEAD` SHA match. A successful `git pull` clears the banner on the next invocation without waiting for the time window.
+- SSH safety: fetch is wrapped with `GIT_SSH_COMMAND="ssh -o ConnectTimeout=5 -o BatchMode=yes"` + `GIT_TERMINAL_PROMPT=0`. Without `ConnectTimeout=5`, SSH hangs ~2 minutes on port 22 blocked (firewall / China mainland / corp network) — discovered via live validation.
+- Banner is a three-line `VERSION_NOTICE:` block (English-only, opt-out inline). LLM prepends verbatim; never paraphrases.
+- Two env vars: `PROJECT_BUTLER_NO_UPDATE_CHECK=1` silences (literal `"1"` only — `=0` does NOT silence); `PROJECT_BUTLER_UPDATE_CHECK_DEBUG=1` enables diagnostic output (external shell only — CC captures stderr into LLM context).
+- Files: `references/update-check.md` (runtime reference, ~100 lines), `SKILL.md` (Step -1 + description mention), `.gitignore`, `README.md` / `README_zh.md` ("Updating project-butler" section), `docs/prd/features/version-freshness-check.md` (design spec, ~130 lines).
+- Live-validated 2026-06-20 (Phase 1+2+3): first install, cache hit, pull recovery (critical UX — `git merge --ff` clears banner next invoke), SSH fail-fast (5s vs 2min), banner verbatim.
+- **Reach limitation**: this feature ships in v1.7.0 and only protects future installs from future drift. Existing users on v1.6.x or earlier must pull once manually (`cd ~/.claude/skills/project-butler && git pull`) before automatic notifications become available.
+- Scope: Claude Code skill loader only (relies on CC's "Base directory for this skill" prompt line). Cursor / Codex / other tools lack the trigger mechanism and are not supported in v1.
+
+---
+
 ## v1.6.0 (2026-06-10)
 
 ### Minor: Project Profile System Runtime Wiring
