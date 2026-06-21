@@ -24,6 +24,7 @@ Triggered when user expresses intent to change language (any expression: 切换�
    - STRUCTURE.md — translate all headers and table column names;
      update 命名规范 column to reflect new language's naming conventions
    - .cursor/rules/project-system.mdc — translate all content (if exists)
+   - AGENTS.md — translate project-butler section content (if exists; preserve unrelated user content)
    - DOCS.md — translate section headers and status values using the DOCS.md glossary
    - UPDATE_LOG.md — translate title and meta line only using the UPDATE_LOG glossary; keep individual entries as-is
 

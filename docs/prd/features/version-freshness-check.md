@@ -17,23 +17,32 @@ VERSION_NOTICE: project-butler is N commits behind upstream.
 
 **Scope**: Claude Code skill loader only. The feature relies on CC's
 "Base directory for this skill: <path>" prompt line. Cursor / Codex /
-other tools lack the trigger mechanism and are not supported.
+other tools lack the trigger mechanism for automatic per-invocation
+checking. They can run the shared script manually.
 
 ## How It Works
 
 `SKILL.md` Step -1 (wrapped in `<EXTREMELY_IMPORTANT>`) instructs the
-LLM to read `references/update-check.md` and run its snippet as a
-single Bash tool call. The snippet resolves `SKILL_DIR` from the
-"Base directory" line, reads cache, optionally fetches, computes
-`behind_by = rev-list --count HEAD..origin/main`, updates cache, and
-prints the banner block if `behind_by > 0`.
+LLM to read `references/update-check.md` and run one Bash command.
+That reference resolves `SKILL_DIR` from the "Base directory" line and
+calls:
+
+```bash
+bash "$SKILL_DIR/scripts/check-update.sh" "$SKILL_DIR"
+```
+
+`scripts/check-update.sh` is the detection source of truth. It reads
+cache, optionally fetches, computes `behind_by = rev-list --count
+HEAD..origin/main`, updates cache, and prints the banner block if
+`behind_by > 0`.
 
 The LLM prepends the banner block verbatim — never paraphrases, never
 auto-pulls.
 
-`references/update-check.md` is the runtime source of truth. This
-spec captures the design rationale; if they diverge, the reference
-wins.
+`references/update-check.md` is the Claude Code adapter source of
+truth. `scripts/check-update.sh` is the detection source of truth. This
+spec captures the design rationale; if they diverge, the runtime
+reference and script win.
 
 ## Cache
 
@@ -86,6 +95,11 @@ denied, disk full) silently degrades to no-cache mode.
 
 5. **Never auto-pull.** Show the upgrade command; the user runs it.
 
+6. **Script extraction for multi-tool use.** Claude Code still gets
+   automatic Step -1 checks. Cursor, Codex, and other tools can call
+   `scripts/check-update.sh` manually or through best-effort adapter
+   instructions, but they do not get automatic per-invocation checks.
+
 ## Edge Cases
 
 | Situation | Behavior |
@@ -98,6 +112,7 @@ denied, disk full) silently degrades to no-cache mode.
 | SSH port 22 blocked (firewall, China mainland, corp net) | `ConnectTimeout=5` bounds hang to 5s |
 | `mkdir -p` or cache write fails (read-only FS, permission, disk full) | Silently degrade to no-cache mode |
 | Plugin install (path is not a git repo) | Silently skip; no banner |
+| Cursor / Codex usage | Manual/on-demand script invocation only |
 
 ## Test Plan
 
@@ -115,6 +130,9 @@ Critical tests. Live-validated 2026-06-20 (Phase 1+2+3).
    ~2min) → no banner but skill remains responsive.
 5. **Banner verbatim** ✅: three-line `VERSION_NOTICE:` block
    delivered as-is — never paraphrased.
+6. **Script standalone**: `bash scripts/check-update.sh <skill-dir>`
+   preserves the same cache, fetch, and banner behavior as the former
+   inline runtime snippet.
 
 Remaining tests not yet validated from a live CC session (require
 new session to verify Step -1 trigger across `/project-butler`,

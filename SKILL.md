@@ -263,8 +263,9 @@ Recommended defaults:
 
 4. **GitHub 仓库** — optional, e.g., "org/repo-name" (default empty)
 5. **是否创建 Cursor 规则文件** — yes/no (default yes)
-6. **语言 / Language** — `en` / `zh` / `bilingual` (default bilingual)
-7. **版本命名方式** — choose one (default AI recommendation, fallback Semantic)
+6. **是否创建 Codex AGENTS.md** — yes/no (default no)
+7. **语言 / Language** — `en` / `zh` / `bilingual` (default bilingual)
+8. **版本命名方式** — choose one (default AI recommendation, fallback Semantic)
    预设选项：Semantic (v0.1.0) / Codename ({project name} 0.1) / Patch (Patch 1) / Date (2026.06.1)
    AI 根据项目类型推荐：产品/品牌类→Codename / 游戏/内容类→Patch / 日志/研究类→Date / 默认→Semantic
 
@@ -279,6 +280,10 @@ Create `log/.gitkeep` (empty file) alongside `log/` directory so git tracks it w
 Create `.claude/.file-snapshot.json` with empty content: `{"lastScan":"","files":{}}`.
 
 Create `.claude/project-profile.json`, `.claude/profile-pending.json`, and confirmed Required profile baseline docs from the approved Foundation Setup proposal.
+
+If the user enabled Cursor support, create `.cursor/rules/project-system.mdc` from Template 6.
+
+If the user enabled Codex support, create `AGENTS.md` from Template 6b. If `AGENTS.md` already exists, do not overwrite it; offer to append the project-butler section after confirmation.
 
 ### Step 4: Output Report
 
@@ -303,6 +308,7 @@ Created:
 - Profile config and pending queue: created
 - File organization rules
 - Cursor rules: created / skipped
+- Codex AGENTS.md: created / skipped
 
 Settings:
 - Language: {{LANGUAGE}}

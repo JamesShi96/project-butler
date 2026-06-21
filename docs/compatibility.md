@@ -9,8 +9,8 @@ The native entry point is Claude Code today, but the output is intentionally fil
 | Tool | Integration level | What works |
 |---|---|---|
 | Claude Code | Native skill | Full `/project-butler` flow, natural-language triggers, session logging, continuation, file organization, document archiving, language switching, versioned update logs, rule review, wiki sync, status summaries, and profile-aware setup/close behavior. |
-| Cursor | Project rules | project-butler can generate `.cursor/rules/project-system.mdc`, which points Cursor at the shared memory files and mirrors the main workflow triggers. |
-| Codex | Shared memory files | Codex can read `PROJECT.md`, `TODO.md`, `session-handoff.md`, `UPDATE_LOG.md`, `STRUCTURE.md`, `DOCS.md`, profile JSON files, and project rules as context. |
+| Cursor | Project rules, best-effort | project-butler can generate `.cursor/rules/project-system.mdc`, which points Cursor at the shared memory files, mirrors the main workflow triggers, and includes a manual update-check trigger. |
+| Codex | `AGENTS.md`, best-effort | project-butler can generate `AGENTS.md`, which points Codex at the shared memory files, mirrors the main workflow triggers, and includes a manual update-check trigger. |
 | Other AI assistants | File-based | Any assistant that can inspect project Markdown files can use the generated project memory. |
 
 ## Current Native Entry Point
@@ -51,9 +51,18 @@ That file tells Cursor to use the same project memory files:
 
 Cursor does not need a separate database or memory store.
 
+Cursor rules are best-effort context. Cursor does not have Claude Code's
+skill lifecycle, so version-freshness checks are manual/on-demand.
+
 ## How Codex Fits
 
-Codex support is file-based:
+If you choose Codex support during setup, project-butler creates:
+
+```text
+AGENTS.md
+```
+
+That file tells Codex to use the same project memory files:
 
 - `PROJECT.md` gives Codex the current project overview.
 - `session-handoff.md` tells Codex where to continue.
@@ -65,7 +74,8 @@ Codex support is file-based:
 - `.claude/profile-pending.json` gives Codex pending profile updates, profile debt, and review queue items.
 - project rules / constitution provide stable constraints.
 
-The recommended pattern is to keep these files in the project root and make sure Codex reads them as project context.
+Codex support is best-effort project instruction, not a Codex-native
+package. Version-freshness checks are manual/on-demand.
 
 ## Why This Is File-Based
 
@@ -82,9 +92,10 @@ project-butler avoids locking memory into one product by writing durable project
 
 - Claude Code is the most complete native integration today.
 - Cursor integration is generated as project rules, not as a Cursor extension.
-- Codex support currently relies on shared project files, not a separate Codex-native marketplace package.
+- Codex integration is generated as `AGENTS.md`, not as a Codex-native package.
 - The main rule file is currently named `CLAUDE.md` because Claude Code is the native entry point. The project memory model is broader than that filename.
 - Existing projects without `.claude/project-profile.json` can still use the base project memory stack, but upgrade should offer the current profile-aware setup model before writing profile files.
+- Cursor and Codex adapters are best-effort. They can read and update the shared project files, but they do not get Claude Code's automatic skill lifecycle.
 
 ## Direction
 
@@ -92,6 +103,6 @@ The long-term direction is to keep one shared project memory while adding better
 
 - `CLAUDE.md` for Claude Code,
 - `.cursor/rules/project-system.mdc` for Cursor,
-- Codex-friendly project instructions and skill packaging where appropriate,
+- `AGENTS.md` for Codex,
 - profile JSON files for profile-aware adapters,
 - plain Markdown files for every other tool.

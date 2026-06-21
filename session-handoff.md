@@ -1,50 +1,52 @@
 # Session Handoff — Project Butler
 
-> Last updated: 2026-06-20
+> Last updated: 2026-06-21
 
 ## Current State
 
-**Version Freshness Check has shipped** as v1.7.0. Implementation complete, live-validated, docs simplified to MVP, all on `origin/main`.
+**v1.7.1 Multi-Tool Compatibility Foundation (Phase 1) is committed.** Patch-level release on top of v1.7.0.
 
-What landed:
+What landed in this change:
 
-- `references/update-check.md` — runtime reference, 100 lines. Single bash snippet, ~50 lines.
-- `SKILL.md` — `description` mentions freshness check; Step -1 wrapped in `<EXTREMELY_IMPORTANT>` before Step 0 routing.
-- `docs/prd/features/version-freshness-check.md` — design spec, 131 lines (MVP).
-- `.gitignore` — excludes `.claude/.version-check.txt`.
-- `README.md` + `README_zh.md` — "Updating project-butler" section.
-- `UPDATE_LOG.md` — v1.7.0 entry.
+- `scripts/check-update.sh` (84 lines, executable) — version-freshness detection extracted out of `references/update-check.md` into a tool-agnostic script. Now the single detection source of truth.
+- `references/update-check.md` — reduced to a single `bash "$SKILL_DIR/scripts/check-update.sh" "$SKILL_DIR"` call; remains the Claude Code adapter source of truth (when to call, how to present banner verbatim, never auto-pull).
+- `references/file-templates.md` — added Template 6b (Codex `AGENTS.md`, full core-workflow mirror); Cursor Template 6 + 6b each gained a Manual Update Check section with a `PROJECT_BUTLER_SKILL_DIR` note for non-default installs; Cursor frontmatter `description` now lists `check project-butler update`.
+- `SKILL.md` — Init Flow added Q6 "Codex AGENTS.md (default no)"; Create Files + report cover AGENTS.md.
+- `references/upgrade-mode.md` — preserves existing `AGENTS.md`, offers append/patch; renumbered steps.
+- `references/language-change.md` — translates AGENTS.md project-butler section (preserves unrelated user content).
+- `docs/test-reports/adapter-coverage-matrix.md` — Claude Code / Cursor / Codex × core-workflow support levels.
+- `docs/prd/features/multi-tool-compatibility.md` — Phase 1/2/3 roadmap (Phase 1 implemented).
+- `docs/compatibility.md`, `README.md`, `README_zh.md`, `docs/prd/features/version-freshness-check.md`, `UPDATE_LOG.md` — updated to state Claude Code native / Cursor + Codex best-effort manual-on-demand.
 
-Detection: `GIT_SSH_COMMAND="ssh -o ConnectTimeout=5 -o BatchMode=yes" GIT_TERMINAL_PROMPT=0 git fetch -q origin main` + `rev-list --count HEAD..origin/main`.
+Support model: Claude Code = native automatic Step -1 check. Cursor / Codex = best-effort, manual/on-demand only (`bash <install>/scripts/check-update.sh`).
 
-Cache: `<SKILL_DIR>/.claude/.version-check.txt`, plain text, dual-keyed (24h time + HEAD SHA). Pull mid-window clears the banner immediately.
+## Review Outcome (this session)
 
-Banner: three-line `VERSION_NOTICE:` block, English-only, opt-out inline. LLM prepends verbatim, never paraphrases, never auto-pulls.
+High-effort multi-agent diff review (4 finder angles) was run. Verdict: **no blocking bugs introduced; shipped as-is by decision.** Findings were deliberately NOT fixed because they are low-value polish or out-of-scope:
 
-Env vars: `PROJECT_BUTLER_NO_UPDATE_CHECK=1` (literal `"1"` only); `PROJECT_BUTLER_UPDATE_CHECK_DEBUG=1` (external shell only).
-
-Live validation passed 2026-06-20 (Phase 1+2+3): first install, cache hit, pull recovery, SSH fail-fast, banner verbatim.
+- Skipped doc polish: PRD "≤80 lines" vs actual 84; PRD Background table still says Cursor/Codex update-check "out of scope" (historical context); upgrade-mode rule 11→19 missing cross-ref; AGENTS.md template missing an `## Output Style` section (best-effort, low impact).
+- Deferred (pre-existing v1.7.0 latent bugs, carried over by the extraction — NOT introduced here):
+  - `check-update.sh`: on `git fetch` failure with a stale/SHA-mismatched cache, `BEHIND` stays 0 instead of falling back to cached `behind_by` (diverges from PRD edge-case table).
+  - `check-update.sh`: a corrupt non-numeric `last_check` makes `$((NOW - LAST_CHECK))` emit a stderr arithmetic error that CC could capture into context.
+  - `check-update.sh`: `resolve_skill_dir` `git rev-parse --show-toplevel` fallback can resolve the wrong repo in degenerate no-arg/sourced invocations.
+  - Root cause cluster: `resolve_skill_dir` fallback chain + cache fallback. A clean fix would validate the resolved dir is actually project-butler (contains `scripts/check-update.sh`/`SKILL.md`) and fall back to cached `behind_by` on fetch failure. **Open as a separate v1.7.0-hardening task.**
 
 ## Next Session Start
 
-Recommended prompt:
-
-```text
-continue full context
-```
+Recommended prompt: `continue full context`
 
 Primary candidate work:
 
-- Run cross-trigger coverage in a new CC session (Step -1 across `/project-butler`, `status`, `continue`, `end session`) — the only ship-blocking tests remaining.
-- Decide whether to tag v1.7.0 + GitHub Release after cross-trigger validation passes.
-- Consider switching `origin` from SSH to HTTPS permanently (SSH port 22 blocked in current env).
+- Decide whether to tag v1.7.1 + GitHub Release (still NOT tagged/released; same as v1.7.0).
+- Cross-trigger live validation of Step -1 in a fresh CC session (`/project-butler`, `status`, `continue`, `end session`) — still the main ship-blocking test from v1.7.0.
+- Optional v1.7.0-hardening task: the 3 deferred `check-update.sh` latent bugs above.
+- Phase 2 (multi-tool polish) only after real Cursor/Codex usage feedback.
 
 ## Do Not Forget
 
-- v1.7.0 is shipped but **not** git-tagged, **not** released on GitHub. Tag only after cross-trigger validation passes.
-- SSH port 22 is blocked in current env (`198.18.0.10` is a DNS-hijack / proxy IP, not GitHub real IP). Use HTTPS for git operations: `git push https://github.com/JamesShi96/project-butler.git main`. The skill's own update-check handles this gracefully via `ConnectTimeout=5`.
-- Cursor users do not get this feature — they load project-butler via `.cursor/rules/` and never see SKILL.md Step -1. Separate future feature.
-- Plugin-installed skills whose path is not a git repo are silently skipped.
+- v1.7.0 AND v1.7.1 are shipped but **not** git-tagged, **not** released on GitHub. Tag only after cross-trigger validation passes.
+- SSH port 22 is blocked in current env. Use HTTPS for git push: `git push https://github.com/JamesShi96/project-butler.git main`.
 - Debug mode (`PROJECT_BUTLER_UPDATE_CHECK_DEBUG=1`) is **external shell only** — CC captures stderr into LLM context.
-- `PROJECT_BUTLER_NO_UPDATE_CHECK=0` does **not** silence the check — only literal `"1"` does.
-- Git history was squashed 2026-06-20: the four process commits (`26a265c`, `e34778c`, `23c573e`, `9c4da20`) were combined into a single `feat: version freshness check` commit. Process artifacts (4 spec iterations, intermediate session log) are no longer in main's history but remain reachable via reflog for ~30 days.
+- `PROJECT_BUTLER_NO_UPDATE_CHECK=0` does **not** silence — only literal `"1"` does.
+- Cursor/Codex update-check is manual/on-demand only; for non-default installs the user must `export PROJECT_BUTLER_SKILL_DIR=<path>` first.
+- `jq` is NOT installed in this env — session-history recovery scripts must use python3, not jq.

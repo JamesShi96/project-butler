@@ -2,6 +2,18 @@
 
 <!-- version-style: semantic -->
 
+## v1.7.1 (2026-06-21)
+
+### Patch: Multi-Tool Compatibility Foundation
+
+- Extracted version freshness detection into `scripts/check-update.sh`. Claude Code keeps automatic Step -1 checks through `references/update-check.md`; Cursor, Codex, and other tools can run the script manually/on-demand.
+- Added Codex `AGENTS.md` project-instruction template and updated Cursor rules with manual update-check coverage.
+- Added `docs/test-reports/adapter-coverage-matrix.md` to track Claude Code, Cursor, and Codex support levels across core workflows.
+- Updated compatibility docs and READMEs to state support levels clearly: Claude Code native, Cursor rules best-effort, Codex `AGENTS.md` best-effort.
+- Preserved v1.7.0 cache semantics, SSH fail-fast behavior, and the three-line `VERSION_NOTICE` banner contract.
+
+---
+
 ## v1.7.0 (2026-06-20)
 
 ### Minor: Version Freshness Check

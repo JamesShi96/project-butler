@@ -76,10 +76,17 @@ literal value `"1"` silences — `=0`, `=false`, or empty does **not**
 silence (counter-intuitive but intentional).
 
 **Debugging missing banners**: from an external shell only, run the
-snippet in `references/update-check.md` with
+shared update-check script with
 `PROJECT_BUTLER_UPDATE_CHECK_DEBUG=1`. Never enable debug inside
 Claude Code — CC captures stderr into the LLM context and debug output
 will leak into responses.
+
+**Cursor / Codex**: these tools do not have Claude Code's skill
+lifecycle, so update checks are manual/on-demand:
+
+```bash
+bash "${PROJECT_BUTLER_SKILL_DIR:-$HOME/.claude/skills/project-butler}/scripts/check-update.sh"
+```
 
 **Reach limitation**: if you installed project-butler before v1.7.0,
 you do not have this auto-check feature yet. Pull once manually:
@@ -168,8 +175,8 @@ Project Butler also keeps a small machine-readable profile so the assistant can 
 | Tool | Status | How it works |
 |---|---|---|
 | Claude Code | Native skill | Install this repo under `~/.claude/skills/project-butler` and run `/project-butler`. |
-| Cursor | Project rules | project-butler can generate `.cursor/rules/project-system.mdc`, which points Cursor at the same project memory files. |
-| Codex | Shared memory files | Codex can read the generated Markdown files (`PROJECT.md`, `TODO.md`, `session-handoff.md`, `STRUCTURE.md`, `UPDATE_LOG.md`, `DOCS.md`, rules) as project context. |
+| Cursor | Project rules, best-effort | project-butler can generate `.cursor/rules/project-system.mdc`, which points Cursor at the same project memory files and mirrors the main triggers. |
+| Codex | `AGENTS.md`, best-effort | project-butler can generate `AGENTS.md`, which points Codex at the same project memory files and mirrors the main triggers. |
 | Other AI assistants | File-based | Any assistant that can read project files can use the project memory as shared context. |
 
 See [docs/compatibility.md](docs/compatibility.md) for details and caveats.
@@ -279,9 +286,14 @@ See [docs/examples.md](docs/examples.md) for a complete session flow:
 - [Claude Code](https://docs.anthropic.com/en/docs/claude-code) CLI for native skill execution
 - [jq](https://jqlang.github.io/jq/) for `continue` / `continue full context` session recovery
 - Optional: [Cursor](https://cursor.sh) for generated project rules
-- Optional: Codex or other AI coding assistants that can read project Markdown files
+- Optional: Codex or other AI coding assistants that can read project Markdown files and `AGENTS.md`
 
 ## Update Log
+
+### v1.7.1 (2026-06-21) - Multi-Tool Compatibility Foundation
+- Extract version freshness detection into `scripts/check-update.sh` so Claude Code can keep automatic Step -1 checks while Cursor/Codex can run manual checks on demand.
+- Add Codex `AGENTS.md` project-instruction template and update Cursor rules with manual update-check coverage.
+- Document best-effort Cursor/Codex support and add an adapter coverage matrix.
 
 ### v1.6.0 (2026-06-10) - Project Profile System Runtime Wiring
 - Add `references/project-profile-system.md` and route profile setup, Normal Close, Full Close, Foundation Repair, and profile-aware status through the main skill.

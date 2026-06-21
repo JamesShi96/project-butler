@@ -11,13 +11,14 @@ All templates use these variables:
 - `{{GITHUB_LINE}}` → `- **GitHub：** {{answer}}` if Q4 provided, else empty string
 - `{{GITHUB_LINK_LINE}}` → `- GitHub: https://github.com/{{answer}}` if Q4 provided, else `- （待添加）`
 - `{{DATE}}` → today YYYY-MM-DD
-- `{{LANGUAGE}}` → Q6 answer (`en`, `zh`, or `bilingual`)
+- `{{LANGUAGE}}` → language answer (`en`, `zh`, or `bilingual`)
 - `{{DOC_TYPES}}` → confirmed Foundation Setup document directories (e.g., `prd, tech-design, research`)
 - `{{DOC_SECTIONS}}` → DOCS.md sections generated from confirmed Foundation Setup document tiers
 - `{{VERSION_STYLE}}` → version style answer (`semantic`, `codename`, `patch`, or `date`)
 - `{{VERSION_INITIAL}}` → initial version calculated from version style (`v0.1.0`, `<project name> 0.1`, `Patch 1`, or `{YYYY.MM}.1`)
 - `{{PROFILE_STATUS}}` → profile maintenance preference (`lightweight`, `standard`, or `strict`)
 - `{{PROFILE_SHAPE}}` → generated project shape label from Foundation Setup
+- `{{UPDATE_CHECK_COMMAND}}` → `bash "${PROJECT_BUTLER_SKILL_DIR:-$HOME/.claude/skills/project-butler}/scripts/check-update.sh"`
 
 For language adaptation: adapt headers, labels, and descriptions to the configured language. See `references/language-adaptation.md` for glossaries.
 
@@ -405,9 +406,9 @@ Adapt section headers using the candidates.md glossary. Ensure `.claude/` direct
 
 Only create if user answered yes to Q5. Mirror the language setting from CLAUDE.md.
 
-```
+````
 ---
-description: Apply at session start and when user says end session / review claude / sync wiki / status / organize files / change language / continue / continue full context. Defines project memory behavior.
+description: Apply at session start and when user says end session / review claude / sync wiki / status / organize files / change language / continue / continue full context / check project-butler update. Defines project memory behavior.
 ---
 
 # {{PROJECT_NAME}} — Project System Rules
@@ -418,6 +419,7 @@ Users only need these daily commands:
 - `end session` — save progress and next steps
 - `continue` — resume next time
 - `status` — check current project state
+- `check project-butler update` — manually check whether the installed project-butler skill is behind upstream
 
 ## Session Start
 1. Read PROJECT.md, session-handoff.md, TODO.md, UPDATE_LOG.md, and DOCS.md if present at the start of every conversation. If .claude/project-profile.json or .claude/profile-pending.json exists, read them for profile shape, document policies, profile debt, and review queue. Check the Language setting in CLAUDE.md to determine output language.
@@ -462,6 +464,7 @@ Shape:
 | Continue (any language) | Read last session log + management files to recover the last working context |
 | Check status (any language) | Show compact dashboard: Project, Active Work, Recent Change, Next Best Step |
 | Normal close / Full close (any language) | Save session and either defer profile updates or align affected profile docs with Scope Plan |
+| Check project-butler update (any language) | Run `{{UPDATE_CHECK_COMMAND}}` and report any `VERSION_NOTICE` block verbatim |
 
 ## Advanced Triggers
 | Intent | Action |
@@ -472,6 +475,19 @@ Shape:
 | Change language (any language) | Update language setting, rewrite management files in the new language, optionally rename user files per STRUCTURE.md |
 | Continue full context (any language) | Recover full project trajectory from session history + management files |
 | Profile setup / foundation repair (any language) | Create or repair project profile files and baseline reference docs after confirmation |
+
+## Manual Update Check
+Cursor rules are best-effort context, not a native project-butler runtime. Cursor does not automatically run the Claude Code Step -1 update check.
+
+When the user asks to check project-butler updates, run:
+
+```bash
+{{UPDATE_CHECK_COMMAND}}
+```
+
+If project-butler is installed outside the default `~/.claude/skills/project-butler`, set `PROJECT_BUTLER_SKILL_DIR` to the install path first so the command resolves the right repository.
+
+If the command prints a three-line `VERSION_NOTICE:` block, show it verbatim and do not run `git pull` automatically.
 
 ## Internals: File Roles
 This project uses a 7-component base memory stack internally and maintains 2 profile JSON files as runtime state. Users should not need to manage these files by hand.
@@ -490,7 +506,104 @@ This project uses a 7-component base memory stack internally and maintains 2 pro
 | DOCS.md | AI auto | end session + document archiving |
 | .claude/project-profile.json | AI auto | Foundation Setup + confirmed profile changes |
 | .claude/profile-pending.json | AI auto | Normal Close / Full Close profile pending queue |
+````
+
+---
+
+## Template 6b: AGENTS.md
+
+Create only when Codex support is enabled. Mirror the language setting from CLAUDE.md.
+
+````
+# {{PROJECT_NAME}} — Project Agent Instructions
+
+This project uses project-butler memory files. Treat these files as the shared source of truth across Claude Code, Cursor, Codex, and other AI coding assistants.
+
+## Daily Workflow
+Users only need these daily commands:
+
+- `end session` — save progress and next steps
+- `continue` — resume next time
+- `status` — check current project state
+- `check project-butler update` — manually check whether the installed project-butler skill is behind upstream
+
+## Session Start
+At the start of a task, read the project memory files that exist:
+
+- `PROJECT.md`
+- `session-handoff.md`
+- `TODO.md`
+- `UPDATE_LOG.md`
+- `DOCS.md`
+- `STRUCTURE.md`
+- `CLAUDE.md`
+- `.claude/project-profile.json`
+- `.claude/profile-pending.json`
+
+Use `CLAUDE.md` for stable project rules and language setting. Use the profile JSON files for project shape, document policies, protected sections, pending profile updates, profile debt, and review queue.
+
+## Primary Triggers
+| Intent | Action |
+|--------|--------|
+| End session / wrap up (any language) | Save progress, refresh next steps, and record important changes |
+| Continue (any language) | Read session-handoff.md, PROJECT.md, TODO.md, UPDATE_LOG.md, DOCS.md, profile JSON files, and recent logs to recover context |
+| Check status (any language) | Show compact dashboard: Project, Active Work, Recent Change, Profile, Next Best Step |
+| Normal close / Full close (any language) | Save session and either defer profile updates or align affected profile docs with Scope Plan |
+| Check project-butler update (any language) | Run `{{UPDATE_CHECK_COMMAND}}` and report any `VERSION_NOTICE` block verbatim |
+
+## Advanced Triggers
+| Intent | Action |
+|--------|--------|
+| Review constitution (any language) | Show `.claude/candidates.md` for user to confirm each entry |
+| Sync wiki (any language) | Force rescan and update PROJECT.md |
+| Organize files (any language) | Scan files and reorganize according to STRUCTURE.md rules |
+| Change language (any language) | Update language setting, rewrite management files in the new language, optionally rename user files per STRUCTURE.md |
+| Continue full context (any language) | Recover full project trajectory from session history + management files |
+| Profile setup / foundation repair (any language) | Create or repair project profile files and baseline reference docs after confirmation |
+
+## End Session Protocol
+When the user expresses that the work session is done:
+
+1. Write `log/session-YYYY-MM-DD-{slug}.md` with summary, decisions, outputs, and next steps.
+2. If raw logs exceed the compaction threshold, write a summary under `log/summaries/` and archive raw logs without deleting history.
+3. Update `session-handoff.md`.
+4. Update `PROJECT.md` if structure, module status, or progress changed.
+5. Update `TODO.md`.
+6. Append stable-rule candidates to `.claude/candidates.md`; do not edit CLAUDE.md directly.
+7. If profile files exist or Normal/Full Close was requested, scan for profile impact. Normal Close records pending items in `.claude/profile-pending.json`; Full Close requires a Scope Plan before changing profile docs.
+8. Organize new/changed files according to STRUCTURE.md.
+9. Archive new/changed document outputs under docs/ and update DOCS.md.
+10. If the session contains a significant milestone, prepend a versioned entry to UPDATE_LOG.md.
+11. Output a short result-focused summary.
+
+## Manual Update Check
+Codex reads AGENTS.md as best-effort project context. It does not automatically run the Claude Code Step -1 update check.
+
+When the user asks to check project-butler updates, run:
+
+```bash
+{{UPDATE_CHECK_COMMAND}}
 ```
+
+If project-butler is installed outside the default `~/.claude/skills/project-butler`, set `PROJECT_BUTLER_SKILL_DIR` to the install path first so the command resolves the right repository.
+
+If the command prints a three-line `VERSION_NOTICE:` block, show it verbatim and do not run `git pull` automatically.
+
+## File Roles
+| File | Role |
+|------|------|
+| CLAUDE.md | Human-confirmed project rules / constitution |
+| PROJECT.md | Current project overview |
+| session-handoff.md | Next-session pickup point |
+| TODO.md | Active task list |
+| STRUCTURE.md | File organization rules |
+| UPDATE_LOG.md | Milestone history |
+| DOCS.md | Document index and metadata |
+| log/session-*.md | Session logs |
+| .claude/candidates.md | Candidate long-term rules |
+| .claude/project-profile.json | Project profile config |
+| .claude/profile-pending.json | Pending profile updates, profile debt, and review queue |
+````
 
 ---
 
