@@ -2,6 +2,20 @@
 
 <!-- version-style: semantic -->
 
+## v1.7.2 (2026-06-24)
+
+### Patch: Test-Driven Hardening of Freshness Check and Memory Protocols
+
+- Fixed the version-freshness check (`scripts/check-update.sh`): when `git fetch` fails (offline / port 22 blocked), the banner now falls back to the last SHA-valid cached `behind_by` instead of silently reporting up-to-date — the feature no longer fails closed in exactly the firewalled environments it targets.
+- Fixed a corrupt-cache edge case: a non-numeric `last_check` no longer leaks an arithmetic error to stderr.
+- Profile System: a profile-evolution proposal can no longer narrate an unconfirmed pivot into `generated_project_shape`; added optional `maintenance.multi_contributor` and pending `touches_protected_section` / `gated_artifacts` fields; clarified that `review_queue` is terminal relative to the count track.
+- Document archiving: generic filename keywords (`notes`, `design`, `test`, …) now defer to content analysis instead of silently mis-filing content-rich documents.
+- Update log: patch-level significant changes in codename / patch / date styles are now recorded as Minor rather than dropped.
+- File reorganization: moving a file now also fixes the moved file's own relative references, not only inbound references.
+- Validated by a full test pass: Project Profile System (6 use cases + 3 adversarial scenarios) plus the file-reorganization, document-archiving, update-log, and freshness-check modules.
+
+---
+
 ## v1.7.1 (2026-06-21)
 
 ### Patch: Multi-Tool Compatibility Foundation

@@ -130,7 +130,7 @@ Guardrails:
 
 - Foundation areas must be generated from the user's actual project, not chosen from a fixed list.
 - Each Required directory should map to at least one foundation area.
-- Required directories should usually be capped at 3-4.
+- Required directories should usually be capped at 3-4. Promoting a Recommended directory to Required later (e.g. through an approved Full Close Scope Plan) is allowed but still counts toward this cap; keep Required lean and prefer leaving secondary areas as Recommended.
 - Recommended directories should usually be capped at 5-6.
 - Optional directories are listed but not created by default.
 - Every Required or Recommended directory needs rationale or evidence.
@@ -210,6 +210,7 @@ Minimum `.claude/project-profile.json`:
   ],
   "maintenance": {
     "preference": "standard",
+    "multi_contributor": false,
     "normal_close": "save_and_defer_profile_updates",
     "full_close": "sync_affected_profile_docs"
   },
@@ -246,6 +247,7 @@ Creation rules:
 - `generated_project_shape` must match the approved project-shape summary.
 - `reference_archetypes_used` and `overlays` must include confidence and evidence when used.
 - `maintenance.preference` should be `lightweight`, `standard`, or `strict`. Use `lightweight` for small or short-lived projects instead of skipping profile state.
+- `maintenance.multi_contributor` is an optional boolean (default `false`). Set `true` when multiple people maintain the project; this makes a Scope Plan required for Full Close (see Scope Plan). Do not invent ad hoc top-level flags for this.
 - `foundation_areas` must be project-specific. Use internal archetypes only as hints; do not write a fixed template category as the user's foundation area.
 - Each `foundation_areas[]` item must include `id`, `label`, `purpose`, `docs`, `status`, and `evidence`.
 - `foundation_areas[].status` should be one of `active`, `missing`, `stale`, `under_specified`, or `deferred`.
@@ -385,9 +387,13 @@ Example pending item:
   "seen_count": 1,
   "status": "pending",
   "recommended_action": "branch",
-  "priority": "medium"
+  "priority": "medium",
+  "touches_protected_section": false,
+  "gated_artifacts": []
 }
 ```
+
+`touches_protected_section` (optional boolean, default `false`) marks that the item conflicts with a protected section or confirmed decision. When `true`, the item may escalate straight to `review_queue` even at `seen_count = 1`. `gated_artifacts` (optional list) links any `protected-change-request` or `profile-evolution-proposal` files produced for this item. Use these fields instead of inventing ad hoc keys.
 
 ### Full Close
 
@@ -513,6 +519,7 @@ Rules:
 - `seen_count = 2`: `repeated`.
 - `seen_count >= 3`: `profile_debt`.
 - Decision-heavy profile debt escalates to `review_queue`.
+- `review_queue` is terminal relative to the count track. Once an item reaches it (for example via `touches_protected_section`), `seen_count` keeps incrementing as a churn signal but `status` does not fall back to `repeated` or `profile_debt`. Do not add side-fields to re-track the count stage — `review_queue` already subsumes it.
 
 Escalate to `review_queue` when:
 
@@ -731,7 +738,7 @@ Signals:
 - the user explicitly says the project direction changed,
 - Full Close or Foundation Repair would need to invent a new foundation area to proceed.
 
-When detected, propose. Do not edit `.claude/project-profile.json` automatically.
+When detected, propose. Do not edit `.claude/project-profile.json` automatically. This includes `generated_project_shape`: do not edit its `label`, `summary`, `confidence`, or `foundation_areas` to narrate an unconfirmed direction. The proposed direction lives only in the proposal artifact and the review-queue item until the user confirms. Appending a forward-looking note to `summary` still counts as an automatic shape edit and is not allowed.
 
 Output shape:
 
@@ -887,5 +894,6 @@ For existing projects with profile files:
 - Do not run Full Close without user intent or a close-mode prompt.
 - Do not deep-read every document during impact scan.
 - Do not rewrite stable PRD, architecture, roadmap, or rules automatically.
+- Do not edit `generated_project_shape` (including its `summary`) to describe an unconfirmed pivot. Keep unconfirmed direction in the proposal artifact and the review-queue item only.
 - Do not use `TODO.md` as the default home for profile debt.
 - Do not create a separate review queue file by default.

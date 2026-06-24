@@ -46,8 +46,8 @@ Identify files created or significantly modified during this session that appear
 For each identified document, determine its type:
 
 1. **Directory match** — if the file is already in a `docs/` subdirectory, use that directory's type
-2. **Filename keywords** — match against the keyword table above
-3. **Content analysis** — read first 3-5 paragraphs for unclassifiable files:
+2. **Filename keywords** — match against the keyword table above. Generic single words (`notes`, `design`, `test`, `analysis`, `research`) are a WEAK signal: if a filename's only keyword hit is a generic word, do not finalize on it — fall through to content analysis and let the content decide the type.
+3. **Content analysis** — read first 3-5 paragraphs for unclassifiable files (and for files whose only keyword hit was generic):
    - Mentions features, user stories, requirements → PRD
    - Mentions architecture, APIs, data models, system design → Tech Design
    - Mentions UI, UX, screens, interactions, wireframes → Design Docs

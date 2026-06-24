@@ -58,9 +58,15 @@ if [[ -f "$CACHE" ]]; then
   LAST_CHECK="$(grep '^last_check=' "$CACHE" | cut -d= -f2-)"
   CACHED_BEHIND="$(grep '^behind_by=' "$CACHE" | cut -d= -f2-)"
   CACHED_SHA="$(grep '^head_sha=' "$CACHE" | cut -d= -f2-)"
-  if [[ -n "$LAST_CHECK" && $((NOW - LAST_CHECK)) -lt 86400 && "$CACHED_SHA" == "$CURRENT_SHA" ]]; then
-    NEED_FETCH=0
+  # Seed from a SHA-valid cached count so a later fetch failure (offline / port 22
+  # blocked) falls back to the last known value instead of silently reporting 0.
+  if [[ "$CACHED_SHA" == "$CURRENT_SHA" && "$CACHED_BEHIND" =~ ^[0-9]+$ ]]; then
     BEHIND="$CACHED_BEHIND"
+  fi
+  # Skip the fetch only when the cache is also time-fresh. The numeric guard on
+  # LAST_CHECK keeps a corrupt cache from leaking an arithmetic error to stderr.
+  if [[ "$LAST_CHECK" =~ ^[0-9]+$ && $((NOW - LAST_CHECK)) -lt 86400 && "$CACHED_SHA" == "$CURRENT_SHA" ]]; then
+    NEED_FETCH=0
     [[ "$DEBUG" == "1" ]] && echo "[update-check] cache fresh; BEHIND=$BEHIND" >&2
   fi
 fi

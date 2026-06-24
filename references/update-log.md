@@ -59,12 +59,12 @@ When a session is judged significant, determine the bump level from the session'
 | Style | Major | Minor | Patch |
 |-------|-------|-------|-------|
 | semantic | `v{M+1}.0.0` | `v{M}.{m+1}.0` | `v{M}.{m}.{p+1}` |
-| codename | `{prefix} {M+1}.0` | `{prefix} {M}.{m+1}` | skip |
-| patch | `Patch {n+1}` | `Patch {n+1}` | skip |
-| date | `YYYY.MM.{n+1}` | `YYYY.MM.{n+1}` | skip |
+| codename | `{prefix} {M+1}.0` | `{prefix} {M}.{m+1}` | record as Minor |
+| patch | `Patch {n+1}` | `Patch {n+1}` | record as Minor |
+| date | `YYYY.MM.{n+1}` | `YYYY.MM.{n+1}` | record as Minor |
 
 **Rules:**
-- Codename and Patch styles skip patch-level changes (too minor for these formats)
+- Codename, Patch, and Date styles have no patch level. A patch-level change that already passed the significance gate is still a real milestone — record it as **Minor**, never drop the entry. (Genuinely insignificant changes are already filtered out by the significance gate before this point.)
 - Date style: parse month from current version. Same month → increment counter. Different month → reset to 1
 - When uncertain about level, default to Minor
 

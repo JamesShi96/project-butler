@@ -268,7 +268,7 @@ Wait for explicit user confirmation before proceeding to Phase 4.
 - **Never move files in exclusion list**: .git/, node_modules/, docs/, etc.
 - **Never move or rename files in docs/**: Document files are managed by DOCS.md and the document archiving workflow, not by file reorganization
 - **Preserve git history**: use `git mv` when in a git repo, not bare `mv`
-- **Update references**: after moving a file, search for and update any imports/links to its old path
+- **Update references**: after moving a file, update both directions — (a) other files' imports/links pointing TO its old path, and (b) the moved file's OWN relative imports/links, which break when its location changes
 - **No overwrites**: if target has a same-name file, flag instead of clobbering
 - **Respect human edits**: if user manually modified STRUCTURE.md rules, honor them. Only add new rules, never remove user-written rules without confirmation
 
