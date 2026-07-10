@@ -49,17 +49,24 @@ Before any other step, read `references/update-check.md` and execute
 the version freshness check described there.
 
 - If the check prints nothing → continue to Step 0 silently.
-- If the check prints a `VERSION_NOTICE:` block (three lines starting
-  with `VERSION_NOTICE:`) → prepend that exact block to your first
-  user-facing response for read triggers (`status`, `continue`,
-  `continue full context`, `sync wiki`, `review claude`), or append
-  it as a footnote at the end of your response for write triggers
-  (`init`, `end session`, `organize files`, `change language`,
-  `profile setup`, `foundation repair`, `normal close`, `full close`).
-  Deliver the block verbatim — never paraphrase, summarize, or merge.
-- Never run `git pull` on the skill directory yourself, even if the
-  user asks. Always show the upgrade command and let the user run it
-  in their own shell.
+- If the check prints a `VERSION_NOTICE:` block → do NOT print it
+  verbatim. Instead present ONE interactive update prompt with
+  AskUserQuestion, worded in the project's CLAUDE.md language:
+    - Question: "project-butler is N commits behind upstream. Update now?"
+      (read N from the `VERSION_NOTICE:` line).
+    - Option "Update now" → run
+      `bash "<SKILL_DIR>/scripts/check-update.sh" --pull "<SKILL_DIR>"`
+      as a single Bash call, then report its `UPDATE_OK` / `UPDATE_FAILED`
+      output to the user.
+    - Option "Remind me later" → do nothing; the script throttles the
+      prompt to at most once per 24h, so it will not ask again today.
+    - Option "Stop reminding" → tell the user to set
+      `PROJECT_BUTLER_NO_UPDATE_CHECK=1` to silence permanently.
+  Present this prompt once, before the triggered work. The script already
+  limits it to once per 24h, so do not add your own suppression.
+- Never run `git pull` on the skill directory yourself EXCEPT as the
+  "Update now" action the user explicitly selected (which runs the
+  `--pull` subcommand above).
 - If you cannot find the "Base directory for this skill: <path>" line
   in the current skill loading prompt, skip the check silently and
   continue to Step 0.

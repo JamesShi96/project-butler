@@ -36,6 +36,38 @@ quote_cd_path() {
   printf '%q' "$1"
 }
 
+# Banner language follows the current project's CLAUDE.md "Language:" field
+# (en / zh / bilingual). Falls back to en when there is no readable marker, so
+# English projects and non-Claude-Code tools are unaffected.
+detect_lang() {
+  [[ -f ./CLAUDE.md ]] || { printf 'en\n'; return; }
+  local token
+  token="$(grep -iE 'Language:' ./CLAUDE.md | head -1 | grep -oiE '(bilingual|zh|en)' | head -1 | tr '[:upper:]' '[:lower:]')"
+  case "$token" in
+    zh|bilingual|en) printf '%s\n' "$token" ;;
+    *) printf 'en\n' ;;
+  esac
+}
+
+# Subcommand: --pull <dir> — the "Update now" action. Try a fast fetch + ff-only
+# pull; on any failure (offline, SSH port 22 blocked, or local changes) fall back
+# to printing the manual command plus an HTTPS alternative.
+if [[ "${1:-}" == "--pull" ]]; then
+  PULL_DIR="$(resolve_skill_dir "${2:-}")"
+  if GIT_SSH_COMMAND="ssh -o ConnectTimeout=5 -o BatchMode=yes" GIT_TERMINAL_PROMPT=0 \
+       git -C "$PULL_DIR" pull --ff-only -q origin main 2>/dev/null; then
+    echo "UPDATE_OK: project-butler updated to the latest version."
+  else
+    ORIGIN="$(git -C "$PULL_DIR" remote get-url origin 2>/dev/null)"
+    HTTPS_URL="$(printf '%s' "$ORIGIN" | sed -E 's#^git@([^:]+):#https://\1/#')"
+    echo "UPDATE_FAILED: could not pull automatically (offline, SSH blocked, or local changes)."
+    echo "  Run manually: cd $(quote_cd_path "$PULL_DIR") && git pull"
+    [[ -n "$HTTPS_URL" && "$HTTPS_URL" != "$ORIGIN" ]] && \
+      echo "  SSH blocked? Use HTTPS: git -C $(quote_cd_path "$PULL_DIR") pull $HTTPS_URL main"
+  fi
+  exit 0
+fi
+
 SKILL_DIR="$(resolve_skill_dir "${1:-}")"
 
 if [[ "${PROJECT_BUTLER_NO_UPDATE_CHECK:-}" == "1" ]]; then
@@ -84,7 +116,32 @@ if [[ "$NEED_FETCH" -eq 1 ]]; then
 fi
 
 if [[ "${BEHIND:-0}" -gt 0 ]]; then
-  echo "VERSION_NOTICE: project-butler is ${BEHIND} commits behind upstream."
-  echo "  → Update: cd $(quote_cd_path "$SKILL_DIR") && git pull"
-  echo "  → Silence: PROJECT_BUTLER_NO_UPDATE_CHECK=1"
+  # 24h notification throttle: surface the update prompt at most once per day so it
+  # does not appear on every invocation. Claude Code turns this VERSION_NOTICE into
+  # an interactive update question; shell / Cursor / Codex users read it directly.
+  PROMPT_STATE="$SKILL_DIR/.claude/.version-prompt"
+  LAST_PROMPTED=0
+  [[ -f "$PROMPT_STATE" ]] && LAST_PROMPTED="$(cat "$PROMPT_STATE" 2>/dev/null)"
+  [[ "$LAST_PROMPTED" =~ ^[0-9]+$ ]] || LAST_PROMPTED=0
+  if [[ $((NOW - LAST_PROMPTED)) -ge 86400 ]]; then
+    mkdir -p "$(dirname "$PROMPT_STATE")" 2>/dev/null
+    printf '%s\n' "$NOW" > "$PROMPT_STATE" 2>/dev/null
+    CD_CMD="cd $(quote_cd_path "$SKILL_DIR") && git pull"
+    case "$(detect_lang)" in
+      zh)
+        echo "VERSION_NOTICE: project-butler 已落后上游 ${BEHIND} 个提交。"
+        echo "  → 更新: ${CD_CMD}"
+        ;;
+      bilingual)
+        echo "VERSION_NOTICE: project-butler is ${BEHIND} commits behind upstream. / 已落后上游 ${BEHIND} 个提交。"
+        echo "  → Update / 更新: ${CD_CMD}"
+        ;;
+      *)
+        echo "VERSION_NOTICE: project-butler is ${BEHIND} commits behind upstream."
+        echo "  → Update: ${CD_CMD}"
+        ;;
+    esac
+  else
+    [[ "$DEBUG" == "1" ]] && echo "[update-check] within 24h prompt throttle; suppressing" >&2
+  fi
 fi

@@ -1,36 +1,35 @@
 # Session Handoff — Project Butler
 
-> Last updated: 2026-06-24
+> Last updated: 2026-07-10
 
 ## Current State
 
-**v1.7.2 test-driven hardening — committed.** Patch on top of v1.7.1.
+**v1.7.3 — interactive update prompt + language-aware notice.** Minor on top of v1.7.2. Committed this session.
 
-This session ran a full test pass of the major features and fixed every real defect found:
+The version-freshness notice changed shape based on live testing:
 
-- **Project Profile System** — 6 use cases (SaaS / AI-agent / research / client-deliverable / lightweight / internal-pipeline) + 3 adversarial scenarios (ambiguous intake / triple protected-section assault / cross-session flip-flop). Zero hard failures. Fixes: shape-summary leak on evolution proposals; optional `maintenance.multi_contributor` + pending `touches_protected_section`/`gated_artifacts` fields; `review_queue` terminal rule; Required-cap clarification.
-- **File reorganization** — 10/10 hard rules held across 5 scenarios. Fix: moving a file now also fixes the moved file's own relative references.
-- **Document archiving** — adversarial guards all held. Fix: generic filename keywords defer to content analysis instead of mis-filing content-rich docs.
-- **Update log** — 13/13 version computations correct. Fix: patch-level significant changes in codename/patch/date styles record as Minor instead of being dropped; calc table aligned.
-- **Version freshness check (`scripts/check-update.sh`)** — two real latent bugs fixed, reproduced and re-verified with regression tests:
-  - L1: corrupt non-numeric `last_check` no longer leaks an arithmetic error to stderr (numeric guard).
-  - L2: on `git fetch` failure it now falls back to the last SHA-valid cached `behind_by` instead of reporting 0 — no longer fails closed for offline / port-22-blocked users.
-  - L3 (the 3rd previously-deferred bug, `resolve_skill_dir` wrong-repo) was tested and is NOT reproducible — effectively dead code. The "3 deferred latent bugs" cluster is now closed.
+- **Live cross-trigger validation** (forced-behind cache): `status` → prompt at top ✓; `continue` → missed once, then fired ✓ (bilingual — first live i18n confirmation); `/project-butler` → footnote landed correctly at the end of the completed upgrade ✓. Finding: Step -1 firing is **best-effort** (one observed miss); the read/write placement rule was actually correct.
+- **Language-aware notice**: `check-update.sh` reads the current project's CLAUDE.md `Language:` field (en / zh / bilingual), default en.
+- **Option C — interactive update prompt** (replaces the passive banner): when behind upstream, Claude Code presents an AskUserQuestion (Update now / Remind me later / Stop reminding) **at most once per 24h**. "Update now" runs `check-update.sh --pull` (fast fetch + ff-only pull; manual + HTTPS fallback on failure). `VERSION_NOTICE:` token kept stable so Cursor/Codex templates are untouched.
+
+Prior context: v1.7.2 (committed earlier) fixed check-update.sh L1/L2 latent bugs + hardened the profile / archiving / update-log / file-reorg specs after a full test pass (6 profile use cases + 3 adversarial + 4 module tests).
 
 ## Next Session Start
 
 Recommended prompt: `continue full context`
 
-THE remaining ship-blocker (now the only one):
+Remaining work:
 
-- **Cross-trigger live validation of Step -1** in a fresh Claude Code session — run `/project-butler`, `status`, `continue`, `end session` and confirm the loader fires the version check and the banner lands verbatim (prepend for read triggers, footnote for write triggers). A subagent cannot reproduce a real top-level skill load, so this needs real fresh sessions. The forced-cache recipe still works post-fix: write `.claude/.version-check.txt` with `last_check=9999999999`, `behind_by=2`, `head_sha=<current HEAD>`; clean up after.
-- After validation passes: tag v1.7.0 / v1.7.1 / v1.7.2 and create GitHub Releases (still none tagged).
+- **Live-validate Option C** in a fresh session: interactive prompt appears once + localized; "Update now" runs `--pull` (expect `UPDATE_FAILED` here — SSH blocked — with HTTPS fallback); a second invocation within 24h is throttled (no prompt). To set up: re-seed `.claude/.version-check.txt` (`last_check=9999999999`, `behind_by=2`, `head_sha=<current HEAD>`) and `rm .claude/.version-prompt`. NOTE: HEAD changed with the v1.7.3 commit, so the previously-seeded cache is now SHA-stale and must be re-seeded.
+- **Doc sweep**: `docs/prd/features/version-freshness-check.md` and README still describe the old always-prepend banner — update them to the interactive-prompt model.
+- **Tag + GitHub Release** for v1.7.0 / v1.7.1 / v1.7.2 / v1.7.3 — still deferred ("正式发布"), do after validation completes.
+- Step -1 best-effort firing (occasional miss) — accepted as soft-instruction behavior; harden only if it proves annoying in real use.
 
 ## Do Not Forget
 
-- v1.7.0–v1.7.2 are committed but NOT git-tagged, NOT released on GitHub. Tag only after the cross-trigger validation passes.
-- SSH port 22 is blocked in this environment. Use HTTPS for git push: `git push https://github.com/JamesShi96/project-butler.git main`. Plain `git fetch`/`pull` over SSH times out (~2 min) — use the HTTPS + `gh` credential path.
+- v1.7.0–v1.7.3 are committed but NOT git-tagged, NOT released on GitHub. Tag only after validation completes.
+- SSH port 22 is blocked in this environment. Use HTTPS for git push/pull: `git push https://github.com/JamesShi96/project-butler.git main` (with `gh` credentials). Plain SSH `git fetch`/`pull` times out (~2 min).
 - Debug mode (`PROJECT_BUTLER_UPDATE_CHECK_DEBUG=1`) is external-shell only — CC captures stderr into context.
 - `PROJECT_BUTLER_NO_UPDATE_CHECK=0` does NOT silence — only literal `"1"` does.
 - `jq` is NOT installed — session-history scripts must use python3.
-- Test artifacts from this session live under the scratchpad (`pb-test/`), not in the repo.
+- Test artifacts from prior sessions live under the scratchpad (`pb-test/`, `i18n-test/`, `c-test/`), not in the repo.

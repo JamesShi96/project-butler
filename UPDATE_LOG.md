@@ -2,6 +2,17 @@
 
 <!-- version-style: semantic -->
 
+## v1.7.3 (2026-07-10)
+
+### Minor: Interactive Update Prompt and Language-Aware Notice
+
+- The update notice is now an interactive prompt instead of a passive banner: when project-butler is behind upstream, Claude Code presents an AskUserQuestion (Update now / Remind me later / Stop reminding) at most once per 24h, rather than printing a banner on every invocation.
+- "Update now" runs a new `check-update.sh --pull` subcommand (fast fetch + fast-forward pull) and falls back to the manual command plus an HTTPS alternative if the pull fails (offline / SSH blocked / local changes).
+- The notice now follows the project's CLAUDE.md language — English, Chinese, or bilingual — falling back to English when no language marker is present.
+- SKILL.md Step -1 and references/update-check.md updated to drive the interactive prompt; the `VERSION_NOTICE:` token is unchanged, so Cursor and Codex adapters keep working with no template changes.
+
+---
+
 ## v1.7.2 (2026-06-24)
 
 ### Patch: Test-Driven Hardening of Freshness Check and Memory Protocols

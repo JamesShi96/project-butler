@@ -6,7 +6,7 @@
 
 1. Resolve `SKILL_DIR` from the "Base directory for this skill: <path>" line in the current skill loading context. If absent, skip silently.
 2. Run the command below as a **single Bash tool call**.
-3. If stdout contains `VERSION_NOTICE:`, prepend those three lines verbatim to your response. Never paraphrase. Never auto-pull. If stdout is empty, continue silently.
+3. If stdout contains `VERSION_NOTICE:`, present the interactive update prompt defined in SKILL.md Step -1 (AskUserQuestion: Update now / Remind me later / Stop reminding) — do NOT print the block verbatim. On "Update now", run `bash "$SKILL_DIR/scripts/check-update.sh" --pull "$SKILL_DIR"`. If stdout is empty, continue silently.
 
 ## Command
 
@@ -17,8 +17,8 @@ bash "$SKILL_DIR/scripts/check-update.sh" "$SKILL_DIR"
 
 ## Rules
 
-- Never auto-pull. Show the upgrade command; the user runs it.
-- Never paraphrase the three-line `VERSION_NOTICE:` block.
+- Never auto-pull EXCEPT as the "Update now" action the user selects, which runs the `--pull` subcommand (fast fetch + ff-only pull, with a manual/HTTPS fallback message on failure).
+- The `VERSION_NOTICE:` output is throttled by the script to at most once per 24h, so the prompt does not appear on every invocation. Do not add extra suppression.
 - Never run debug mode inside Claude Code — CC captures stderr into the LLM context and debug output will leak into responses.
 - Silence switch matches the literal string `"1"` only. `=0`, `=false`, empty do NOT silence.
 - Run the command as a single Bash tool call.
