@@ -54,28 +54,39 @@ That is enough for daily use. For Cursor, Codex, and other assistants, see [Tool
 
 The skill auto-checks for updates on every invocation. Once per day per
 machine, it runs `git fetch` against its own repo and compares local
-`HEAD` to `origin/main`. If behind, the next response carries this
-banner block:
+`HEAD` to `origin/main`. If behind, Claude Code asks you once — and at
+most once every 24 hours:
 
 ```
-VERSION_NOTICE: project-butler is N commits behind upstream.
-  → Update: cd <path> && git pull
-  → Silence: PROJECT_BUTLER_NO_UPDATE_CHECK=1
+project-butler is 3 commits behind upstream. Update now?
+  › Update now       — pull the latest version right here
+  › Remind me later  — ask again tomorrow
+  › Stop reminding   — turn the check off
 ```
 
-The banner disappears on the next invocation after you pull — cache is
-keyed on commit SHA, not just time.
+Picking **Update now** runs a fast-forward-only `git pull` for you and
+reports the result. If it fails (local changes, offline, SSH blocked),
+you get the manual command plus an HTTPS fallback. Nothing is ever
+pulled without you choosing it.
+
+The prompt is worded in your project's CLAUDE.md `Language:` setting
+(English / Chinese / bilingual), and stops appearing once you are up to
+date — the cache is keyed on commit SHA, not just time.
 
 **Side effect on `git status`**: after the auto-fetch, `git status`
 inside the skill directory may show "behind origin/main by N commits".
 This is expected and harmless — the skill never modifies the working
-tree.
+tree unless you pick "Update now".
 
 **Silencing**: `export PROJECT_BUTLER_NO_UPDATE_CHECK=1`. Only the
 literal value `"1"` silences — `=0`, `=false`, or empty does **not**
 silence (counter-intuitive but intentional).
 
-**Debugging missing banners**: from an external shell only, run the
+**Note**: the check runs as a skill instruction, so it is best-effort —
+it may occasionally not fire. Run the script manually any time you want
+a definitive answer.
+
+**Debugging a missing prompt**: from an external shell only, run the
 shared update-check script with
 `PROJECT_BUTLER_UPDATE_CHECK_DEBUG=1`. Never enable debug inside
 Claude Code — CC captures stderr into the LLM context and debug output
@@ -87,6 +98,10 @@ lifecycle, so update checks are manual/on-demand:
 ```bash
 bash "${PROJECT_BUTLER_SKILL_DIR:-$HOME/.claude/skills/project-butler}/scripts/check-update.sh"
 ```
+
+Outside Claude Code there is no prompt — the script just prints a
+`VERSION_NOTICE:` block with the update command when you are behind, and
+nothing when you are current.
 
 **Reach limitation**: if you installed project-butler before v1.7.0,
 you do not have this auto-check feature yet. Pull once manually:

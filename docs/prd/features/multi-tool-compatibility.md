@@ -124,6 +124,8 @@ Cursor/Codex update checking remains **manual/on-demand best-effort**, not autom
 
 3. **CC adapter 仍是 LLM-side 行为的 source of truth**——single Bash call、never paraphrase banner、never auto-pull、debug external-shell only。Script 只做 detection and banner stdout。
 
+   > 已被 v1.7.3 部分取代：CC adapter 现在把 `VERSION_NOTICE:` 转成交互提示（AskUserQuestion），不再 verbatim 输出；用户选"立即更新"时会跑 `--pull`。分层不变——script 仍只做 detection，adapter 仍是 LLM-side 行为的 source of truth。Cursor/Codex 仍是 verbatim 展示。详见 `version-freshness-check.md`。
+
 4. **Cursor/Codex adapter 是 best-effort**。它们提供触发词和规则，但不承诺自动执行。特别是 update-check 只能是 manual/on-demand。
 
 5. **Codex `AGENTS.md` template 默认完整镜像 core workflow**。不要只写 update-check 章节，否则 Codex adapter 会变成半截入口。

@@ -30,7 +30,7 @@ bash "$SKILL_DIR/scripts/check-update.sh" "$SKILL_DIR"
 |---|---|
 | No "Base directory" line in CC prompt | Skip silently |
 | Cache missing, corrupt, or SHA mismatch | Fetch |
-| `git fetch` fails (offline, port 22 blocked, non-git path) | Use cached `behind_by`; no banner update |
+| `git fetch` fails (offline, port 22 blocked, non-git path) | Use cached `behind_by`; no cache update |
 | SSH port 22 blocked (firewall, China mainland, corp net) | `ConnectTimeout=5` bounds hang to ~5s (vs ~2min default) |
 | `mkdir -p` or cache write fails | Silently degrade to no-cache mode |
 | Cursor / Codex usage | Manual/on-demand only: run `bash <project-butler-install>/scripts/check-update.sh` from shell |
@@ -38,4 +38,5 @@ bash "$SKILL_DIR/scripts/check-update.sh" "$SKILL_DIR"
 ## Source
 
 Design rationale and full failure modes: `docs/prd/features/version-freshness-check.md`.
-Live-validated 2026-06-20 (Phase 1+2+3 — first install, cache hit, pull recovery, SSH fail-fast, banner verbatim).
+Live-validated 2026-06-20 (Phase 1+2+3 — first install, cache hit, pull recovery, SSH fail-fast, notice delivery).
+Interactive prompt live-validated 2026-07-17 (5/5 — trigger, 24h throttle, language adaptation, AskUserQuestion, `--pull` → `UPDATE_OK`).

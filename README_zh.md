@@ -52,27 +52,34 @@ continue
 
 ## 更新 project-butler
 
-skill 每次触发都会自动检查更新。每台机器每天最多跑一次 `git fetch`，对比本地 `HEAD` 和 `origin/main`。如果落后，下一次响应会带这个 banner：
+skill 每次触发都会自动检查更新。每台机器每天最多跑一次 `git fetch`，对比本地 `HEAD` 和 `origin/main`。如果落后，Claude Code 会弹一次交互提示——每 24 小时最多一次：
 
 ```
-VERSION_NOTICE: project-butler is N commits behind upstream.
-  → Update: cd <path> && git pull
-  → Silence: PROJECT_BUTLER_NO_UPDATE_CHECK=1
+project-butler 落后上游 3 个提交。现在更新吗？
+  › 立即更新    — 直接在这里拉取最新版本
+  › 稍后提醒    — 明天再问
+  › 停止提醒    — 关掉这个检查
 ```
 
-升级（`git pull`）之后，下一次触发 banner 消失——缓存同时按时间窗口和 commit SHA 失效。
+选**立即更新**会帮你跑一次 fast-forward-only 的 `git pull` 并回报结果。失败时（有本地改动、离线、SSH 被封）会给出手动命令和 HTTPS 备选。不选就绝不会自动拉取。
 
-**`git status` 副作用**：自动 fetch 之后，skill 目录里跑 `git status` 可能显示 "behind origin/main by N commits"。这是预期行为，无害——skill 不会改工作树。
+提示语跟随当前项目 CLAUDE.md 的 `Language:` 设置（英文 / 中文 / 双语）。升级之后提示消失——缓存同时按时间窗口和 commit SHA 失效。
+
+**`git status` 副作用**：自动 fetch 之后，skill 目录里跑 `git status` 可能显示 "behind origin/main by N commits"。这是预期行为，无害——除非你选了"立即更新"，否则 skill 不会改工作树。
 
 **关闭检查**：`export PROJECT_BUTLER_NO_UPDATE_CHECK=1`。只有字面值 `"1"` 才关闭——`=0`、`=false`、空都**不**关闭（反直觉，但是有意为之）。
 
-**诊断 banner 不出现**：仅在外部 shell 跑共享更新检查脚本，并设置 `PROJECT_BUTLER_UPDATE_CHECK_DEBUG=1`。不要在 Claude Code 里开 debug——CC 会把 stderr 喂给 LLM，debug 输出会泄漏到响应里。
+**注意**：检查是靠 skill 指令驱动的，属于 best-effort——偶尔可能不触发。想要确定的答案，随时手动跑一次脚本。
+
+**诊断提示不出现**：仅在外部 shell 跑共享更新检查脚本，并设置 `PROJECT_BUTLER_UPDATE_CHECK_DEBUG=1`。不要在 Claude Code 里开 debug——CC 会把 stderr 喂给 LLM，debug 输出会泄漏到响应里。
 
 **Cursor / Codex**：这两个工具没有 Claude Code 的 skill lifecycle，因此更新检查是手动 / 按需触发：
 
 ```bash
 bash "${PROJECT_BUTLER_SKILL_DIR:-$HOME/.claude/skills/project-butler}/scripts/check-update.sh"
 ```
+
+在 Claude Code 之外没有交互提示——落后时脚本直接打印一段带更新命令的 `VERSION_NOTICE:` 文本，已是最新则不输出。
 
 **覆盖范围限制**：如果你在 v1.7.0 之前装的 project-butler，你还没有这个自动检查功能。手动拉一次：
 
